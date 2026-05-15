@@ -1009,7 +1009,7 @@ nav {
   </a>
   <div class="nav-right">
     <span class="nav-badge">Coach Dashboard</span>
-    <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr" class="nav-btn-back">
+    <a href="javascript:void(0)" onclick="goToNewAssessment()" class="nav-btn-back">
       + New Assessment
     </a>
   </div>
@@ -1045,7 +1045,7 @@ nav {
   <!-- Section label + add button -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <div class="sec-label" style="flex:1;margin:0;margin-right:20px;">Player assessments</div>
-    <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr" class="btn-add-player">
+    <a href="javascript:void(0)" onclick="goToNewAssessment()" class="btn-add-player">
       + New Assessment
     </a>
   </div>
@@ -1345,6 +1345,20 @@ function printReport() {
 
 // ── INIT ──
 buildCards(SAMPLE_PLAYERS);
+
+// ── NEW ASSESSMENT ──
+function goToNewAssessment() {
+  // Pass mode=new so PDDR skips registration
+  const base = 'https://vitaliylomov-creator.github.io/talent-mates-pddr';
+  const params = new URLSearchParams({
+    mode: 'new',
+    email: 'coach@talent-mates.com',
+    club: 'My Club',
+    team: 'My Team',
+    role: 'coach'
+  });
+  window.location.href = base + '?' + params.toString();
+}
 </script>
 </body>
 </html>
