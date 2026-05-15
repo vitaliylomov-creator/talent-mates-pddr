@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player Development Diagnostic Report — Talent Mates</title>
+<title>Coach Dashboard — Talent Mates</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
   --purple:        #794DC6;
   --purple-dk:     #6b42b5;
+  --purple-lt:     #7a50cc;
   --white:         #ffffff;
+  --ink:           #1a0f2e;
   --border:        rgba(255,255,255,0.10);
   --border-mid:    rgba(255,255,255,0.20);
   --border-strong: rgba(255,255,255,0.35);
@@ -23,7 +25,6 @@
   --font-b: 'DM Sans', system-ui, sans-serif;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --accent:  #c8f04a;
-  --accent2: #4af0c8;
   --green:   #22c97a;
   --amber:   #f5a623;
   --red:     #ff4d6a;
@@ -40,352 +41,293 @@ body {
   overflow-x: hidden;
 }
 
-
-/* ── LOGO ── */
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(121,77,198,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 48px;
+  height: 64px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
 .nav-logo-link {
   display: flex; align-items: center;
   text-decoration: none;
   transition: opacity 0.15s;
+  height: 36px;
 }
 .nav-logo-link:hover { opacity: 0.8; }
-.nav-logo {
-  height: 36px; width: auto;
-  display: flex; align-items: center;
+.tm-logo-svg { height: 36px; width: auto; display: block; }
+.nav-right {
+  display: flex; align-items: center; gap: 16px;
 }
-.tm-logo-svg {
-  height: 36px;
-  width: auto;
-  display: block;
+.nav-badge {
+  font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent);
+  background: rgba(200,240,74,0.1);
+  border: 1px solid rgba(200,240,74,0.25);
+  border-radius: 20px; padding: 4px 12px;
 }
-
-/* NAV */
-nav {
-  position: fixed; top: 0; left: 0; right: 0;
-  background: rgba(121,77,198,0.88);
-  backdrop-filter: blur(20px);
-  border-bottom: 0.5px solid var(--border);
-  padding: 20px 48px;
-  display: flex; align-items: center; justify-content: space-between;
-  z-index: 100;
-}
-
-.nav-back {
+.nav-btn-back {
   font-size: 13px; color: var(--t3);
   background: transparent; border: none; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
-  transition: color 0.15s;
+  transition: color 0.15s; text-decoration: none;
 }
-.nav-back:hover { color: var(--t1); }
+.nav-btn-back:hover { color: var(--t1); }
 
-/* PAGES */
-.page { display: none; position: relative; z-index: 1; }
-.page.active { display: block; }
+/* LAYOUT */
+.main { padding-top: 64px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 40px 40px 80px; }
 
-/* ════════════════════════════════
-   REGISTRATION PAGE
-════════════════════════════════ */
-#page-register {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 120px 24px 80px;
+/* PAGE HEADER */
+.page-header {
+  display: flex; align-items: flex-end;
+  justify-content: space-between; gap: 20px;
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
 }
-.reg-wrap { width: 100%; max-width: 480px; }
-.reg-eyebrow {
-  font-size: 11px; letter-spacing: 0.24em;
-  text-transform: uppercase; color: var(--t3); margin-bottom: 16px;
+.page-eyebrow {
+  font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--accent);
+  opacity: 0.8; margin-bottom: 8px;
 }
-.reg-title {
+.page-title {
   font-family: var(--font-d);
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 400; line-height: 1.1;
-  letter-spacing: -0.02em; margin-bottom: 8px;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 400; line-height: 1.05;
+  letter-spacing: -0.02em;
 }
-.reg-title em { color: rgba(255,255,255,0.45); font-style: italic; }
-.reg-sub { font-size: 15px; color: var(--t3); line-height: 1.6; margin-bottom: 36px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.form-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--t3); }
-.form-input {
-  background: rgba(255,255,255,0.08);
+.page-title em { color: rgba(255,255,255,0.42); font-style: italic; }
+.page-sub { font-size: 13px; color: var(--t3); margin-top: 6px; }
+.stats-row {
+  display: flex; gap: 12px; flex-shrink: 0;
+}
+.stat-pill {
+  display: flex; flex-direction: column; align-items: center;
+  background: rgba(255,255,255,0.07);
   border: 1px solid var(--border-mid);
   border-radius: var(--radius-sm);
-  color: var(--t1); font-family: var(--font-b);
-  font-size: 15px; font-weight: 300;
-  padding: 13px 16px; outline: none;
-  transition: border-color 0.2s, background 0.2s; width: 100%;
+  padding: 12px 20px; min-width: 80px;
 }
-.form-input::placeholder { color: var(--t4); }
-.form-input:focus { border-color: var(--border-strong); background: rgba(255,255,255,0.12); }
-.form-input option { background: var(--purple-dk, #6b42b5); color: #fff; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.role-label-txt {
-  font-size: 11px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--t3); margin-bottom: 10px;
+.stat-num {
+  font-family: var(--font-d);
+  font-size: 24px; font-weight: 400;
+  color: var(--accent); line-height: 1;
 }
-.role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.role-btn {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border-mid);
-  border-radius: var(--radius-sm); color: var(--t3);
-  font-family: var(--font-b); font-size: 14px;
-  padding: 14px 16px; cursor: pointer;
-  transition: all 0.15s; text-align: left;
-  display: flex; align-items: center; gap: 10px;
-}
-.role-btn:hover { border-color: var(--border-strong); color: var(--t1); }
-.role-btn.selected { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.5); color: var(--t1); }
-.role-icon { font-size: 18px; }
-.role-lbl { font-size: 13px; font-weight: 500; display: block; }
-.role-sub-txt { font-size: 11px; color: var(--t4); display: block; margin-top: 1px; }
-.divider { height: 1px; background: var(--border); margin: 18px 0; }
-.btn-primary {
-  width: 100%; background: var(--white); color: var(--purple);
-  font-family: var(--font-b); font-size: 14px; font-weight: 500;
-  letter-spacing: 0.02em; padding: 15px;
-  border: none; border-radius: 100px; cursor: pointer;
-  transition: opacity 0.15s, transform 0.15s; margin-top: 8px;
-}
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-.login-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--t3); }
-.login-link a { color: var(--t1); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-.form-error {
-  background: rgba(255,77,106,0.12);
-  border: 1px solid rgba(255,77,106,0.3);
-  border-radius: var(--radius-sm); color: rgba(255,150,165,0.9);
-  font-size: 13px; padding: 10px 14px; margin-bottom: 12px; display: none;
-}
-.form-error.visible { display: block; }
-.success-screen {
-  display: none; min-height: 100vh;
-  align-items: center; justify-content: center;
-  flex-direction: column; text-align: center;
-  padding: 120px 24px; position: relative; z-index: 1;
-}
-.success-screen.visible { display: flex; }
-.success-icon {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: rgba(34,201,122,0.15);
-  border: 1px solid rgba(34,201,122,0.3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; margin: 0 auto 24px;
-}
-.success-title { font-family: var(--font-d); font-size: clamp(28px, 4vw, 42px); font-weight: 400; margin-bottom: 12px; }
-.success-sub { font-size: 15px; color: var(--t3); max-width: 400px; line-height: 1.6; }
-.btn-goto {
-  margin-top: 32px; background: var(--white); color: var(--purple);
-  font-family: var(--font-b); font-size: 14px; font-weight: 500;
-  padding: 14px 32px; border: none; border-radius: 100px;
-  cursor: pointer; transition: opacity 0.15s;
-}
-.btn-goto:hover { opacity: 0.9; }
+.stat-lbl { font-size: 10px; color: var(--t4); margin-top: 4px; letter-spacing: 0.08em; }
 
-/* ════════════════════════════════
-   PDDR PAGE
-════════════════════════════════ */
-#page-pddr { padding-top: 72px; }
-.pddr-wrap { max-width: 900px; margin: 0 auto; padding: 0 32px 80px; }
-
-.pddr-header {
-  padding: 24px 0 24px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 32px;
-  display: flex; align-items: flex-end;
-  justify-content: space-between; gap: 24px;
-}
-.pddr-eyebrow { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); opacity: 0.8; margin-bottom: 12px; }
-.pddr-title { font-family: var(--font-d); font-size: clamp(32px, 5vw, 52px); font-weight: 400; line-height: 1.05; letter-spacing: -0.02em; }
-.pddr-title em { color: rgba(255,255,255,0.42); font-style: italic; }
-.pddr-sub { font-size: 13px; color: var(--t3); margin-top: 10px; line-height: 1.6; }
-.user-pill {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--border-mid);
-  border-radius: 100px; padding: 8px 16px 8px 8px;
-  white-space: nowrap; flex-shrink: 0;
-}
-.user-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 600;
-}
-.u-name { font-size: 12px; font-weight: 500; }
-.u-role { font-size: 10px; color: var(--t3); letter-spacing: 0.05em; }
-
-.section-label {
+/* SECTION LABEL */
+.sec-label {
   font-size: 10px; letter-spacing: 0.22em;
   text-transform: uppercase; color: var(--accent);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex; align-items: center; gap: 12px;
 }
-.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* Player info */
-.pi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 48px; }
-.pi-field { display: flex; flex-direction: column; gap: 5px; }
-.pi-field.full { grid-column: 1/-1; }
-.pi-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); }
-.pi-input {
-  background: rgba(255,255,255,0.07);
+/* PLAYER CARDS GRID */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* PLAYER CARD */
+.player-card {
+  background: rgba(255,255,255,0.05);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--t1);
-  font-family: var(--font-b); font-size: 14px; font-weight: 300;
-  padding: 10px 14px; outline: none; transition: border-color 0.2s;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: pointer;
 }
-.pi-input::placeholder { color: var(--t4); }
-.pi-input:focus { border-color: var(--border-strong); }
-.pi-input option { background: #6b42b5; }
+.player-card:hover {
+  border-color: var(--border-mid);
+  transform: translateY(-2px);
+}
+.card-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 12px;
+}
+.card-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(200,240,74,0.3), rgba(74,240,200,0.3));
+  border: 1px solid rgba(200,240,74,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-d); font-size: 16px;
+  color: var(--accent); flex-shrink: 0;
+}
+.card-info { flex: 1; }
+.card-name { font-size: 15px; font-weight: 600; color: var(--t1); margin-bottom: 3px; }
+.card-pos { font-size: 12px; color: var(--t3); }
+.card-date { font-size: 10px; color: var(--t4); font-family: monospace; letter-spacing: 0.04em; margin-top: 4px; }
+.card-status {
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 20px; font-weight: 500;
+  flex-shrink: 0; align-self: flex-start;
+}
+.status-completed { background: rgba(34,201,122,0.15); color: var(--green); border: 1px solid rgba(34,201,122,0.25); }
+.status-pending { background: rgba(245,166,35,0.12); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+.status-processing { background: rgba(61,139,255,0.12); color: #6eb6ff; border: 1px solid rgba(61,139,255,0.25); }
 
-/* Summary strip */
-.sum-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 32px; }
-.strip-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.strip-bar { width: 100%; height: 52px; border-radius: 5px; background: rgba(255,255,255,0.07); position: relative; overflow: hidden; }
-.strip-fill { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, var(--accent), rgba(200,240,74,0.3)); transition: height 0.5s var(--ease); border-radius: 5px; }
-.strip-num { font-family: var(--font-d); font-size: 12px; color: var(--accent); }
-.strip-lbl { font-size: 8px; color: var(--t4); text-align: center; letter-spacing: 0.06em; }
+/* FIB LEVELS */
+.card-levels {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.levels-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); margin-bottom: 10px; }
+.levels-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.lv-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.lv-bar-wrap {
+  width: 100%; height: 36px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 4px; position: relative; overflow: hidden;
+}
+.lv-bar-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  border-radius: 4px;
+  transition: height 0.5s var(--ease);
+}
+.lv-num { font-family: var(--font-d); font-size: 10px; color: var(--t4); }
+.lv-score { font-size: 9px; color: var(--accent); font-family: monospace; }
 
-/* Fibonacci levels */
-.fib-levels { display: flex; flex-direction: column; gap: 4px; margin-bottom: 48px; }
-.fib-level { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s; }
-.fib-level:hover { border-color: var(--border-mid); }
-.fib-level.active { border-color: rgba(200,240,74,0.35); }
-.fib-hdr {
-  display: grid; grid-template-columns: 52px 1fr auto;
-  align-items: center; gap: 16px; padding: 18px 20px;
-  cursor: pointer; background: rgba(255,255,255,0.04);
-  user-select: none; transition: background 0.15s;
+/* CARD FOOTER */
+.card-footer {
+  padding: 12px 20px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 10px;
 }
-.fib-hdr:hover { background: rgba(255,255,255,0.07); }
-.fib-num { font-family: var(--font-d); font-size: 30px; color: var(--accent); line-height: 1; text-align: center; }
-.fib-name { font-size: 15px; font-weight: 500; }
-.fib-desc { font-size: 12px; color: var(--t3); margin-top: 2px; }
-.fib-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-.fib-age { font-size: 10px; letter-spacing: 0.1em; color: var(--t4); background: rgba(255,255,255,0.07); padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
-.avg-badge {
-  font-size: 10px; letter-spacing: 0.06em;
-  color: var(--amber); background: rgba(245,166,35,0.08);
-  border: 1px solid rgba(245,166,35,0.2);
-  border-radius: 20px; padding: 2px 8px;
-  transition: all 0.3s; white-space: nowrap;
-}
-.fib-body { display: none; padding: 0 20px 20px; background: rgba(0,0,0,0.15); }
-.fib-body.open { display: block; }
-
-/* 2 sliders per level */
-.dims-2 {
-  display: flex; flex-direction: column; gap: 24px;
-  margin-top: 16px; padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-.dim-row { display: flex; flex-direction: column; gap: 7px; }
-.dim-top { display: flex; justify-content: space-between; align-items: center; }
-.dim-label { font-size: 12px; color: var(--t2); font-weight: 400; }
-.dim-val { font-size: 14px; font-weight: 600; color: var(--accent); min-width: 28px; text-align: right; }
-.dim-slider {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 4px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 2px; outline: none; cursor: pointer;
-}
-.dim-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--accent); cursor: pointer;
-  box-shadow: 0 0 10px rgba(200,240,74,0.6);
-  transition: transform 0.1s;
-}
-.dim-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.bar-wrap { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.3s var(--ease); }
-.dim-scale { display: flex; justify-content: space-between; font-size: 9px; color: var(--t4); padding: 0 2px; }
-
-.gap-indicator {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; padding: 5px 12px; border-radius: 20px;
-  margin-top: 12px; border: 1px solid;
-}
-.gap-warn  { color: var(--amber); border-color: rgba(245,166,35,0.3);  background: rgba(245,166,35,0.08); }
-.gap-ok    { color: var(--green); border-color: rgba(34,201,122,0.3);  background: rgba(34,201,122,0.08); }
-.gap-dev   { color: var(--t3);   border-color: var(--border);          background: rgba(255,255,255,0.04); }
-
-.obs-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--t4); margin-top: 16px; margin-bottom: 6px; display: block; }
-.obs-input {
-  width: 100%; background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--t1); font-family: var(--font-b);
-  font-size: 13px; font-weight: 300; padding: 10px 14px;
-  resize: vertical; min-height: 60px; outline: none; transition: border-color 0.2s;
-}
-.obs-input:focus { border-color: var(--border-mid); }
-.obs-input::placeholder { color: var(--t4); }
-
-/* Pathway */
-.pathway-card { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 32px; }
-.pathway-card h3 { font-family: var(--font-d); font-size: 24px; font-weight: 400; margin-bottom: 16px; }
-.rec-area {
-  width: 100%; background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--t1); font-family: var(--font-b);
-  font-size: 14px; font-weight: 300; line-height: 1.7;
-  padding: 16px; resize: vertical; min-height: 120px; outline: none;
-}
-.rec-area:focus { border-color: var(--border-mid); }
-.rec-area::placeholder { color: var(--t4); }
-.tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-.tag {
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 5px 12px; border-radius: 20px;
-  border: 1px solid var(--border); color: var(--t3);
-  background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.15s;
-}
-.tag.selected { border-color: rgba(200,240,74,0.4); color: var(--accent); background: rgba(200,240,74,0.08); }
-
-/* Submit section */
-.submit-section {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border-mid);
-  border-radius: var(--radius); padding: 40px 32px;
-  text-align: center; margin-bottom: 48px;
-}
-.submit-section h3 { font-family: var(--font-d); font-size: 26px; font-weight: 400; margin-bottom: 10px; }
-.submit-section p { font-size: 14px; color: var(--t3); line-height: 1.6; margin-bottom: 28px; max-width: 460px; margin-left: auto; margin-right: auto; }
-.btn-submit {
+.card-email { font-size: 11px; color: var(--t4); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.btn-report {
+  font-family: var(--font-b); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.04em;
   background: var(--white); color: var(--purple);
-  font-family: var(--font-b); font-size: 15px; font-weight: 600;
-  padding: 16px 44px; border: none; border-radius: 100px;
-  cursor: pointer; transition: opacity 0.15s, transform 0.15s;
-  display: inline-flex; align-items: center; gap: 10px;
+  border: none; border-radius: 20px;
+  padding: 7px 14px; cursor: pointer;
+  transition: opacity 0.15s; flex-shrink: 0;
+  white-space: nowrap;
 }
-.btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-submit:active { transform: translateY(0); }
-.submit-note { font-size: 11px; color: var(--t4); margin-top: 14px; letter-spacing: 0.04em; }
+.btn-report:hover { opacity: 0.88; }
 
-/* Export */
-.export-bar { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 32px; gap: 16px; flex-wrap: wrap; }
-.footer-brand { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--t4); }
-.footer-brand span { color: var(--accent); }
-.btn-print { font-family: var(--font-b); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 24px; background: var(--white); color: var(--purple); border: none; border-radius: 100px; cursor: pointer; font-weight: 500; transition: opacity 0.15s; }
-.btn-print:hover { opacity: 0.9; }
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(10,5,20,0.82);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--purple-dk);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius);
+  max-width: 680px; width: 100%;
+  max-height: 85vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  flex-shrink: 0;
+}
+.modal-title { font-family: var(--font-d); font-size: 22px; font-weight: 400; }
+.modal-sub { font-size: 12px; color: var(--t3); margin-top: 4px; }
+.modal-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: none; color: var(--t3);
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.modal-close:hover { background: rgba(255,255,255,0.15); color: var(--t1); }
+.modal-body {
+  padding: 24px 28px;
+  overflow-y: auto; flex: 1;
+}
+.modal-body::-webkit-scrollbar { width: 4px; }
+.modal-body::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+.report-text {
+  font-size: 13px; line-height: 1.8;
+  color: var(--t2); white-space: pre-wrap;
+  font-family: var(--font-b); font-weight: 300;
+}
+.report-text h1, .report-text h2 {
+  font-family: var(--font-d); font-weight: 400;
+  color: var(--t1); margin: 16px 0 8px;
+}
+.modal-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+  flex-shrink: 0;
+}
+.btn-ghost {
+  font-family: var(--font-b); font-size: 13px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  color: var(--t3); border-radius: 20px;
+  padding: 8px 18px; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { border-color: var(--border-strong); color: var(--t1); }
+.btn-primary-sm {
+  font-family: var(--font-b); font-size: 13px; font-weight: 500;
+  background: var(--white); color: var(--purple);
+  border: none; border-radius: 20px;
+  padding: 8px 20px; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary-sm:hover { opacity: 0.88; }
 
-/* Scrollbar */
+/* EMPTY STATE */
+.empty-state {
+  text-align: center; padding: 80px 20px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
+.empty-title { font-family: var(--font-d); font-size: 20px; font-weight: 400; margin-bottom: 8px; }
+.empty-sub { font-size: 13px; color: var(--t3); line-height: 1.6; }
+
+/* ADD PLAYER BTN */
+.btn-add-player {
+  font-family: var(--font-b); font-size: 13px; font-weight: 500;
+  background: var(--white); color: var(--purple);
+  border: none; border-radius: 100px;
+  padding: 11px 24px; cursor: pointer;
+  transition: opacity 0.15s;
+  text-decoration: none; display: inline-flex;
+  align-items: center; gap: 8px;
+}
+.btn-add-player:hover { opacity: 0.9; }
+
+/* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
 
-/* Responsive */
-@media (max-width: 600px) {
-  nav { padding: 18px 20px; }
-  .form-row, .pi-grid { grid-template-columns: 1fr; }
-  .pi-field.full { grid-column: 1; }
-  .pddr-header { flex-direction: column; align-items: flex-start; }
-  .sum-strip { grid-template-columns: repeat(3, 1fr); }
-}
-@media print {
-  nav { display: none; }
-  #page-register { display: none; }
-  #page-pddr { display: block !important; padding-top: 20px; }
-  .fib-body { display: block !important; }
-  .btn-print, .btn-submit { display: none; }
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  nav { padding: 0 20px; }
+  .wrap { padding: 24px 20px 60px; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .stats-row { width: 100%; }
+  .cards-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -393,8 +335,8 @@ nav {
 
 <!-- NAV -->
 <nav>
-  <a href="https://talent-mates.com/" target="_blank" rel="noopener" class="nav-logo-link" title="Go to Talent Mates">
-    <div class="nav-logo"><svg width="2079" height="1276" class="tm-logo-svg" viewBox="0 0 2079 1276" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <a href="https://talent-mates.com/" target="_blank" class="nav-logo-link" title="Talent Mates">
+    <svg width="2079" height="1276" class="tm-logo-svg" viewBox="0 0 2079 1276" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_750_45007)">
 <path d="M1608.76 736.16C1608.68 736.951 1608.46 738.78 1608.13 741.646C1608.05 744.566 1607.97 746.395 1607.88 747.187C1607.67 749.015 1607.2 750.817 1606.46 752.591C1605.73 754.365 1604.23 755.784 1601.99 756.849C1600.84 757.504 1599.2 758.104 1596.99 758.65C1594.84 758.923 1592.71 758.95 1590.61 758.705C1589.82 758.623 1589.02 758.514 1588.26 758.432C1587.77 758.104 1586.27 757.395 1583.73 756.303C1582.72 755.921 1580.78 755.429 1577.94 754.829C1575.1 754.228 1572.1 753.628 1568.99 753C1565.88 752.372 1563.04 751.772 1560.45 751.226C1557.85 750.653 1556.57 750.38 1556.57 750.38C1554.74 750.162 1552.89 750.216 1550.98 750.544C1549.09 750.844 1546.61 751.636 1543.55 752.864C1541.89 753.464 1539.89 754.692 1537.55 756.548C1535.5 758.159 1534.22 761.325 1533.67 766.047C1533.34 768.913 1533.75 772.161 1534.93 775.736C1536.37 779.339 1537.87 782.314 1539.48 784.607C1540.44 785.507 1542 787.009 1544.12 789.11C1546.31 790.966 1548.57 793.068 1550.95 795.47C1553.35 797.599 1555.37 799.564 1557.03 801.338C1558.95 803.139 1559.9 804.067 1559.9 804.067C1560.64 804.695 1561.18 805.541 1561.59 806.66C1562.3 807.534 1563.01 808.271 1563.72 808.898C1564.19 809.472 1564.79 809.963 1565.55 810.29C1566.31 810.645 1567.05 811.137 1567.76 811.737C1568.23 812.31 1569.37 813.92 1571.2 816.513C1573.3 818.888 1574.59 820.498 1575.02 821.344C1576.44 822.846 1577.86 824.32 1579.28 825.821C1580.97 827.349 1582.5 828.987 1583.89 830.734C1587.82 835.701 1590.36 839.031 1591.48 840.751C1592.63 842.224 1593.75 844.053 1594.81 846.319C1596.28 849.676 1597.62 853.006 1598.82 856.335C1600.3 859.693 1601.33 863.268 1601.96 867.035C1602.83 870.856 1603.27 875.141 1603.27 879.917C1603.52 884.721 1603.27 890.398 1602.51 896.949C1601.93 901.916 1601.31 906.229 1600.62 909.859C1599.94 913.489 1598.77 916.683 1597.13 919.412C1597.1 919.685 1596.58 920.667 1595.57 922.414C1594.59 924.161 1593.45 926.017 1592.14 927.982C1591.1 929.975 1590.09 931.858 1589.11 933.605C1588.12 935.352 1587.6 936.225 1587.6 936.225C1586.68 937.453 1585.15 939.118 1583.05 941.274C1580.94 943.431 1579.14 945.205 1577.64 946.624C1573.47 950.664 1568.94 954.239 1564.05 957.405C1559.46 960.326 1556.9 961.882 1556.35 962.073C1556.35 962.073 1555.1 962.591 1552.59 963.628C1550.1 964.393 1547.07 965.375 1543.5 966.549C1540.19 967.504 1536.65 968.405 1532.83 969.305C1529.28 970.233 1526.27 970.807 1523.87 971.052C1523.08 970.97 1521.53 970.779 1519.15 970.506C1516.2 970.534 1512.74 970.261 1508.83 969.66C1504.22 969.688 1501.33 969.66 1500.15 969.524C1498.84 969.387 1497.67 969.251 1496.63 969.114C1495.54 969.251 1494.5 969.251 1493.44 969.142C1492.65 969.06 1491.37 968.76 1489.56 968.296C1487.74 968.077 1485.8 967.722 1483.72 967.231C1481.65 966.713 1479.74 966.249 1477.94 965.757C1476.14 965.293 1474.83 964.993 1474.06 964.911C1468.11 963.683 1463.44 962.618 1460.11 961.718C1456.78 960.79 1453.26 959.07 1449.58 956.532C1446.88 954.621 1445.21 952.984 1444.58 951.564C1443.96 950.172 1443.74 948.562 1443.96 946.706C1444.04 945.914 1444.26 944.086 1444.58 941.22C1445.18 938.381 1445.51 936.553 1445.62 935.761C1445.84 933.932 1445.89 932.213 1445.81 930.603C1446 929.019 1446.17 927.464 1446.36 925.881C1446.44 925.144 1446.66 923.315 1446.99 920.422C1447.83 917.583 1448.38 915.236 1448.6 913.38C1449.03 911.852 1449.31 910.678 1449.39 909.886C1449.44 909.368 1449.5 907.894 1449.5 905.519C1449.5 903.117 1449.55 901.534 1449.63 900.77C1450.15 896.321 1452.42 893.919 1456.43 893.592C1460.44 893.264 1464.94 893.373 1469.91 893.947C1471.74 894.165 1473.95 894.547 1476.54 895.12C1479.14 895.693 1482.19 896.84 1485.69 898.559C1486.67 899.214 1487.54 899.706 1488.31 900.06C1489.32 900.443 1490.46 900.852 1491.75 901.261C1491.75 901.261 1492.54 901.343 1494.09 901.534C1495.92 901.753 1497.86 902.108 1499.94 902.599C1502.04 902.845 1504 903.063 1505.83 903.281C1507.66 903.5 1508.83 903.636 1509.38 903.691C1510.42 903.8 1512.14 903.882 1514.54 903.882C1517.19 903.909 1519.89 903.445 1522.67 902.435C1525.43 901.425 1527.88 899.733 1530.04 897.304C1532.2 894.629 1533.59 890.671 1534.19 885.458C1534.44 883.357 1534.38 881.637 1534 880.272C1533.89 878.935 1533.67 877.325 1533.37 875.414C1532.39 872.384 1531.35 870.01 1530.2 868.29C1529.33 866.598 1527.37 864.251 1524.25 861.221C1523.79 860.648 1522.51 859.174 1520.38 856.799C1518.3 854.179 1516.89 852.542 1516.18 851.941C1515.71 851.368 1514.13 850.112 1511.43 848.202C1509.02 846.073 1507.47 844.681 1506.73 844.08C1505.78 843.18 1504.11 841.515 1501.74 839.113C1499.64 836.738 1497.26 834.227 1494.64 831.525C1492.32 828.605 1490.11 825.957 1488.01 823.583C1485.93 820.962 1484.41 819.052 1483.5 817.878C1481.81 816.35 1480.07 814.439 1478.21 812.092C1476.63 809.772 1475.18 807.233 1473.92 804.422C1470.87 798.772 1468.98 794.433 1468.27 791.43C1467.57 788.428 1466.88 785.043 1466.26 781.25C1465.6 777.729 1465.14 774.754 1464.89 772.352C1464.64 769.923 1464.34 767.766 1464.04 765.883C1464.04 763.754 1463.99 761.762 1463.94 759.906C1464.15 758.077 1464.4 755.975 1464.67 753.628C1465.16 749.425 1465.55 746.04 1465.85 743.42C1466.42 740.827 1466.94 738.644 1467.4 736.842C1467.87 735.041 1468.44 733.512 1469.12 732.257C1469.83 730.756 1470.54 729.227 1471.22 727.726C1472.97 724.205 1475.29 720.111 1478.21 715.416C1481.4 710.749 1486.02 706.355 1492.05 702.288C1495.49 700.023 1499.31 698.085 1503.46 696.447C1507.63 694.809 1511.62 693.554 1515.44 692.653C1519.51 691.807 1523.05 691.152 1526 690.688C1529.22 690.279 1531.52 690.006 1532.85 689.896C1533.37 689.951 1534.82 690.006 1537.22 690.006C1539.89 689.787 1542.81 689.733 1545.98 689.815C1549.15 689.924 1552.31 690.006 1555.51 690.115C1558.95 690.251 1561.84 690.442 1564.19 690.715C1571.5 691.561 1579.03 693.09 1586.73 695.301C1594.43 697.511 1599.8 699.34 1602.81 700.732C1606.33 702.452 1608.54 703.926 1609.47 705.072C1610.7 706 1611.43 707.556 1611.7 709.712C1611.9 710.258 1611.73 711.704 1611.21 714.024C1610.67 716.344 1610.37 717.9 1610.29 718.692C1610.23 719.21 1610.04 720.793 1609.74 723.413C1609.74 725.815 1609.69 727.262 1609.63 727.781L1608.68 736.023L1608.76 736.16Z" fill="white"/>
 <path d="M1606.98 735.985C1607.14 736.531 1607.71 736.285 1607.77 734.866L1606.98 733.747V735.985Z" fill="white"/>
@@ -1063,476 +1005,346 @@ nav {
 </clipPath>
 </defs>
 </svg>
-</div>
+
   </a>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <a href="coach_dashboard.html" id="nav-dashboard" style="display:none;font-size:12px;color:var(--accent);background:rgba(200,240,74,0.1);border:1px solid rgba(200,240,74,0.25);border-radius:20px;padding:5px 14px;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;font-weight:500;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
-      Dashboard ↗
+  <div class="nav-right">
+    <span class="nav-badge">Coach Dashboard</span>
+    <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr" class="nav-btn-back">
+      + New Assessment
     </a>
-    <button class="nav-back" id="nav-back" style="display:none" onclick="goBack()">← Back to registration</button>
   </div>
 </nav>
 
-<!-- ════════════════════════════════ PAGE 1 — REGISTER ════════════════════════════════ -->
-<div id="page-register" class="page active">
+<!-- MAIN -->
+<div class="main">
+<div class="wrap">
 
-  <div id="reg-form-view">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:100px 24px 60px;">
-    <div class="reg-wrap">
-      <div class="reg-eyebrow">Talent Mates · AI Lab</div>
-      <h1 class="reg-title">Player Development<br><em>Diagnostic Report</em></h1>
-      <p class="reg-sub">Create your account to access the Fibonacci Path assessment system for your club or academy.</p>
-      <div class="form-error" id="reg-error"></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Name of Club *</label>
-          <input class="form-input" id="reg-club" type="text" placeholder="e.g. Arsenal FC">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Team *</label>
-          <input class="form-input" id="reg-team" type="text" placeholder="e.g. U19, First Team">
-        </div>
-      </div>
-      <div class="role-label-txt">Football Role *</div>
-      <div class="role-selector">
-        <button class="role-btn selected" id="role-coach" onclick="selectRole('coach')">
-          <span class="role-icon">🎯</span>
-          <div><span class="role-lbl">Coach</span><span class="role-sub-txt">Assess your players</span></div>
-        </button>
-        <button class="role-btn" id="role-player" onclick="selectRole('player')">
-          <span class="role-icon">⚽</span>
-          <div><span class="role-lbl">Player</span><span class="role-sub-txt">Track your progress</span></div>
-        </button>
-      </div>
-      <div class="divider"></div>
-      <div class="form-group">
-        <label class="form-label">Email *</label>
-        <input class="form-input" id="reg-email" type="email" placeholder="your@email.com">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input class="form-input" id="reg-phone" type="tel" placeholder="+44 7700 000000">
-      </div>
-      <div class="divider"></div>
-      <div class="form-group">
-        <label class="form-label">Password *</label>
-        <input class="form-input" id="reg-pass" type="password" placeholder="Min. 8 characters">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password Confirmation *</label>
-        <input class="form-input" id="reg-pass2" type="password" placeholder="Repeat password">
-      </div>
-      <button class="btn-primary" onclick="handleRegister()">Create Account & Access PDDR →</button>
-      <div class="login-link">Already have an account? <a onclick="showLoginForm()">Sign in</a></div>
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">Talent Mates · Fibonacci Path System</div>
+      <h1 class="page-title">Coach <em>Dashboard</em></h1>
+      <p class="page-sub">Player assessment overview — Fibonacci Path diagnostics</p>
     </div>
+    <div class="stats-row">
+      <div class="stat-pill">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-lbl">Players</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-num" id="stat-done" style="color:var(--green)">0</div>
+        <div class="stat-lbl">Reports</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-num" id="stat-avg" style="color:var(--amber)">—</div>
+        <div class="stat-lbl">Avg Level</div>
+      </div>
     </div>
   </div>
 
-  <div id="login-form-view" style="display:none;">
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:100px 24px 60px;">
-    <div class="reg-wrap">
-      <div class="reg-eyebrow">Talent Mates · AI Lab</div>
-      <h1 class="reg-title">Welcome<br><em>back</em></h1>
-      <p class="reg-sub">Sign in to access your Player Development Diagnostic Report.</p>
-      <div class="form-error" id="login-error"></div>
-      <div class="form-group">
-        <label class="form-label">Email *</label>
-        <input class="form-input" id="login-email" type="email" placeholder="your@email.com">
-      </div>
-      <div class="form-group" style="margin-bottom:24px;">
-        <label class="form-label">Password *</label>
-        <input class="form-input" id="login-pass" type="password" placeholder="Your password"
-          onkeydown="if(event.key==='Enter') handleLogin()">
-      </div>
-      <button class="btn-primary" onclick="handleLogin()">Sign in & Open PDDR →</button>
-      <div class="login-link">Don't have an account? <a onclick="showRegisterForm()">Create account</a></div>
-    </div>
-    </div>
-  </div>
-
-  <div class="success-screen" id="success-screen">
-    <div class="success-icon">✓</div>
-    <h2 class="success-title">Account created<br><em>successfully</em></h2>
-    <p class="success-sub">Welcome to Talent Mates AI Lab. Your Fibonacci Path diagnostic tool is ready.</p>
-    <button class="btn-goto" onclick="gotoPDDR()">Open Diagnostic Report →</button>
-    <a href="coach_dashboard.html" style="display:inline-block;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.55);text-decoration:underline;text-underline-offset:3px;cursor:pointer;">
-      View Coach Dashboard →
+  <!-- Section label + add button -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div class="sec-label" style="flex:1;margin:0;margin-right:20px;">Player assessments</div>
+    <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr" class="btn-add-player">
+      + New Assessment
     </a>
   </div>
 
+  <!-- Cards grid -->
+  <div class="cards-grid" id="cards-grid">
+    <div class="empty-state">
+      <div class="empty-icon">⚽</div>
+      <div class="empty-title">No players yet</div>
+      <p class="empty-sub">Submit a player assessment via the PDDR form.<br>Results will appear here automatically.</p>
+    </div>
+  </div>
+
+</div>
 </div>
 
-<!-- ════════════════════════════════ PAGE 2 — PDDR ════════════════════════════════ -->
-<div id="page-pddr" class="page">
-<div class="pddr-wrap">
-
-  <header class="pddr-header">
-    <div>
-      <div class="pddr-eyebrow">Talent Mates · Fibonacci Path System · v1.0</div>
-      <h1 class="pddr-title">Player Development<br><em>Diagnostic Report</em></h1>
-      <p class="pddr-sub">Structured Fibonacci assessment for coaches and academy directors.</p>
-    </div>
-    <div class="user-pill">
-      <div class="user-avatar" id="u-avatar">TM</div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
       <div>
-        <div class="u-name" id="u-name">Talent Mates</div>
-        <div class="u-role" id="u-role">COACH</div>
+        <div class="modal-title" id="modal-title">AI Report</div>
+        <div class="modal-sub" id="modal-sub">Fibonacci Path Analysis</div>
       </div>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
     </div>
-  </header>
-
-  <!-- 01 Player profile -->
-  <div class="section-label">01 · Player profile</div>
-  <div class="pi-grid">
-    <div class="pi-field"><div class="pi-label">Full name</div><input class="pi-input" id="f-name" type="text" placeholder="e.g. John Smith"></div>
-    <div class="pi-field"><div class="pi-label">Date of birth</div><input class="pi-input" id="f-dob" type="date"></div>
-    <div class="pi-field">
-      <div class="pi-label">Primary position</div>
-      <select class="pi-input" id="f-position">
-        <option value="">Select position</option>
-        <option>Goalkeeper</option><option>Centre-back</option>
-        <option>Full-back / Wing-back</option><option>Defensive midfielder</option>
-        <option>Central midfielder</option><option>Attacking midfielder</option>
-        <option>Wide midfielder / Winger</option><option>Striker / Centre-forward</option>
-        <option>Second striker</option>
-      </select>
+    <div class="modal-body">
+      <div class="report-text" id="modal-report">Loading...</div>
     </div>
-    <div class="pi-field"><div class="pi-label">Nationality</div><input class="pi-input" id="f-nationality" type="text" placeholder="e.g. Ukrainian"></div>
-    <div class="pi-field"><div class="pi-label">Current team</div><input class="pi-input" id="f-club" type="text" placeholder="e.g. Slough Town FC"></div>
-    <div class="pi-field"><div class="pi-label">Assessment date</div><input class="pi-input" id="f-date" type="date"></div>
-    <div class="pi-field full"><div class="pi-label">Assessed by (agent / coach / license)</div><input class="pi-input" id="f-assessor" type="text" placeholder="e.g. Vitaliy Lomov — FIFA Agent, UEFA C"></div>
-  </div>
-
-  <!-- 02 Overview -->
-  <div class="section-label">02 · Fibonacci level overview</div>
-  <div class="sum-strip" id="sum-strip"></div>
-  <p style="font-size:11px;color:var(--t4);margin-bottom:32px;line-height:1.5;">Tap any level to expand. Move sliders to set ratings. Bar height shows average per level.</p>
-
-  <!-- 03 Dimensional assessment -->
-  <div class="section-label">03 · Dimensional assessment</div>
-  <div class="fib-levels" id="fib-levels"></div>
-
-  <!-- 04 Pathway -->
-  <div class="section-label">04 · Development pathway</div>
-  <div class="pathway-card">
-    <h3>Pathway recommendation</h3>
-    <textarea class="rec-area" id="pathway-text" placeholder="Based on the assessment, write the recommended development pathway. Include: primary focus area, suggested next step (club / loan / academy), timeline, and key priority actions..."></textarea>
-    <div style="margin-top:16px;">
-      <span class="obs-label">Priority tags</span>
-      <div class="tags-wrap">
-        <span class="tag" onclick="this.classList.toggle('selected')">Technical gap</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Physical priority</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Tactical development</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Psychology focus</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Ready to advance</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Loan recommended</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Academy target</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Professional threshold</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">UK pathway</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Trial recommended</span>
-        <span class="tag" onclick="this.classList.toggle('selected')">Agent follow-up</span>
-      </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModalBtn()">Close</button>
+      <button class="btn-primary-sm" onclick="printReport()">Print Report</button>
     </div>
   </div>
-
-  <!-- 05 Submit -->
-  <div class="submit-section">
-    <h3>Ready to generate the report?</h3>
-    <p>All player data and Fibonacci ratings will be sent to the assessment system. You will confirm once more before final submission.</p>
-    <button class="btn-submit" onclick="submitToTally()">
-      Submit Assessment ↗
-    </button>
-    <div class="submit-note">Redirects to assessment confirmation · Powered by Talent Mates AI Lab</div>
-  </div>
-
-  <!-- Export -->
-  <div class="export-bar">
-    <div class="footer-brand">© Talent Mates · <span>Fibonacci Path System</span> · talent-mates.com</div>
-    <button class="btn-print" onclick="window.print()">Print / Save PDF ↗</button>
-  </div>
-
-</div>
 </div>
 
 <script>
-// ── STATE ──
-let currentUser = null;
-let selectedRole = 'coach';
+// ── SAMPLE DATA ──
+// Replace this with real Airtable API call in production
+const SAMPLE_PLAYERS = [
+  {
+    id: 1,
+    name: 'Pavel Bure',
+    position: 'Striker / Centre-forward',
+    nationality: 'USA',
+    team: 'U21',
+    email: 'pavel@u21.com',
+    assessed_by: 'Yehor Topal C-UEFA',
+    assessment_date: '2026-05-15',
+    status: 'completed',
+    levels: { l1: 8.5, l2: 9.0, l3: 7.5, l5: 6.0, l8: 5.5, l13: 4.0 },
+    report: `# FIBONACCI PATH REPORT
 
-// ── REGISTER ──
-function selectRole(r) {
-  selectedRole = r;
-  document.getElementById('role-coach').classList.toggle('selected', r==='coach');
-  document.getElementById('role-player').classList.toggle('selected', r==='player');
-}
-function handleRegister() {
-  const club  = document.getElementById('reg-club').value.trim();
-  const team  = document.getElementById('reg-team').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass  = document.getElementById('reg-pass').value;
-  const pass2 = document.getElementById('reg-pass2').value;
-  const err   = document.getElementById('reg-error');
-  if (!club||!team||!email||!pass||!pass2){ showErr(err,'Please fill in all required fields.'); return; }
-  if (!email.includes('@')){ showErr(err,'Please enter a valid email address.'); return; }
-  if (pass.length<8){ showErr(err,'Password must be at least 8 characters.'); return; }
-  if (pass!==pass2){ showErr(err,'Passwords do not match.'); return; }
-  err.classList.remove('visible');
-  currentUser = { club, team, email, role: selectedRole };
-  document.getElementById('reg-form-view').style.display = 'none';
-  document.getElementById('success-screen').classList.add('visible');
-}
-function showErr(el, msg) { el.textContent = msg; el.classList.add('visible'); }
+## PLAYER PROFILE
+**Name:** Pavel Bure
+**Position:** Striker / Centre-forward
+**Nationality:** USA
+**Date of Birth:** 2006-06-27 (Age: 19)
+**Current Team:** U21
+**Assessment Date:** 2026-05-15
+**Assessed By:** Yehor Topal C-UEFA
 
-function showLoginForm() {
-  document.getElementById('reg-form-view').style.display = 'none';
-  document.getElementById('login-form-view').style.display = 'block';
-  document.getElementById('success-screen').classList.remove('visible');
-}
-function showRegisterForm() {
-  document.getElementById('login-form-view').style.display = 'none';
-  document.getElementById('reg-form-view').style.display = 'block';
-}
-function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const err   = document.getElementById('login-error');
-  if (!email||!pass){ showErr(err,'Please enter your email and password.'); return; }
-  if (!email.includes('@')){ showErr(err,'Please enter a valid email address.'); return; }
-  if (pass.length<8){ showErr(err,'Password must be at least 8 characters.'); return; }
-  err.classList.remove('visible');
-  // Hide login form before switching page
-  document.getElementById('login-form-view').style.display = 'none';
-  currentUser = { email, club:'My Club', team:'My Team', role:'coach' };
-  gotoPDDR();
-}
-function gotoPDDR() {
-  if (currentUser) {
-    document.getElementById('u-avatar').textContent = currentUser.email.slice(0,2).toUpperCase();
-    document.getElementById('u-name').textContent = currentUser.email;
-    document.getElementById('u-role').textContent = currentUser.role.toUpperCase() + ' · ' + currentUser.club.toUpperCase();
-    document.getElementById('f-assessor').value = currentUser.email;
-    document.getElementById('f-club').value = currentUser.team || '';
+---
+
+## 1. PLAYER SUMMARY
+
+Pavel Bure presents as an elite-level physical prospect with exceptional technical fundamentals currently playing at U21 level. At 19 years old, he possesses a rare combination of explosive speed and clinical finishing that positions him as a high-potential professional candidate. The primary development priority is psychological stability under pressure (Level 5: 6.0) to unlock his considerable athletic and technical gifts.
+
+## 2. FIBONACCI LEVEL ANALYSIS
+
+**Level 1 — Fundamentals (8.5/10)**
+Exceptional foundation. Ball control and weak foot are both operating at near-elite level, suggesting years of structured technical development. This is a genuine strength that underpins everything above.
+
+**Level 2 — Physical (9.0/10)**
+Top of the chart. Speed and endurance scores place Pavel in the top tier for his age group. Physical maturity is already professional-grade — this is a significant competitive advantage.
+
+**Level 3 — Tactical (7.5/10)**
+Solid tactical understanding with room to grow. Off-ball positioning is good but decision speed under pressure drops slightly, indicating that tactical execution under stress needs reinforcement.
+
+**Level 5 — Psychology (6.0/10)**
+The critical gap. Pressure handling and concentration scores suggest inconsistency in high-stakes moments. At professional level this gap will be exposed — this is the #1 development priority.
+
+**Level 8 — Intelligence (5.5/10)**
+Anticipation and spatial reads are developing but not yet elite. This level typically develops with experience — consistent first-team exposure will accelerate progress here.
+
+**Level 13 — Professional (4.0/10)**
+Early stage. Professional habits and market positioning need structured development. Expected at this age but requires a plan.
+
+## 3. GAP ANALYSIS
+
+Critical gap: Level 5 Psychology (6.0) vs Level 2 Physical (9.0). The 3.0 point differential means Pavel's mental game is not keeping pace with his physical gifts. Under pressure, decision quality drops and frustration patterns emerge — blocking progression to Level 8.
+
+Secondary gap: Level 13 Professional habits (4.0). Without structured professional environment this will remain underdeveloped.
+
+## 4. PATHWAY RECOMMENDATION
+
+**30 days:** Engage sports psychologist — focus on pressure simulation drills, breathing protocols, and pre-match routines.
+
+**60 days:** Secure regular first-team exposure (loan or promotion) — intelligence and professional scores only improve with consistent senior competitive minutes.
+
+**90 days:** Re-assess Level 5 and Level 8 — target +1.5 improvement in psychology score.
+
+## 5. PRIORITY ACTIONS — NEXT 7 DAYS
+
+1. Daily 10-minute visualisation practice — game scenarios under pressure
+2. Video analysis session: review last 3 matches, focus on moments of hesitation
+3. 1v1 finishing drill under time pressure — 20 repetitions daily
+4. Introduce weekly check-in with MATE AI dashboard
+5. Set one measurable psychological target for next match
+
+## 6. AGENT NOTE (Talent Mates Internal)
+
+**Worth representing: YES — high priority.**
+Physical and technical profile is top 5% for age group. Psychology gap is fixable with proper support. Market value trajectory: HIGH — if psychological development is addressed within 6 months, EFL Championship or top-tier European U21 loan is realistic.
+
+**Target clubs:** Swindon Town, Cheltenham, Newport County (EFL Trophy exposure), or Serie C loan via existing Italian contacts.
+
+**Commercial opportunity rating: 8/10**
+**Recommended next contact:** Direct conversation with player and family within 14 days.`
+  },
+  {
+    id: 2,
+    name: 'Jon Sem',
+    position: 'Centre-back',
+    nationality: 'UK',
+    team: 'TeamU19',
+    email: 'jon@teamu19.com',
+    assessed_by: 'Vitaliy Lomov',
+    assessment_date: '2026-05-15',
+    status: 'completed',
+    levels: { l1: 7.0, l2: 8.0, l3: 6.5, l5: 5.5, l8: 5.0, l13: 3.5 },
+    report: `# FIBONACCI PATH REPORT
+
+## PLAYER PROFILE
+**Name:** Jon Sem
+**Position:** Centre-back
+**Team:** TeamU19
+**Assessment Date:** 2026-05-15
+
+## 1. PLAYER SUMMARY
+Jon Sem is a technically sound centre-back with strong physical attributes. Current Fibonacci level: 3 — Tactical Thinking. Primary priority: decision speed under pressure.
+
+## 2. FIBONACCI LEVEL ANALYSIS
+
+**Level 1 — Fundamentals (7.0):** Strong baseline with reliable first touch and developing weak foot.
+
+**Level 2 — Physical (8.0):** Excellent athletic profile for a centre-back. Aerial dominance and recovery speed are standout attributes.
+
+**Level 3 — Tactical (6.5):** Positional awareness is good but decision speed in transition needs improvement.
+
+**Level 5 — Psychology (5.5):** Shows composure in routine situations but can be rattled by sustained pressure.
+
+**Level 8 — Intelligence (5.0):** Reading of the game is developing — needs more senior competitive experience.
+
+**Level 13 — Professional (3.5):** Early stage. Professional habits need structured development plan.
+
+## 3. GAP ANALYSIS
+Primary gap: Level 5 Psychology holding back Level 3 Tactical from reaching full potential.
+
+## 4. PATHWAY RECOMMENDATION
+30 days: Focus on decision-making drills under fatigue.
+60 days: Secure regular U21/reserve team minutes.
+90 days: Re-assess tactical and psychology scores.
+
+## 5. PRIORITY ACTIONS
+1. Daily passing combinations under pressure
+2. Video analysis of top Premier League centre-backs
+3. Aerial duel practice 3x per week
+4. Mental resilience journal — post-match reflection
+5. Weekly MATE AI check-in
+
+## 6. AGENT NOTE
+**Worth representing: YES — medium priority.**
+Solid profile with clear development trajectory. EFL League Two or National League target within 18 months.
+**Commercial opportunity: 6/10**`
   }
-  // Show dashboard button after login
-  const dashBtn = document.getElementById('nav-dashboard');
-  if (dashBtn) dashBtn.style.display = 'inline-flex';
-  showPage('pddr');
-}
-function goBack() { showPage('register'); }
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => {
-    p.classList.remove('active');
-    p.style.display = 'none';
-  });
-  const target = document.getElementById('page-'+id);
-  target.classList.add('active');
-  target.style.display = 'block';
-  document.getElementById('nav-back').style.display = id==='pddr' ? 'flex' : 'none';
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-}
-
-// ── PDDR — 2 SLIDERS PER LEVEL ──
-const LEVELS = [
-  { fib:1,  name:'Fundamental movement',   desc:'Basic motor skills & ball mastery',              age:'U8–U10',  dims:[
-    { label:'Rating 1 — Fundamentals · Ball control & first touch', key:'r1' },
-    { label:'Rating 2 — Fundamentals · Weak foot & 1v1 dribbling',  key:'r2' },
-  ]},
-  { fib:2,  name:'Physical development',   desc:'Athletic layer built on technique',               age:'U12–U14', dims:[
-    { label:'Rating 3 — Physical · Speed & explosiveness',           key:'r3' },
-    { label:'Rating 4 — Physical · Endurance & strength',            key:'r4' },
-  ]},
-  { fib:3,  name:'Tactical thinking',      desc:'Game understanding beyond individual action',     age:'U14–U16', dims:[
-    { label:'Rating 5 — Tactical · Off-ball positioning',            key:'r5' },
-    { label:'Rating 6 — Tactical · Decision speed under pressure',   key:'r6' },
-  ]},
-  { fib:5,  name:'Psychology & stability', desc:'Mental resilience as competitive differentiator', age:'U16–U18', dims:[
-    { label:'Rating 7 — Psychology · Pressure handling & resilience',  key:'r7' },
-    { label:'Rating 8 — Psychology · Concentration & self-regulation', key:'r8' },
-  ]},
-  { fib:8,  name:'Game intelligence',      desc:'Reading the game at elite cognitive level',       age:'U18–U21', dims:[
-    { label:'Rating 9 — Intelligence · Anticipation & spatial reads',   key:'r9' },
-    { label:'Rating 10 — Intelligence · Decision quality & leadership', key:'r10' },
-  ]},
-  { fib:13, name:'Professional readiness', desc:'All systems integrated — contract threshold',     age:'21+',     dims:[
-    { label:'Rating 11 — Professional · Consistency & adaptability',    key:'r11' },
-    { label:'Rating 12 — Professional · Habits & market positioning',   key:'r12' },
-  ]},
 ];
 
-const SC = LEVELS.map(l => l.dims.map(() => 50));
-
-function avg(a) { return a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0; }
-
-function buildStrip() {
-  document.getElementById('sum-strip').innerHTML = LEVELS.map((l,i) => `
-    <div class="strip-cell">
-      <div class="strip-bar"><div class="strip-fill" id="sf-${i}" style="height:50%"></div></div>
-      <div class="strip-num">${l.fib}</div>
-      <div class="strip-lbl">${l.name.split(' ')[0]}</div>
-    </div>`).join('');
+// ── LEVEL COLORS ──
+function levelColor(score) {
+  if (score >= 8) return 'var(--green)';
+  if (score >= 6) return 'var(--accent)';
+  if (score >= 4) return 'var(--amber)';
+  return 'var(--red)';
 }
 
-function gapHTML(i) {
-  const a = avg(SC[i]);
-  const hasGap = SC[i].some(v=>v<35) && a>45;
-  if (hasGap) return '<div class="gap-indicator gap-warn">⚠ Gap detected — reinforce before advancing</div>';
-  if (a>=75)  return '<div class="gap-indicator gap-ok">✓ Level solid — ready to progress</div>';
-  return '<div class="gap-indicator gap-dev">In development — continue monitoring</div>';
-}
+// ── BUILD CARDS ──
+function buildCards(players) {
+  const grid = document.getElementById('cards-grid');
+  if (!players.length) return;
 
-function buildLevels() {
-  document.getElementById('fib-levels').innerHTML = LEVELS.map((l,i) => `
-    <div class="fib-level" id="lc-${i}">
-      <div class="fib-hdr" onclick="toggleLv(${i})">
-        <div class="fib-num">${l.fib}</div>
-        <div><div class="fib-name">${l.name}</div><div class="fib-desc">${l.desc}</div></div>
-        <div class="fib-right">
-          <span class="fib-age">${l.age}</span>
-          <span class="avg-badge" id="ab-${i}">avg: 50</span>
+  // Update stats
+  document.getElementById('stat-total').textContent = players.length;
+  const completed = players.filter(p => p.status === 'completed').length;
+  document.getElementById('stat-done').textContent = completed;
+  const avgLevels = players.map(p => {
+    const vals = Object.values(p.levels);
+    return vals.reduce((a,b) => a+b, 0) / vals.length;
+  });
+  const overallAvg = (avgLevels.reduce((a,b) => a+b, 0) / avgLevels.length).toFixed(1);
+  document.getElementById('stat-avg').textContent = overallAvg;
+
+  grid.innerHTML = players.map(p => {
+    const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const lvls = [
+      { num: 1, key: 'l1', label: 'Fund' },
+      { num: 2, key: 'l2', label: 'Phys' },
+      { num: 3, key: 'l3', label: 'Tact' },
+      { num: 5, key: 'l5', label: 'Psych' },
+      { num: 8, key: 'l8', label: 'Intel' },
+      { num: 13, key: 'l13', label: 'Pro' },
+    ];
+    const statusClass = {
+      completed: 'status-completed',
+      pending: 'status-pending',
+      processing: 'status-processing'
+    }[p.status] || 'status-pending';
+
+    return `
+    <div class="player-card" onclick="openReport(${p.id})">
+      <div class="card-header">
+        <div class="card-avatar">${initials}</div>
+        <div class="card-info">
+          <div class="card-name">${p.name}</div>
+          <div class="card-pos">${p.position} · ${p.team}</div>
+          <div class="card-date">Updated: ${p.assessment_date}</div>
         </div>
+        <span class="card-status ${statusClass}">${p.status}</span>
       </div>
-      <div class="fib-body" id="lb-${i}">
-        <div class="dims-2">
-          ${l.dims.map((d,di) => `
-            <div class="dim-row">
-              <div class="dim-top">
-                <span class="dim-label">${d.label}</span>
-                <span class="dim-val" id="dv-${i}-${di}">50</span>
+      <div class="card-levels">
+        <div class="levels-label">Fibonacci levels</div>
+        <div class="levels-strip">
+          ${lvls.map(l => {
+            const score = p.levels[l.key] || 0;
+            const pct = (score / 10) * 100;
+            return `
+            <div class="lv-cell">
+              <div class="lv-bar-wrap">
+                <div class="lv-bar-fill" style="height:${pct}%;background:${levelColor(score)};opacity:0.85;"></div>
               </div>
-              <input type="range" class="dim-slider" min="0" max="100" value="50"
-                oninput="updDim(${i},${di},this.value)">
-              <div class="bar-wrap"><div class="bar-fill" id="bf-${i}-${di}" style="width:50%"></div></div>
-              <div class="dim-scale"><span>0 — Beginner</span><span>50 — Developing</span><span>100 — Elite</span></div>
-            </div>`).join('')}
+              <div class="lv-num">${l.num}</div>
+              <div class="lv-score">${score}</div>
+            </div>`;
+          }).join('')}
         </div>
-        <div id="gi-${i}">${gapHTML(i)}</div>
-        <span class="obs-label">Coach observations</span>
-        <textarea class="obs-input" placeholder="Note key observations and development priorities at this level..."></textarea>
       </div>
-    </div>`).join('');
+      <div class="card-footer">
+        <span class="card-email">${p.email}</span>
+        <button class="btn-report" onclick="event.stopPropagation();openReport(${p.id})">AI Report ↗</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function toggleLv(i) {
-  document.getElementById('lb-'+i).classList.toggle('open');
-  document.getElementById('lc-'+i).classList.toggle('active');
+// ── MODAL ──
+let currentReport = '';
+function openReport(id) {
+  const player = SAMPLE_PLAYERS.find(p => p.id === id);
+  if (!player) return;
+  document.getElementById('modal-title').textContent = player.name + ' — AI Report';
+  document.getElementById('modal-sub').textContent = player.position + ' · ' + player.team + ' · ' + player.assessment_date;
+  
+  // Render markdown-lite
+  const report = player.report || 'Report not available yet.';
+  currentReport = report;
+  document.getElementById('modal-report').innerHTML = renderMarkdown(report);
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function updDim(li, di, val) {
-  SC[li][di] = parseInt(val);
-  document.getElementById('dv-'+li+'-'+di).textContent = val;
-  document.getElementById('bf-'+li+'-'+di).style.width = val+'%';
-  document.getElementById('gi-'+li).innerHTML = gapHTML(li);
-  const sf = document.getElementById('sf-'+li);
-  if (sf) sf.style.height = avg(SC[li])+'%';
-  const a = avg(SC[li]);
-  const ab = document.getElementById('ab-'+li);
-  if (ab) {
-    ab.textContent = 'avg: '+a;
-    ab.style.color  = a>=75?'var(--green)':a<35?'var(--red)':'var(--amber)';
-    ab.style.borderColor = a>=75?'rgba(34,201,122,0.3)':a<35?'rgba(255,77,106,0.3)':'rgba(245,166,35,0.2)';
-    ab.style.background  = a>=75?'rgba(34,201,122,0.08)':a<35?'rgba(255,77,106,0.08)':'rgba(245,166,35,0.08)';
-  }
+function renderMarkdown(text) {
+  return text
+    .replace(/^# (.+)$/gm, '<h1 style="font-family:var(--font-d);font-size:20px;font-weight:400;color:var(--accent);margin:20px 0 8px;">$1</h1>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-family:var(--font-d);font-size:16px;font-weight:400;color:var(--t1);margin:16px 0 6px;">$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--t1);font-weight:600;">$1</strong>')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:16px 0;">')
+    .replace(/
+/g, '<br>');
 }
 
-// ── SUBMIT TO MAKE ──
-async function submitToTally() {
-  const name     = document.getElementById('f-name').value.trim();
-  const pos      = document.getElementById('f-position').value.trim();
-  const nat      = document.getElementById('f-nationality').value.trim();
-  const dob      = document.getElementById('f-dob').value.trim();
-  const club     = document.getElementById('f-club').value.trim();
-  const adate    = document.getElementById('f-date').value.trim();
-  const assessor = document.getElementById('f-assessor').value.trim();
-  const pathway  = document.getElementById('pathway-text').value.trim();
-
-  if (!name||!pos||!dob||!club) {
-    alert('Please fill in: Full Name, Position, Date of Birth, and Current Team before submitting.');
-    return;
-  }
-
-  // Convert 0-100 slider → 1-10 scale
-  function t10(v) { return Math.max(1, Math.min(10, Math.round(v/10))); }
-
-  // Collect selected tags
-  const tags = [...document.querySelectorAll('.tag.selected')]
-    .map(t => t.textContent).join(', ');
-
-  const payload = {
-    player_name:      name,
-    position:         pos,
-    nationality:      nat,
-    date_of_birth:    dob,
-    current_team:     club,
-    assessment_date:  adate,
-    assessed_by:      assessor,
-    pathway:          pathway,
-    priority_tags:    tags,
-    ratings: {
-      r1:  t10(SC[0][0]),
-      r2:  t10(SC[0][1]),
-      r3:  t10(SC[1][0]),
-      r4:  t10(SC[1][1]),
-      r5:  t10(SC[2][0]),
-      r6:  t10(SC[2][1]),
-      r7:  t10(SC[3][0]),
-      r8:  t10(SC[3][1]),
-      r9:  t10(SC[4][0]),
-      r10: t10(SC[4][1]),
-      r11: t10(SC[5][0]),
-      r12: t10(SC[5][1]),
-    },
-    levels: {
-      level_1:  ((t10(SC[0][0]) + t10(SC[0][1])) / 2).toFixed(1),
-      level_2:  ((t10(SC[1][0]) + t10(SC[1][1])) / 2).toFixed(1),
-      level_3:  ((t10(SC[2][0]) + t10(SC[2][1])) / 2).toFixed(1),
-      level_5:  ((t10(SC[3][0]) + t10(SC[3][1])) / 2).toFixed(1),
-      level_8:  ((t10(SC[4][0]) + t10(SC[4][1])) / 2).toFixed(1),
-      level_13: ((t10(SC[5][0]) + t10(SC[5][1])) / 2).toFixed(1),
-    }
-  };
-
-  // Show loading state
-  const btn = document.querySelector('.btn-submit');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = 'Sending... ⏳';
-  btn.disabled = true;
-
-  try {
-    const response = await fetch(
-      'https://hook.eu1.make.com/7cq32xai9btscldpdtxs3tisbyst057k',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        mode: 'no-cors'
-      }
-    );
-
-    // Success state
-    btn.innerHTML = '✓ Submitted successfully';
-    btn.style.background = 'var(--green)';
-    btn.style.color = '#fff';
-
-    // Show success message
-    const note = document.querySelector('.submit-note');
-    if (note) {
-      note.innerHTML = '✓ Assessment sent to MATE AI · Report will be generated shortly · Check your dashboard';
-      note.style.color = 'var(--green)';
-    }
-
-  } catch (err) {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-    alert('Connection error. Please try again.');
-    console.error('Make webhook error:', err);
-  }
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function printReport() {
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>Fibonacci Path Report</title>
+  <style>body{font-family:sans-serif;max-width:700px;margin:40px auto;line-height:1.7;color:#1a1a1a;}
+  h1{color:#794DC6;font-size:22px;}h2{color:#333;font-size:16px;margin-top:24px;}</style></head>
+  <body><pre style="white-space:pre-wrap;font-family:inherit;">${currentReport}</pre></body></html>`);
+  w.document.close();
+  w.print();
 }
 
 // ── INIT ──
-document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
-buildStrip();
-buildLevels();
+buildCards(SAMPLE_PLAYERS);
 </script>
 </body>
 </html>
