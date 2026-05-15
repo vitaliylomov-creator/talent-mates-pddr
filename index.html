@@ -1278,6 +1278,7 @@ function handleRegister() {
   if (pass!==pass2){ showErr(err,'Passwords do not match.'); return; }
   err.classList.remove('visible');
   currentUser = { club, team, email, role: selectedRole };
+  sessionStorage.setItem('tm_user', JSON.stringify(currentUser));
   document.getElementById('reg-form-view').style.display = 'none';
   document.getElementById('success-screen').classList.add('visible');
 }
@@ -1303,6 +1304,7 @@ function handleLogin() {
   // Hide login form before switching page
   document.getElementById('login-form-view').style.display = 'none';
   currentUser = { email, club:'My Club', team:'My Team', role:'coach' };
+  sessionStorage.setItem('tm_user', JSON.stringify(currentUser));
   gotoPDDR();
 }
 function gotoPDDR() {
@@ -1312,6 +1314,37 @@ function gotoPDDR() {
     document.getElementById('u-role').textContent = currentUser.role.toUpperCase() + ' · ' + currentUser.club.toUpperCase();
     document.getElementById('f-assessor').value = currentUser.email;
     document.getElementById('f-club').value = currentUser.team || '';
+    // Clear player fields for new assessment
+    const clearFields = ['f-name','f-dob','f-nationality','f-position'];
+    clearFields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    // Reset sliders to 50
+    SC.forEach((level, li) => {
+      level.forEach((_, di) => {
+        SC[li][di] = 50;
+        const slider = document.querySelector(`[oninput="updDim(${li},${di},this.value)"]`);
+        const val = document.getElementById('dv-'+li+'-'+di);
+        const bar = document.getElementById('bf-'+li+'-'+di);
+        if (slider) slider.value = 50;
+        if (val) val.textContent = 50;
+        if (bar) bar.style.width = '50%';
+      });
+    });
+    // Reset pathway
+    const pathway = document.getElementById('pathway-text');
+    if (pathway) pathway.value = '';
+    // Reset tags
+    document.querySelectorAll('.tag.selected').forEach(t => t.classList.remove('selected'));
+    // Reset submit button
+    const btn = document.querySelector('.btn-submit');
+    if (btn) { btn.innerHTML = 'Submit Assessment ↗'; btn.disabled = false; btn.style.background = ''; btn.style.color = ''; }
+    // Reset submit note
+    const note = document.querySelector('.submit-note');
+    if (note) { note.innerHTML = 'Redirects to assessment confirmation · Powered by Talent Mates AI Lab'; note.style.color = ''; }
+    // Set today date
+    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
   }
   // Show dashboard button after login
   const dashBtn = document.getElementById('nav-dashboard');
@@ -1533,6 +1566,20 @@ async function submitToTally() {
 document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
 buildStrip();
 buildLevels();
+
+// Auto-skip registration if ?mode=new (coming from dashboard)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mode') === 'new') {
+    currentUser = {
+      email: params.get('email') || 'coach@talent-mates.com',
+      club:  params.get('club')  || 'My Club',
+      team:  params.get('team')  || 'My Team',
+      role:  params.get('role')  || 'coach'
+    };
+    gotoPDDR();
+  }
+})();
 </script>
 </body>
 </html>
