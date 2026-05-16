@@ -1096,148 +1096,14 @@ nav {
 </div>
 
 <script>
-// ── SAMPLE DATA ──
-// Replace this with real Airtable API call in production
-const SAMPLE_PLAYERS = [
-  {
-    id: 1,
-    name: 'Pavel Bure',
-    position: 'Striker / Centre-forward',
-    nationality: 'USA',
-    team: 'U21',
-    email: 'pavel@u21.com',
-    assessed_by: 'Yehor Topal C-UEFA',
-    assessment_date: '2026-05-15',
-    status: 'completed',
-    levels: { l1: 8.5, l2: 9.0, l3: 7.5, l5: 6.0, l8: 5.5, l13: 4.0 },
-    report: `# FIBONACCI PATH REPORT
+// ── AIRTABLE CONFIG ──
+const AIRTABLE_TOKEN = 'patUqPduibzchhlVl.5b5bd9f9a736f5f3c43d164701f25bae077ef9267704c3d9f4a5a1bbcd009e58';
+const BASE_ID        = 'appTxHkjsSg2bN96c';
+const TABLE_ID       = 'tbl1Il7d4e5th74uf';
 
-## PLAYER PROFILE
-**Name:** Pavel Bure
-**Position:** Striker / Centre-forward
-**Nationality:** USA
-**Date of Birth:** 2006-06-27 (Age: 19)
-**Current Team:** U21
-**Assessment Date:** 2026-05-15
-**Assessed By:** Yehor Topal C-UEFA
+let ALL_PLAYERS = [];
 
----
-
-## 1. PLAYER SUMMARY
-
-Pavel Bure presents as an elite-level physical prospect with exceptional technical fundamentals currently playing at U21 level. At 19 years old, he possesses a rare combination of explosive speed and clinical finishing that positions him as a high-potential professional candidate. The primary development priority is psychological stability under pressure (Level 5: 6.0) to unlock his considerable athletic and technical gifts.
-
-## 2. FIBONACCI LEVEL ANALYSIS
-
-**Level 1 — Fundamentals (8.5/10)**
-Exceptional foundation. Ball control and weak foot are both operating at near-elite level, suggesting years of structured technical development. This is a genuine strength that underpins everything above.
-
-**Level 2 — Physical (9.0/10)**
-Top of the chart. Speed and endurance scores place Pavel in the top tier for his age group. Physical maturity is already professional-grade — this is a significant competitive advantage.
-
-**Level 3 — Tactical (7.5/10)**
-Solid tactical understanding with room to grow. Off-ball positioning is good but decision speed under pressure drops slightly, indicating that tactical execution under stress needs reinforcement.
-
-**Level 5 — Psychology (6.0/10)**
-The critical gap. Pressure handling and concentration scores suggest inconsistency in high-stakes moments. At professional level this gap will be exposed — this is the #1 development priority.
-
-**Level 8 — Intelligence (5.5/10)**
-Anticipation and spatial reads are developing but not yet elite. This level typically develops with experience — consistent first-team exposure will accelerate progress here.
-
-**Level 13 — Professional (4.0/10)**
-Early stage. Professional habits and market positioning need structured development. Expected at this age but requires a plan.
-
-## 3. GAP ANALYSIS
-
-Critical gap: Level 5 Psychology (6.0) vs Level 2 Physical (9.0). The 3.0 point differential means Pavel's mental game is not keeping pace with his physical gifts. Under pressure, decision quality drops and frustration patterns emerge — blocking progression to Level 8.
-
-Secondary gap: Level 13 Professional habits (4.0). Without structured professional environment this will remain underdeveloped.
-
-## 4. PATHWAY RECOMMENDATION
-
-**30 days:** Engage sports psychologist — focus on pressure simulation drills, breathing protocols, and pre-match routines.
-
-**60 days:** Secure regular first-team exposure (loan or promotion) — intelligence and professional scores only improve with consistent senior competitive minutes.
-
-**90 days:** Re-assess Level 5 and Level 8 — target +1.5 improvement in psychology score.
-
-## 5. PRIORITY ACTIONS — NEXT 7 DAYS
-
-1. Daily 10-minute visualisation practice — game scenarios under pressure
-2. Video analysis session: review last 3 matches, focus on moments of hesitation
-3. 1v1 finishing drill under time pressure — 20 repetitions daily
-4. Introduce weekly check-in with MATE AI dashboard
-5. Set one measurable psychological target for next match
-
-## 6. AGENT NOTE (Talent Mates Internal)
-
-**Worth representing: YES — high priority.**
-Physical and technical profile is top 5% for age group. Psychology gap is fixable with proper support. Market value trajectory: HIGH — if psychological development is addressed within 6 months, EFL Championship or top-tier European U21 loan is realistic.
-
-**Target clubs:** Swindon Town, Cheltenham, Newport County (EFL Trophy exposure), or Serie C loan via existing Italian contacts.
-
-**Commercial opportunity rating: 8/10**
-**Recommended next contact:** Direct conversation with player and family within 14 days.`
-  },
-  {
-    id: 2,
-    name: 'Jon Sem',
-    position: 'Centre-back',
-    nationality: 'UK',
-    team: 'TeamU19',
-    email: 'jon@teamu19.com',
-    assessed_by: 'Vitaliy Lomov',
-    assessment_date: '2026-05-15',
-    status: 'completed',
-    levels: { l1: 7.0, l2: 8.0, l3: 6.5, l5: 5.5, l8: 5.0, l13: 3.5 },
-    report: `# FIBONACCI PATH REPORT
-
-## PLAYER PROFILE
-**Name:** Jon Sem
-**Position:** Centre-back
-**Team:** TeamU19
-**Assessment Date:** 2026-05-15
-
-## 1. PLAYER SUMMARY
-Jon Sem is a technically sound centre-back with strong physical attributes. Current Fibonacci level: 3 — Tactical Thinking. Primary priority: decision speed under pressure.
-
-## 2. FIBONACCI LEVEL ANALYSIS
-
-**Level 1 — Fundamentals (7.0):** Strong baseline with reliable first touch and developing weak foot.
-
-**Level 2 — Physical (8.0):** Excellent athletic profile for a centre-back. Aerial dominance and recovery speed are standout attributes.
-
-**Level 3 — Tactical (6.5):** Positional awareness is good but decision speed in transition needs improvement.
-
-**Level 5 — Psychology (5.5):** Shows composure in routine situations but can be rattled by sustained pressure.
-
-**Level 8 — Intelligence (5.0):** Reading of the game is developing — needs more senior competitive experience.
-
-**Level 13 — Professional (3.5):** Early stage. Professional habits need structured development plan.
-
-## 3. GAP ANALYSIS
-Primary gap: Level 5 Psychology holding back Level 3 Tactical from reaching full potential.
-
-## 4. PATHWAY RECOMMENDATION
-30 days: Focus on decision-making drills under fatigue.
-60 days: Secure regular U21/reserve team minutes.
-90 days: Re-assess tactical and psychology scores.
-
-## 5. PRIORITY ACTIONS
-1. Daily passing combinations under pressure
-2. Video analysis of top Premier League centre-backs
-3. Aerial duel practice 3x per week
-4. Mental resilience journal — post-match reflection
-5. Weekly MATE AI check-in
-
-## 6. AGENT NOTE
-**Worth representing: YES — medium priority.**
-Solid profile with clear development trajectory. EFL League Two or National League target within 18 months.
-**Commercial opportunity: 6/10**`
-  }
-];
-
-// ── LEVEL COLORS ──
+// ── LEVEL COLOR ──
 function levelColor(score) {
   if (score >= 8) return 'var(--green)';
   if (score >= 6) return 'var(--accent)';
@@ -1247,38 +1113,41 @@ function levelColor(score) {
 
 // ── BUILD CARDS ──
 function buildCards(players) {
+  ALL_PLAYERS = players;
   const grid = document.getElementById('cards-grid');
-  if (!players.length) return;
 
   // Update stats
   document.getElementById('stat-total').textContent = players.length;
   const completed = players.filter(p => p.status === 'completed').length;
   document.getElementById('stat-done').textContent = completed;
-  const avgLevels = players.map(p => {
-    const vals = Object.values(p.levels);
-    return vals.reduce((a,b) => a+b, 0) / vals.length;
-  });
-  const overallAvg = (avgLevels.reduce((a,b) => a+b, 0) / avgLevels.length).toFixed(1);
-  document.getElementById('stat-avg').textContent = overallAvg;
+  if (players.length > 0) {
+    const avgLevels = players.map(p => {
+      const vals = Object.values(p.levels).filter(v => v > 0);
+      return vals.length ? vals.reduce((a,b) => a+b,0) / vals.length : 0;
+    });
+    const overall = (avgLevels.reduce((a,b)=>a+b,0) / avgLevels.length).toFixed(1);
+    document.getElementById('stat-avg').textContent = overall;
+  }
+
+  const lvls = [
+    { num:1,  key:'l1',  label:'Fund' },
+    { num:2,  key:'l2',  label:'Phys' },
+    { num:3,  key:'l3',  label:'Tact' },
+    { num:5,  key:'l5',  label:'Psych'},
+    { num:8,  key:'l8',  label:'Intel'},
+    { num:13, key:'l13', label:'Pro'  },
+  ];
 
   grid.innerHTML = players.map(p => {
-    const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    const lvls = [
-      { num: 1, key: 'l1', label: 'Fund' },
-      { num: 2, key: 'l2', label: 'Phys' },
-      { num: 3, key: 'l3', label: 'Tact' },
-      { num: 5, key: 'l5', label: 'Psych' },
-      { num: 8, key: 'l8', label: 'Intel' },
-      { num: 13, key: 'l13', label: 'Pro' },
-    ];
+    const initials = p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     const statusClass = {
-      completed: 'status-completed',
-      pending: 'status-pending',
+      completed:  'status-completed',
+      pending:    'status-pending',
       processing: 'status-processing'
     }[p.status] || 'status-pending';
 
     return `
-    <div class="player-card" onclick="openReport(${p.id})">
+    <div class="player-card" onclick="openReport('${p.id}')">
       <div class="card-header">
         <div class="card-avatar">${initials}</div>
         <div class="card-info">
@@ -1307,7 +1176,7 @@ function buildCards(players) {
       </div>
       <div class="card-footer">
         <span class="card-email">${p.email}</span>
-        <button class="btn-report" onclick="event.stopPropagation();openReport(${p.id})">AI Report ↗</button>
+        <button class="btn-report" onclick="event.stopPropagation();openReport('${p.id}')">AI Report ↗</button>
       </div>
     </div>`;
   }).join('');
@@ -1315,34 +1184,27 @@ function buildCards(players) {
 
 // ── MODAL ──
 let currentReport = '';
+
 function openReport(id) {
-  const player = SAMPLE_PLAYERS.find(p => p.id === id);
+  const player = ALL_PLAYERS.find(p => p.id === id);
   if (!player) return;
   document.getElementById('modal-title').textContent = player.name + ' — AI Report';
   document.getElementById('modal-sub').textContent = player.position + ' · ' + player.team + ' · ' + player.assessment_date;
-  
-  // Render markdown-lite
-  const report = player.report || 'Report not available yet.';
-  currentReport = report;
-  document.getElementById('modal-report').innerHTML = renderMarkdown(report);
+  currentReport = player.report || 'Report not available yet.';
+  document.getElementById('modal-report').innerHTML = renderMarkdown(currentReport);
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function renderMarkdown(text) {
-  // Escape then process markdown safely
   let html = text;
-  // Headers
-  html = html.replace(/^# (.+)$/gm, '<h1 class="md-h1">$1</h1>');
-  html = html.replace(/^## (.+)$/gm, '<h2 class="md-h2">$1</h2>');
-  html = html.replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>');
-  // Bold — use split approach to avoid regex issues
+  html = html.replace(/^# (.+)$/gm, '<div class="md-h1">$1</div>');
+  html = html.replace(/^## (.+)$/gm, '<div class="md-h2">$1</div>');
+  html = html.replace(/^### (.+)$/gm, '<div class="md-h3">$1</div>');
   html = html.split('**').map(function(part, i) {
     return i % 2 === 1 ? '<strong class="md-bold">' + part + '</strong>' : part;
   }).join('');
-  // HR
-  html = html.replace(/^---$/gm, '<hr class="md-hr">');
-  // Line breaks
+  html = html.replace(/^---$/gm, '<div class="md-hr"></div>');
   html = html.replace(/
 /g, '<br>');
   return html;
@@ -1357,30 +1219,73 @@ function closeModalBtn() {
 }
 function printReport() {
   const w = window.open('', '_blank');
-  w.document.write(`<html><head><title>Fibonacci Path Report</title>
-  <style>body{font-family:sans-serif;max-width:700px;margin:40px auto;line-height:1.7;color:#1a1a1a;}
-  h1{color:#794DC6;font-size:22px;}h2{color:#333;font-size:16px;margin-top:24px;}</style></head>
-  <body><pre style="white-space:pre-wrap;font-family:inherit;">${currentReport}</pre></body></html>`);
+  w.document.write('<html><head><title>Fibonacci Path Report</title><style>body{font-family:sans-serif;max-width:700px;margin:40px auto;line-height:1.7;color:#1a1a1a;}h1{color:#794DC6;}</style></head><body><pre style="white-space:pre-wrap;font-family:inherit;">' + currentReport + '</pre></body></html>');
   w.document.close();
   w.print();
 }
 
-// ── INIT ──
-buildCards(SAMPLE_PLAYERS);
+// ── FETCH FROM AIRTABLE ──
+async function fetchPlayers() {
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--t3);font-size:14px;">Loading players... ⏳</div>';
+
+  try {
+    const url = 'https://api.airtable.com/v0/' + BASE_ID + '/' + TABLE_ID + '?sort[0][field]=Assessment%20Date&sort[0][direction]=desc';
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN }
+    });
+
+    if (!res.ok) throw new Error('Airtable error: ' + res.status);
+
+    const data = await res.json();
+    const records = data.records || [];
+
+    if (!records.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚽</div><div class="empty-title">No players yet</div><p class="empty-sub">Submit a player assessment via the PDDR form.<br>Results will appear here automatically.</p></div>';
+      return;
+    }
+
+    const players = records.map(r => {
+      const f = r.fields;
+      return {
+        id:              r.id,
+        name:            f['Player name']     || f['Player Name']     || 'Unknown',
+        position:        f['Position']                                || '—',
+        nationality:     f['Nationality']                             || '—',
+        team:            f['Current Team']    || f['Team']            || '—',
+        email:           f['Player Email']    || f['Email']           || '—',
+        assessed_by:     f['Assessed By']                             || '—',
+        assessment_date: f['Assessment Date'] || f['assessment_date'] || '—',
+        status:          f['Status']                                  || 'completed',
+        report:          f['AI Report']                               || '',
+        levels: {
+          l1:  parseFloat(f['Level 1'])  || parseFloat(f['level_1'])  || 0,
+          l2:  parseFloat(f['Level 2'])  || parseFloat(f['level_2'])  || 0,
+          l3:  parseFloat(f['Level 3'])  || parseFloat(f['level_3'])  || 0,
+          l5:  parseFloat(f['Level 5'])  || parseFloat(f['level_5'])  || 0,
+          l8:  parseFloat(f['Level 8'])  || parseFloat(f['level_8'])  || 0,
+          l13: parseFloat(f['Level 13']) || parseFloat(f['level_13']) || 0,
+        }
+      };
+    });
+
+    buildCards(players);
+
+  } catch (err) {
+    console.error('Airtable error:', err);
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Connection error</div><p class="empty-sub">Could not load player data. Check your connection.</p><button onclick="fetchPlayers()" style="margin-top:16px;background:var(--white);color:var(--purple);border:none;padding:10px 24px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;">Retry</button></div>';
+  }
+}
 
 // ── NEW ASSESSMENT ──
 function goToNewAssessment() {
-  // Pass mode=new so PDDR skips registration
   const base = 'https://vitaliylomov-creator.github.io/talent-mates-pddr';
-  const params = new URLSearchParams({
-    mode: 'new',
-    email: 'coach@talent-mates.com',
-    club: 'My Club',
-    team: 'My Team',
-    role: 'coach'
-  });
+  const params = new URLSearchParams({ mode: 'new', role: 'coach' });
   window.location.href = base + '?' + params.toString();
 }
+
+// ── INIT ──
+fetchPlayers();
 </script>
 </body>
 </html>
