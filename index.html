@@ -1144,12 +1144,35 @@ nav {
         <input class="form-input" id="login-pass" type="password" placeholder="Your password"
           onkeydown="if(event.key==='Enter') handleLogin()">
       </div>
-      <button class="btn-primary" onclick="handleLogin()">Sign in & Open PDDR →</button>
+      <div style="margin-bottom:16px;">
+        <div class="role-label-txt">Your role</div>
+        <div class="role-selector">
+          <button class="role-btn selected" id="login-role-coach" onclick="setLoginRole('coach')">
+            <span class="role-icon">🎯</span>
+            <div><span class="role-lbl">Coach</span><span class="role-sub-txt">Access PDDR form</span></div>
+          </button>
+          <button class="role-btn" id="login-role-player" onclick="setLoginRole('player')">
+            <span class="role-icon">⚽</span>
+            <div><span class="role-lbl">Player</span><span class="role-sub-txt">View my dashboard</span></div>
+          </button>
+        </div>
+        <input type="hidden" id="login-role-select" value="coach">
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">Sign in →</button>
       <div class="login-link">Don't have an account? <a onclick="showRegisterForm()">Create account</a></div>
     </div>
     </div>
   </div>
 
+  <!-- PLAYER SUCCESS SCREEN -->
+  <div class="success-screen" id="player-success-screen">
+    <div class="success-icon">⚽</div>
+    <h2 class="success-title">Welcome to<br><em>MATE AI</em></h2>
+    <p class="success-sub">We're loading your Fibonacci Path profile. Your coach has assessed your development — let's see where you are.</p>
+    <button class="btn-goto" onclick="goToPlayerDashboard(currentUser.email)">View My Fibonacci Path →</button>
+  </div>
+
+  <!-- COACH SUCCESS SCREEN -->
   <div class="success-screen" id="success-screen">
     <div class="success-icon">✓</div>
     <h2 class="success-title">Account created<br><em>successfully</em></h2>
@@ -1201,6 +1224,7 @@ nav {
     <div class="pi-field"><div class="pi-label">Current team</div><input class="pi-input" id="f-club" type="text" placeholder="e.g. Slough Town FC"></div>
     <div class="pi-field"><div class="pi-label">Assessment date</div><input class="pi-input" id="f-date" type="date"></div>
     <div class="pi-field full"><div class="pi-label">Assessed by (agent / coach / license)</div><input class="pi-input" id="f-assessor" type="text" placeholder="e.g. Vitaliy Lomov — FIFA Agent, UEFA C"></div>
+    <div class="pi-field full"><div class="pi-label">Player Email <span style="font-size:9px;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin-left:8px;">Required for player dashboard access</span></div><input class="pi-input" id="f-player-email" type="email" placeholder="e.g. player@email.com"></div>
   </div>
 
   <!-- 02 Overview -->
@@ -1279,10 +1303,24 @@ function handleRegister() {
   err.classList.remove('visible');
   currentUser = { club, team, email, role: selectedRole };
   sessionStorage.setItem('tm_user', JSON.stringify(currentUser));
-  document.getElementById('reg-form-view').style.display = 'none';
-  document.getElementById('success-screen').classList.add('visible');
+
+  if (selectedRole === 'player') {
+    // Player goes to Player Dashboard
+    document.getElementById('reg-form-view').style.display = 'none';
+    document.getElementById('player-success-screen').classList.add('visible');
+  } else {
+    // Coach goes to PDDR form
+    document.getElementById('reg-form-view').style.display = 'none';
+    document.getElementById('success-screen').classList.add('visible');
+  }
 }
 function showErr(el, msg) { el.textContent = msg; el.classList.add('visible'); }
+
+function setLoginRole(role) {
+  document.getElementById('login-role-select').value = role;
+  document.getElementById('login-role-coach').classList.toggle('selected', role === 'coach');
+  document.getElementById('login-role-player').classList.toggle('selected', role === 'player');
+}
 
 function showLoginForm() {
   document.getElementById('reg-form-view').style.display = 'none';
@@ -1301,12 +1339,28 @@ function handleLogin() {
   if (!email.includes('@')){ showErr(err,'Please enter a valid email address.'); return; }
   if (pass.length<8){ showErr(err,'Password must be at least 8 characters.'); return; }
   err.classList.remove('visible');
-  // Hide login form before switching page
   document.getElementById('login-form-view').style.display = 'none';
-  currentUser = { email, club:'My Club', team:'My Team', role:'coach' };
+
+  // Check role from form or default to coach
+  const loginRole = document.getElementById('login-role-select') ?
+    document.getElementById('login-role-select').value : 'coach';
+
+  currentUser = { email, club:'My Club', team:'My Team', role: loginRole };
   sessionStorage.setItem('tm_user', JSON.stringify(currentUser));
-  gotoPDDR();
+
+  if (loginRole === 'player') {
+    goToPlayerDashboard(email);
+  } else {
+    gotoPDDR();
+  }
 }
+// ── PLAYER DASHBOARD ──
+function goToPlayerDashboard(email) {
+  const base = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/player_dashboard.html';
+  const params = new URLSearchParams({ email: email });
+  window.location.href = base + '?' + params.toString();
+}
+
 function gotoPDDR() {
   if (currentUser) {
     document.getElementById('u-avatar').textContent = currentUser.email.slice(0,2).toUpperCase();
@@ -1315,7 +1369,7 @@ function gotoPDDR() {
     document.getElementById('f-assessor').value = currentUser.email;
     document.getElementById('f-club').value = currentUser.team || '';
     // Clear player fields for new assessment
-    const clearFields = ['f-name','f-dob','f-nationality','f-position'];
+    const clearFields = ['f-name','f-dob','f-nationality','f-position','f-player-email'];
     clearFields.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
@@ -1491,6 +1545,9 @@ async function submitToTally() {
   const tags = [...document.querySelectorAll('.tag.selected')]
     .map(t => t.textContent).join(', ');
 
+  const player_email = document.getElementById('f-player-email') ?
+    document.getElementById('f-player-email').value.trim() : '';
+
   const payload = {
     player_name:      name,
     position:         pos,
@@ -1499,6 +1556,7 @@ async function submitToTally() {
     current_team:     club,
     assessment_date:  adate,
     assessed_by:      assessor,
+    player_email:     player_email,
     pathway:          pathway,
     priority_tags:    tags,
     ratings: {
