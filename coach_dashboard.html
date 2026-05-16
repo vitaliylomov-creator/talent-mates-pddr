@@ -1203,8 +1203,7 @@ function renderMarkdown(text) {
     return i % 2 === 1 ? '<strong class="md-bold">' + part + '</strong>' : part;
   }).join('');
   html = html.replace(/^---$/gm, '<div class="md-hr"></div>');
-  html = html.replace(/
-/g, '<br>');
+  html = html.split('\n').join('<br>');
   return html;
 }
 
