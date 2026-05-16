@@ -1096,10 +1096,8 @@ nav {
 </div>
 
 <script>
-// ── AIRTABLE CONFIG ──
-const AIRTABLE_TOKEN = 'patUqPduibzchhlVl.5b5bd9f9a736f5f3c43d164701f25bae077ef9267704c3d9f4a5a1bbcd009e58';
-const BASE_ID        = 'appTxHkjsSg2bN96c';
-const TABLE_ID       = 'tbl1Il7d4e5th74uf';
+// ── MAKE PROXY CONFIG ──
+const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/xtfd88c6x9yolcuctm6ybu9mmeuqeg8c';
 
 let ALL_PLAYERS = [];
 
@@ -1224,40 +1222,45 @@ function printReport() {
   w.print();
 }
 
-// ── FETCH FROM AIRTABLE ──
+// ── FETCH FROM MAKE PROXY ──
 async function fetchPlayers() {
   const grid = document.getElementById('cards-grid');
   grid.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--t3);font-size:14px;">Loading players... ⏳</div>';
 
   try {
-    const url = 'https://api.airtable.com/v0/' + BASE_ID + '/' + TABLE_ID + '?sort[0][field]=Assessment%20Date&sort[0][direction]=desc';
-    const res = await fetch(url, {
-      headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN }
-    });
+    const res = await fetch(MAKE_WEBHOOK_URL);
+    const text = await res.text();
 
-    if (!res.ok) throw new Error('Airtable error: ' + res.status);
-
-    const data = await res.json();
-    const records = data.records || [];
+    // Parse response
+    let records = [];
+    try {
+      const data = JSON.parse(text);
+      records = data.records || data || [];
+    } catch(e) {
+      console.error('JSON parse error:', e);
+      throw new Error('Invalid response from server');
+    }
 
     if (!records.length) {
       grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚽</div><div class="empty-title">No players yet</div><p class="empty-sub">Submit a player assessment via the PDDR form.<br>Results will appear here automatically.</p></div>';
       return;
     }
 
-    const players = records.map(r => {
-      const f = r.fields;
+    const players = records.map((r, idx) => {
+      // Handle both flat and nested field structures
+      const f = r.fields || r;
+      const id = r.id || r.ID || idx;
       return {
-        id:              r.id,
-        name:            f['Player name']     || f['Player Name']     || 'Unknown',
-        position:        f['Position']                                || '—',
-        nationality:     f['Nationality']                             || '—',
-        team:            f['Current Team']    || f['Team']            || '—',
-        email:           f['Player Email']    || f['Email']           || '—',
-        assessed_by:     f['Assessed By']                             || '—',
+        id:              id,
+        name:            f['Player name']     || f['Player Name']     || f['player_name']     || 'Unknown',
+        position:        f['Position']        || f['position']        || '—',
+        nationality:     f['Nationality']     || f['nationality']     || '—',
+        team:            f['Current Team']    || f['Team']            || f['current_team']    || '—',
+        email:           f['Player Email']    || f['Email']           || f['player_email']    || '—',
+        assessed_by:     f['Assessed By']     || f['assessed_by']     || '—',
         assessment_date: f['Assessment Date'] || f['assessment_date'] || '—',
-        status:          f['Status']                                  || 'completed',
-        report:          f['AI Report']                               || '',
+        status:          f['Status']          || f['status']          || 'completed',
+        report:          f['AI Report']       || f['ai_report']       || '',
         levels: {
           l1:  parseFloat(f['Level 1'])  || parseFloat(f['level_1'])  || 0,
           l2:  parseFloat(f['Level 2'])  || parseFloat(f['level_2'])  || 0,
@@ -1272,8 +1275,8 @@ async function fetchPlayers() {
     buildCards(players);
 
   } catch (err) {
-    console.error('Airtable error:', err);
-    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Connection error</div><p class="empty-sub">Could not load player data. Check your connection.</p><button onclick="fetchPlayers()" style="margin-top:16px;background:var(--white);color:var(--purple);border:none;padding:10px 24px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;">Retry</button></div>';
+    console.error('Fetch error:', err);
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Connection error</div><p class="empty-sub">Could not load player data.<br>Check your connection and try again.</p><button onclick="fetchPlayers()" style="margin-top:16px;background:var(--white);color:var(--purple);border:none;padding:10px 24px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;">Retry</button></div>';
   }
 }
 
