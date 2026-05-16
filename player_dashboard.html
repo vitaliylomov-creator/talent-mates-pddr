@@ -1517,7 +1517,7 @@ function sendMsg() {
 
 // ── MAKE PLAYER AUTH WEBHOOK ──
 // Scenario 3: receives player email → returns player data from Airtable
-const MAKE_PLAYER_WEBHOOK = 'https://hook.eu1.make.com/REPLACE_WITH_SCENARIO3_WEBHOOK';
+const MAKE_PLAYER_WEBHOOK = 'https://hook.eu1.make.com/26244ae0pof6qaeeidpt862xbwjf8bu1';
 
 async function loadPlayerData(email) {
   // Show loading state
@@ -1531,37 +1531,36 @@ async function loadPlayerData(email) {
     try { data = JSON.parse(text); } catch(e) { data = null; }
 
     if (data && data.found) {
-      // Map Airtable fields to PLAYER object
-      const f = data.fields || data;
-      PLAYER.name            = f['Player name']     || PLAYER.name;
-      PLAYER.position        = f['Position']         || PLAYER.position;
-      PLAYER.team            = f['Current Team']     || PLAYER.team;
-      PLAYER.dob             = f['Date of Birth']    || PLAYER.dob;
-      PLAYER.nationality     = f['Nationality']      || PLAYER.nationality;
-      PLAYER.assessment_date = f['Assessment Date']  || PLAYER.assessment_date;
-      PLAYER.assessed_by     = f['Assessed By']      || PLAYER.assessed_by;
-      PLAYER.report          = f['AI Report']        || PLAYER.report;
-      PLAYER.status          = f['Status']           || PLAYER.status;
+      // Map flat JSON structure from Make webhook
+      PLAYER.name            = data.name            || PLAYER.name;
+      PLAYER.position        = data.position        || PLAYER.position;
+      PLAYER.team            = data.team            || PLAYER.team;
+      PLAYER.dob             = data.dob             || PLAYER.dob;
+      PLAYER.nationality     = data.nationality     || PLAYER.nationality;
+      PLAYER.assessment_date = data.assessment_date || PLAYER.assessment_date;
+      PLAYER.assessed_by     = data.assessed_by     || PLAYER.assessed_by;
+      PLAYER.report          = data.report          || PLAYER.report;
+      PLAYER.status          = data.status          || PLAYER.status;
 
-      if (f['Level 1'])  PLAYER.levels.l1  = parseFloat(f['Level 1']);
-      if (f['Level 2'])  PLAYER.levels.l2  = parseFloat(f['Level 2']);
-      if (f['Level 3'])  PLAYER.levels.l3  = parseFloat(f['Level 3']);
-      if (f['Level 5'])  PLAYER.levels.l5  = parseFloat(f['Level 5']);
-      if (f['Level 8'])  PLAYER.levels.l8  = parseFloat(f['Level 8']);
-      if (f['Level 13']) PLAYER.levels.l13 = parseFloat(f['Level 13']);
+      if (data.level_1)  PLAYER.levels.l1  = parseFloat(data.level_1);
+      if (data.level_2)  PLAYER.levels.l2  = parseFloat(data.level_2);
+      if (data.level_3)  PLAYER.levels.l3  = parseFloat(data.level_3);
+      if (data.level_5)  PLAYER.levels.l5  = parseFloat(data.level_5);
+      if (data.level_8)  PLAYER.levels.l8  = parseFloat(data.level_8);
+      if (data.level_13) PLAYER.levels.l13 = parseFloat(data.level_13);
 
-      if (f['Rating 1'])  PLAYER.ratings.r1  = parseInt(f['Rating 1']);
-      if (f['Rating 2'])  PLAYER.ratings.r2  = parseInt(f['Rating 2']);
-      if (f['Rating 3'])  PLAYER.ratings.r3  = parseInt(f['Rating 3']);
-      if (f['Rating 4'])  PLAYER.ratings.r4  = parseInt(f['Rating 4']);
-      if (f['Rating 5'])  PLAYER.ratings.r5  = parseInt(f['Rating 5']);
-      if (f['Rating 6'])  PLAYER.ratings.r6  = parseInt(f['Rating 6']);
-      if (f['Rating 7'])  PLAYER.ratings.r7  = parseInt(f['Rating 7']);
-      if (f['Rating 8'])  PLAYER.ratings.r8  = parseInt(f['Rating 8']);
-      if (f['Rating 9'])  PLAYER.ratings.r9  = parseInt(f['Rating 9']);
-      if (f['Rating 10']) PLAYER.ratings.r10 = parseInt(f['Rating 10']);
-      if (f['Rating 11']) PLAYER.ratings.r11 = parseInt(f['Rating 11']);
-      if (f['Rating 12']) PLAYER.ratings.r12 = parseInt(f['Rating 12']);
+      if (data.rating_1)  PLAYER.ratings.r1  = parseInt(data.rating_1);
+      if (data.rating_2)  PLAYER.ratings.r2  = parseInt(data.rating_2);
+      if (data.rating_3)  PLAYER.ratings.r3  = parseInt(data.rating_3);
+      if (data.rating_4)  PLAYER.ratings.r4  = parseInt(data.rating_4);
+      if (data.rating_5)  PLAYER.ratings.r5  = parseInt(data.rating_5);
+      if (data.rating_6)  PLAYER.ratings.r6  = parseInt(data.rating_6);
+      if (data.rating_7)  PLAYER.ratings.r7  = parseInt(data.rating_7);
+      if (data.rating_8)  PLAYER.ratings.r8  = parseInt(data.rating_8);
+      if (data.rating_9)  PLAYER.ratings.r9  = parseInt(data.rating_9);
+      if (data.rating_10) PLAYER.ratings.r10 = parseInt(data.rating_10);
+      if (data.rating_11) PLAYER.ratings.r11 = parseInt(data.rating_11);
+      if (data.rating_12) PLAYER.ratings.r12 = parseInt(data.rating_12);
 
       // Update initial chat message
       const firstName = PLAYER.name.split(' ')[0];
