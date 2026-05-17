@@ -1358,7 +1358,8 @@ function handleLogin() {
 function goToPlayerDashboard(email) {
   const base = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/player_dashboard.html';
   const params = new URLSearchParams({ email: email });
-  window.location.href = base + '?' + params.toString();
+  // Open in new tab to avoid iframe URL issues
+  window.open(base + '?' + params.toString(), '_blank');
 }
 
 function gotoPDDR() {
