@@ -1528,27 +1528,22 @@ async function loadPlayerData(email) {
   try {
     const res = await fetch(MAKE_PLAYER_WEBHOOK + '?email=' + encodeURIComponent(email));
 
-    let data;
+    let data = null;
     try {
-      // Use response.json() which handles special characters better
       data = await res.json();
     } catch(e) {
-      // Fallback: sanitize text and parse
-      try {
-        const text = await res.clone().text().catch(() => '');
-        const sanitized = text
-          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, ' ')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/\t/g, '\\t');
-        data = JSON.parse(sanitized);
-      } catch(e2) {
+      // Fallback: manual clean and parse
+      const res2 = await fetch(MAKE_PLAYER_WEBHOOK + '?email=' + encodeURIComponent(email));
+      const text = await res2.text();
+      const clean = text
+        .replace(/\r\n/g, '\\n')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+      try { data = JSON.parse(clean); } catch(e2) {
         console.error('Parse failed:', e2.message);
-        data = null;
       }
     }
-
-    console.log('Make response:', data ? data.found : 'null');
 
     if (data && data.found) {
       // Map flat JSON structure from Make webhook
@@ -1597,9 +1592,10 @@ async function loadPlayerData(email) {
         'No assessment found for ' + email + '. Ask your coach to complete a PDDR assessment first.';
       return;
     } else {
-      // Null response — retry once after delay
-      console.log('Empty response, retrying in 1s...');
-      setTimeout(() => loadPlayerData(email), 2000);
+      // No data or not found
+      document.getElementById('hero-name').innerHTML = 'Profile <em>not found</em>';
+      document.querySelector('.hero-meta').textContent =
+        'No assessment found for ' + email + '. Ask your coach to complete a PDDR assessment first.';
       return;
     }
 
