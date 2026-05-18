@@ -859,6 +859,9 @@
        JAVASCRIPT
   ══════════════════════════════════════ -->
   <script>
+    /* ── DASHBOARD URL ── */
+    var DASHBOARD_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/mate-dashboard.html';
+
     /* ── helpers ── */
     function show(id) {
       document.querySelectorAll('.screen').forEach(function(s) {
@@ -866,71 +869,70 @@
       });
       document.getElementById(id).classList.add('active');
       window.scrollTo(0, 0);
+      var card = document.querySelector('#' + id + ' .reg-card');
+      if (card) {
+        card.classList.remove('slide-up');
+        void card.offsetWidth;
+        card.classList.add('slide-up');
+      }
     }
 
-    /* ── navigate to registration ── */
-    function showReg(prompt) {
-      var echo     = document.getElementById('reg-echo');
-      var echoText = document.getElementById('reg-echo-text');
+    function showHome() { show('screen-home'); }
 
-      if (prompt && prompt.trim().length > 0) {
-        echoText.textContent = '\u201C' + prompt.trim() + '\u201D';
-        echo.classList.add('visible');
-      } else {
-        echo.classList.remove('visible');
-        echoText.textContent = '';
-      }
-
-      show('screen-reg');
-
-      /* Re-trigger slide-up on card */
-      var card = document.querySelector('.reg-card');
-      card.classList.remove('slide-up');
-      void card.offsetWidth; /* reflow */
-      card.classList.add('slide-up');
-
-      /* Focus first field */
+    function showSignIn() {
+      show('screen-signin');
       setTimeout(function() {
-        document.getElementById('reg-name').focus();
+        var f = document.getElementById('si-email');
+        if (f) f.focus();
       }, 350);
     }
 
-    /* ── navigate home ── */
-    function showHome() {
-      show('screen-home');
-      document.getElementById('main-prompt').value = '';
+    function showCreateAccount() {
+      show('screen-create');
+      setTimeout(function() {
+        var f = document.getElementById('ca-name');
+        if (f) f.focus();
+      }, 350);
     }
 
-    /* ── prompt submit ── */
-    function submitPrompt() {
-      var val = document.getElementById('main-prompt').value;
-      showReg(val);
-    }
-
-    /* ── enter key ── */
-    function handleEnter(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        submitPrompt();
-      }
-    }
-
-    /* ── prevent empty form submission ── */
-    document.querySelector('.reg-submit').addEventListener('click', function(e) {
-      e.preventDefault();
-      var name  = document.getElementById('reg-name').value.trim();
-      var email = document.getElementById('reg-email').value.trim();
-      var pass  = document.getElementById('reg-password').value;
-
-      if (!name || !email || pass.length < 8) {
-        /* simple visual feedback - shake the button */
-        var btn = this;
+    /* ── Sign In ── */
+    function handleSignIn() {
+      var email = document.getElementById('si-email').value.trim();
+      var pass  = document.getElementById('si-password').value;
+      var btn   = document.getElementById('signin-btn');
+      if (!email || !pass) {
         btn.style.opacity = '0.5';
         setTimeout(function() { btn.style.opacity = ''; }, 300);
         return;
       }
-      /* Replace with your actual registration handler */
-      alert('Account created! Redirecting to MATE…');
+      btn.textContent = 'Signing in…';
+      btn.disabled = true;
+      setTimeout(function() { window.location.href = DASHBOARD_URL; }, 800);
+    }
+
+    /* ── Create Account ── */
+    function handleCreateAccount() {
+      var name  = document.getElementById('ca-name').value.trim();
+      var email = document.getElementById('ca-email').value.trim();
+      var pass  = document.getElementById('ca-password').value;
+      var btn   = document.getElementById('create-btn');
+      if (!name || !email || pass.length < 8) {
+        btn.style.opacity = '0.5';
+        setTimeout(function() { btn.style.opacity = ''; }, 300);
+        return;
+      }
+      btn.textContent = 'Creating account…';
+      btn.disabled = true;
+      setTimeout(function() { window.location.href = DASHBOARD_URL; }, 800);
+    }
+
+    /* ── Enter key ── */
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      var active = document.querySelector('.screen.active');
+      if (!active) return;
+      if (active.id === 'screen-signin') handleSignIn();
+      if (active.id === 'screen-create') handleCreateAccount();
     });
   </script>
 
