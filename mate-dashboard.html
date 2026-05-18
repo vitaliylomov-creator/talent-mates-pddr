@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MATE — Player Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:     #794DC6;
+      --purple-dk:  #6b42b5;
+      --purple-lt:  #8a5ed4;
+      --white:      #ffffff;
+      --border:     rgba(255,255,255,0.10);
+      --border-mid: rgba(255,255,255,0.20);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.32);
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --success: rgba(100,220,130,0.9);
+      --warning: rgba(255,190,60,0.9);
+      --danger:  rgba(255,100,100,0.9);
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { font-family: var(--font-b); cursor: pointer; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 36px;
+      border-bottom: 0.5px solid var(--border);
+      background: rgba(121,77,198,0.85);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand {
+      font-family: var(--font-b);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t3);
+    }
+    .brand strong { color: var(--t1); font-weight: 500; }
+
+    .brand-sep {
+      width: 0.5px;
+      height: 16px;
+      background: var(--border-mid);
+    }
+
+    .page-title {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t3);
+      letter-spacing: 0.04em;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-btn {
+      background: rgba(255,255,255,0.08);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--t2);
+      letter-spacing: 0.02em;
+      transition: background 0.2s, color 0.2s;
+    }
+    .topbar-btn:hover { background: rgba(255,255,255,0.14); color: var(--t1); }
+
+    .topbar-btn-primary {
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .topbar-btn-primary:hover { opacity: 0.88; }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse-live 2s ease-in-out infinite;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    @keyframes pulse-live {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.35; }
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      flex: 1;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      border-right: 0.5px solid var(--border);
+      padding: 28px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-section {
+      padding: 0 16px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-label {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t4);
+      padding: 0 12px;
+      margin-bottom: 4px;
+      margin-top: 16px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t3);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,0.06); color: var(--t1); }
+    .sidebar-item.active {
+      background: rgba(255,255,255,0.10);
+      color: var(--t1);
+      font-weight: 500;
+    }
+
+    .sidebar-icon { font-size: 15px; width: 20px; text-align: center; }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.15);
+      border-radius: 100px;
+      padding: 2px 8px;
+      font-size: 10px;
+      color: var(--t2);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      padding: 36px 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── PLAYER HEADER CARD ── */
+    .player-header {
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 18px;
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      animation: fadeUp 0.6s var(--ease) 0.05s both;
+    }
+
+    .player-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 0.5px solid var(--border-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 28px;
+    }
+
+    .player-info { flex: 1; }
+
+    .player-name {
+      font-family: var(--font-d);
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .player-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .player-tag {
+      font-size: 12px;
+      color: var(--t3);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .player-tag::before {
+      content: '';
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--t4);
+      display: block;
+    }
+    .player-tag:first-child::before { display: none; }
+
+    .player-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-sm-white {
+      background: #fff;
+      color: var(--purple);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: opacity 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-sm-white:hover { opacity: 0.88; }
+
+    .btn-sm-ghost {
+      background: transparent;
+      color: var(--t2);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 400;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-sm-ghost:hover { color: var(--t1); border-color: rgba(255,255,255,0.4); }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      animation: fadeUp 0.6s var(--ease) 0.15s both;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.25s;
+    }
+    .stat-card:hover { background: rgba(255,255,255,0.09); }
+
+    .stat-label {
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: var(--font-d);
+      font-size: 36px;
+      font-weight: 400;
+      line-height: 1;
+      color: var(--t1);
+      margin-bottom: 6px;
+    }
+
+    .stat-value em {
+      font-style: italic;
+      font-size: 0.55em;
+      color: var(--t3);
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--t3);
+      font-weight: 300;
+    }
+
+    .stat-trend {
+      position: absolute;
+      top: 18px; right: 18px;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+    .stat-trend.up   { color: var(--success); background: rgba(100,220,130,0.12); }
+    .stat-trend.down { color: var(--danger);  background: rgba(255,100,100,0.12); }
+    .stat-trend.neu  { color: var(--warning); background: rgba(255,190,60,0.12); }
+
+    /* ── TWO-COLUMN MIDDLE ── */
+    .mid-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      animation: fadeUp 0.6s var(--ease) 0.25s both;
+    }
+
+    /* ── SECTION CARD ── */
+    .section-card {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--t1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-action {
+      font-size: 11px;
+      color: var(--t3);
+      letter-spacing: 0.04em;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .card-action:hover { color: var(--t1); }
+
+    .card-body { padding: 20px 24px; }
+
+    /* ── AGENT LIST ── */
+    .agent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .agent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-item::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: rgba(255,255,255,0.5);
+      transform: scaleY(0);
+      transform-origin: top;
+      transition: transform 0.3s var(--ease);
+    }
+
+    .agent-item:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--border-mid);
+    }
+    .agent-item:hover::after { transform: scaleY(1); }
+
+    .agent-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .agent-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--t1);
+      margin-bottom: 2px;
+    }
+
+    .agent-desc {
+      font-size: 11px;
+      color: var(--t3);
+      font-weight: 300;
+    }
+
+    .agent-arrow {
+      margin-left: auto;
+      font-size: 14px;
+      color: var(--t4);
+      transition: transform 0.2s, color 0.2s;
+    }
+    .agent-item:hover .agent-arrow { transform: translateX(4px); color: var(--t2); }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 0.5px solid var(--border);
+      align-items: flex-start;
+    }
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .activity-dot.green  { background: var(--success); }
+    .activity-dot.yellow { background: var(--warning); }
+    .activity-dot.red    { background: var(--danger); }
+
+    .activity-text {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t2);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .activity-text strong { font-weight: 500; color: var(--t1); }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--t4);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ── BOTTOM ROW ── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+      animation: fadeUp 0.6s var(--ease) 0.35s both;
+    }
+
+    /* ── CHAT PREVIEW ── */
+    .chat-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .chat-msg {
+      padding: 14px 0;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .chat-msg:last-of-type { border-bottom: none; }
+
+    .chat-msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-agent-tag {
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--t4);
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    .chat-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .chat-msg-text {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t2);
+      line-height: 1.55;
+    }
+
+    .chat-msg-time {
+      font-size: 11px;
+      color: var(--t4);
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t1);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input::placeholder { color: var(--t4); }
+    .chat-input:focus { border-color: rgba(255,255,255,0.35); }
+
+    .chat-send {
+      width: 38px; height: 38px;
+      background: var(--white);
+      border: none;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .chat-send:hover { opacity: 0.85; }
+
+    /* ── PROFILE FORM ── */
+    .profile-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+
+    .form-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--t4);
+      font-weight: 500;
+    }
+
+    .form-input {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t1);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      width: 100%;
+    }
+    .form-input::placeholder { color: var(--t4); }
+    .form-input:focus {
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.08);
+    }
+
+    select.form-input option { background: #794DC6; color: #fff; }
+
+    /* ── PDF UPLOAD ── */
+    .pdf-upload-zone {
+      border: 0.5px dashed rgba(255,255,255,0.25);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      background: rgba(255,255,255,0.03);
+    }
+    .pdf-upload-zone:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.45);
+    }
+    .pdf-upload-zone.has-file {
+      border-color: rgba(100,220,130,0.5);
+      background: rgba(100,220,130,0.05);
+    }
+    .pdf-upload-icon { font-size: 22px; margin-bottom: 6px; }
+    .pdf-upload-text { font-size: 12px; color: var(--t2); font-weight: 400; }
+    .pdf-upload-hint { font-size: 10px; color: var(--t4); margin-top: 3px; }
+    .pdf-filename {
+      font-size: 11px;
+      color: rgba(100,220,130,0.9);
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: rgba(100,220,130,0.08);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-submit {
+      width: 100%;
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 4px;
+    }
+    .form-submit:hover { opacity: 0.88; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-item {
+      margin-bottom: 14px;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .progress-name { font-size: 12px; color: var(--t2); font-weight: 400; }
+    .progress-pct  { font-size: 12px; color: var(--t3); }
+
+    .progress-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: rgba(255,255,255,0.6);
+      border-radius: 100px;
+      transition: width 1s var(--ease);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main { padding: 20px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .mid-row, .bottom-row { grid-template-columns: 1fr; }
+      .topbar { padding: 14px 20px; }
+    }
+
+    @media (max-width: 540px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .player-actions { flex-direction: column; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand"><strong>Talent</strong> Mates</div>
+      <div class="brand-sep"></div>
+      <div class="page-title">Player Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size:12px; color: var(--t3);"><span class="status-dot"></span>MATE Active</span>
+      <button class="topbar-btn">EN / UA</button>
+      <button class="topbar-btn-primary" onclick="window.location.href='#mate-chat'">Ask MATE</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div style="padding: 0 16px; margin-bottom: 4px;">
+        <div class="sidebar-label" style="margin-top:0;">Navigation</div>
+      </div>
+
+      <div style="padding: 0 16px;">
+        <button class="sidebar-item active">
+          <span class="sidebar-icon">⚡</span> Dashboard
+        </button>
+        <button class="sidebar-item" onclick="showSection('profile')">
+          <span class="sidebar-icon">👤</span> My Profile
+        </button>
+        <button class="sidebar-item" onclick="showSection('chat')">
+          <span class="sidebar-icon">💬</span> MATE Chat
+          <span class="sidebar-badge">3</span>
+        </button>
+      </div>
+
+      <div style="padding: 0 16px; margin-top: 8px;">
+        <div class="sidebar-label">AI Agents</div>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">⚖️</span> Legal Advisor
+        </button>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">🏋️</span> Performance Coach
+        </button>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">📊</span> Transfer Analyst
+        </button>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">🏠</span> Concierge
+        </button>
+      </div>
+
+      <div style="padding: 0 16px; margin-top: 8px;">
+        <div class="sidebar-label">Tools</div>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">📄</span> Contracts
+        </button>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">📅</span> Schedule
+        </button>
+        <button class="sidebar-item">
+          <span class="sidebar-icon">⚙️</span> Settings
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- PLAYER HEADER -->
+      <div class="player-header">
+        <div class="player-avatar">⚽</div>
+        <div class="player-info">
+          <div class="player-name">Dmytro Kovalenko</div>
+          <div class="player-meta">
+            <span class="player-tag">Central Midfielder</span>
+            <span class="player-tag">22 years old</span>
+            <span class="player-tag">Slough Town FC</span>
+            <span class="player-tag">🇺🇦 Ukrainian</span>
+            <span class="player-tag">Contract until Jun 2026</span>
+          </div>
+        </div>
+        <div class="player-actions">
+          <button class="btn-sm-white">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M7 2l4 4-4 4" stroke="#794DC6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ask MATE
+          </button>
+          <button class="btn-sm-ghost">Edit Profile</button>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-trend up">↑ +8%</div>
+          <div class="stat-label">Market Value</div>
+          <div class="stat-value">€180<em>K</em></div>
+          <div class="stat-sub">Est. Transfermarkt</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-trend up">↑ Active</div>
+          <div class="stat-label">Contract Status</div>
+          <div class="stat-value">8<em>mo</em></div>
+          <div class="stat-sub">Expires Jun 2026</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-trend neu">● Review</div>
+          <div class="stat-label">Fitness Score</div>
+          <div class="stat-value">87<em>%</em></div>
+          <div class="stat-sub">Last GPS session</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-trend up">↑ 3 new</div>
+          <div class="stat-label">Transfer Interest</div>
+          <div class="stat-value">3<em>+</em></div>
+          <div class="stat-sub">Clubs monitoring</div>
+        </div>
+      </div>
+
+      <!-- MID ROW -->
+      <div class="mid-row">
+
+        <!-- AI Agents -->
+        <div class="section-card">
+          <div class="card-header">
+            <div class="card-title">⚡ AI Agents</div>
+            <button class="card-action">View all →</button>
+          </div>
+          <div class="card-body">
+            <div class="agent-list">
+              <div class="agent-item" onclick="window.location.href='#mate-chat'">
+                <div class="agent-icon">⚖️</div>
+                <div>
+                  <div class="agent-name">Legal Advisor</div>
+                  <div class="agent-desc">Contract review · FIFA RSTP · Registration</div>
+                </div>
+                <div class="agent-arrow">→</div>
+              </div>
+              <div class="agent-item" onclick="window.location.href='#mate-chat'">
+                <div class="agent-icon">🏋️</div>
+                <div>
+                  <div class="agent-name">Performance Coach</div>
+                  <div class="agent-desc">Training · Recovery · Injury prevention</div>
+                </div>
+                <div class="agent-arrow">→</div>
+              </div>
+              <div class="agent-item" onclick="window.location.href='#mate-chat'">
+                <div class="agent-icon">📊</div>
+                <div>
+                  <div class="agent-name">Transfer Analyst</div>
+                  <div class="agent-desc">Club fit · Market value · GPS data</div>
+                </div>
+                <div class="agent-arrow">→</div>
+              </div>
+              <div class="agent-item" onclick="window.location.href='#mate-chat'">
+                <div class="agent-icon">🏠</div>
+                <div>
+                  <div class="agent-name">AI Concierge</div>
+                  <div class="agent-desc">Travel · Housing · Schools · Daily life</div>
+                </div>
+                <div class="agent-arrow">→</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="section-card">
+          <div class="card-header">
+            <div class="card-title">📋 Recent Activity</div>
+            <button class="card-action">Clear all</button>
+          </div>
+          <div class="card-body">
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-dot green"></div>
+                <div class="activity-text"><strong>Contract reviewed</strong> — Legal Advisor flagged 2 clauses for attention in your new offer</div>
+                <div class="activity-time">2h ago</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot yellow"></div>
+                <div class="activity-text"><strong>GPS Report ready</strong> — High-speed running 14% below positional benchmark this week</div>
+                <div class="activity-time">1d ago</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot green"></div>
+                <div class="activity-text"><strong>Transfer alert</strong> — Motherwell FC scouting CM profiles matching yours</div>
+                <div class="activity-time">2d ago</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot green"></div>
+                <div class="activity-text"><strong>School found</strong> — Concierge identified 3 bilingual schools near Birmingham training ground</div>
+                <div class="activity-time">3d ago</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot red"></div>
+                <div class="activity-text"><strong>ITC reminder</strong> — International Transfer Certificate required before Jan 31 window</div>
+                <div class="activity-time">4d ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="bottom-row" id="mate-chat">
+
+        <!-- MATE Chat Preview -->
+        <div class="section-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="status-dot" style="width:6px;height:6px;margin-right:2px;"></span>
+              MATE Chat
+            </div>
+            <button class="card-action" onclick="window.location.href='/mate'">Full chat →</button>
+          </div>
+          <div class="card-body">
+            <div class="chat-preview">
+              <div class="chat-msg">
+                <div class="chat-msg-meta">
+                  <span class="chat-agent-tag"><span class="chat-dot"></span> MATE · Legal Advisor</span>
+                </div>
+                <div class="chat-msg-text">Your contract clause on early termination is non-standard. The club can exit with 2 weeks notice — I'd recommend negotiating this to 60 days minimum.</div>
+                <div class="chat-msg-time">Today, 10:24</div>
+              </div>
+              <div class="chat-msg">
+                <div class="chat-msg-meta">
+                  <span class="chat-agent-tag"><span class="chat-dot"></span> MATE · Transfer Analyst</span>
+                </div>
+                <div class="chat-msg-text">Motherwell FC plays a 4-3-3 high press. Based on your GPS profile — high work rate, strong ball recovery — your system fit score is <strong>High</strong>.</div>
+                <div class="chat-msg-time">Yesterday, 16:11</div>
+              </div>
+            </div>
+            <div class="chat-input-row">
+              <input class="chat-input" type="text" placeholder="Ask MATE anything…" id="chatInput" onkeydown="if(event.key==='Enter'){sendChat()}" />
+              <button class="chat-send" onclick="sendChat()">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M2 7.5h11M8.5 3l4.5 4.5-4.5 4.5" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player Profile Form -->
+        <div class="section-card" id="profile">
+          <div class="card-header">
+            <div class="card-title">👤 Player Profile</div>
+            <button class="card-action">Complete →</button>
+          </div>
+          <div class="card-body">
+
+            <!-- Completion progress -->
+            <div style="margin-bottom: 20px;">
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span class="progress-name">Profile completeness</span>
+                  <span class="progress-pct">68%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 68%;"></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span class="progress-name">Contract uploaded</span>
+                  <span class="progress-pct">100%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-header">
+                  <span class="progress-name">GPS data connected</span>
+                  <span class="progress-pct">40%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 40%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick update form -->
+            <div class="profile-form" id="profileForm">
+              <div class="form-field">
+                <label class="form-label">Full Name</label>
+                <input class="form-input" type="text" placeholder="Your full name" value="Dmytro Kovalenko" id="f_name" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Age</label>
+                <input class="form-input" type="number" placeholder="e.g. 22" id="f_age" value="22" min="15" max="45" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Nationality</label>
+                <input class="form-input" type="text" placeholder="e.g. Ukrainian" id="f_nationality" value="Ukrainian" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Position</label>
+                <select class="form-input" id="f_position">
+                  <option>Central Midfielder</option>
+                  <option>Goalkeeper</option>
+                  <option>Centre Back</option>
+                  <option>Full Back</option>
+                  <option>Attacking Midfielder</option>
+                  <option>Winger</option>
+                  <option>Striker</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Current Club</label>
+                <input class="form-input" type="text" placeholder="Club name" value="Slough Town FC" id="f_club" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Current League & Country</label>
+                <input class="form-input" type="text" placeholder="e.g. Southern League, England" id="f_league" value="Southern League, England" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Transfer Goal</label>
+                <input class="form-input" type="text" placeholder="e.g. League One, Championship" id="f_goal" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Telegram / WhatsApp</label>
+                <input class="form-input" type="text" placeholder="@username or +44..." id="f_telegram" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Email</label>
+                <input class="form-input" type="email" placeholder="your@email.com" id="f_email" />
+              </div>
+
+              <!-- PDF Contract Upload -->
+              <div class="form-field">
+                <label class="form-label">Upload Contract (PDF)</label>
+                <div class="pdf-upload-zone" id="pdfZone" onclick="document.getElementById('f_contract').click()">
+                  <div class="pdf-upload-icon">📄</div>
+                  <div class="pdf-upload-text">Click to upload contract PDF</div>
+                  <div class="pdf-upload-hint">PDF · max 10MB</div>
+                </div>
+                <input type="file" id="f_contract" accept=".pdf" style="display:none" onchange="handlePDF(this)" />
+                <div class="pdf-filename" id="pdfFilename" style="display:none;"></div>
+              </div>
+
+              <button class="form-submit" id="submitBtn" onclick="saveProfile()">
+                Save &amp; Send to MATE →
+              </button>
+
+              <!-- Status message -->
+              <div id="submitStatus" style="display:none; font-size:12px; text-align:center; padding:8px; border-radius:8px;"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    /* ════════════════════════════════════════
+       MAKE.COM WEBHOOK URL
+       Replace with your actual webhook URL
+       after creating scenario in Make.com
+    ════════════════════════════════════════ */
+    const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/YOUR_WEBHOOK_ID';
+
+    /* ── PDF file storage ── */
+    let contractBase64 = null;
+    let contractFilename = null;
+
+    /* ── Handle PDF upload ── */
+    function handlePDF(input) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        showStatus('❌ File too large. Max 10MB.', 'error');
+        return;
+      }
+
+      contractFilename = file.name;
+      const zone = document.getElementById('pdfZone');
+      const fname = document.getElementById('pdfFilename');
+
+      // Convert to base64 for webhook
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        contractBase64 = e.target.result.split(',')[1]; // strip data:...;base64,
+        zone.classList.add('has-file');
+        zone.querySelector('.pdf-upload-text').textContent = '✓ ' + file.name;
+        fname.style.display = 'flex';
+        fname.textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+
+        // Update progress bar
+        updateProgress('contractPct', 100);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ── Update progress bar ── */
+    function updateProgress(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.style.width = value + '%';
+    }
+
+    /* ── Show status message ── */
+    function showStatus(msg, type) {
+      const el = document.getElementById('submitStatus');
+      el.style.display = 'block';
+      el.textContent = msg;
+      if (type === 'success') {
+        el.style.background = 'rgba(100,220,130,0.12)';
+        el.style.color = 'rgba(100,220,130,0.95)';
+      } else if (type === 'error') {
+        el.style.background = 'rgba(255,100,100,0.12)';
+        el.style.color = 'rgba(255,120,120,0.95)';
+      } else {
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.color = 'rgba(255,255,255,0.6)';
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN SUBMIT — sends to Make.com webhook
+    ══════════════════════════════════════════ */
+    async function saveProfile() {
+      const btn = document.getElementById('submitBtn');
+
+      // Collect form data
+      const payload = {
+        // ── Player profile ──
+        name:        document.getElementById('f_name').value.trim(),
+        age:         document.getElementById('f_age').value,
+        nationality: document.getElementById('f_nationality').value.trim(),
+        position:    document.getElementById('f_position').value,
+        club:        document.getElementById('f_club').value.trim(),
+        league:      document.getElementById('f_league').value.trim(),
+        goal:        document.getElementById('f_goal').value.trim(),
+        telegram:    document.getElementById('f_telegram').value.trim(),
+        email:       document.getElementById('f_email').value.trim(),
+        // ── Contract PDF (base64) ──
+        contract_pdf:      contractBase64 || null,
+        contract_filename: contractFilename || null,
+        // ── Metadata ──
+        source:    'mate-dashboard',
+        timestamp: new Date().toISOString(),
+        language:  navigator.language || 'en'
+      };
+
+      // Basic validation
+      if (!payload.name) {
+        showStatus('⚠️ Please enter your name.', 'error');
+        return;
+      }
+
+      // Loading state
+      btn.textContent = 'Sending to MATE…';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      showStatus('⏳ Connecting to MATE…', 'neutral');
+
+      try {
+        const response = await fetch(MAKE_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          // Success
+          btn.textContent = '✓ Sent to MATE';
+          btn.style.background = 'rgba(100,220,130,0.9)';
+          btn.style.color = '#0a3d1f';
+          btn.style.opacity = '1';
+          showStatus('✅ Profile saved. MATE will respond via Telegram/WhatsApp shortly.', 'success');
+
+          // Update header name
+          document.querySelector('.player-name').textContent = payload.name;
+
+          // Reset after 4s
+          setTimeout(() => {
+            btn.textContent = 'Save & Send to MATE →';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.disabled = false;
+          }, 4000);
+
+        } else {
+          throw new Error('Server error: ' + response.status);
+        }
+
+      } catch (err) {
+        // Error state — show friendly message
+        btn.textContent = 'Save & Send to MATE →';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+
+        // If webhook URL not set yet — show setup reminder
+        if (MAKE_WEBHOOK_URL.includes('YOUR_WEBHOOK_ID')) {
+          showStatus('⚙️ Webhook not connected yet. Add your Make.com URL to the MAKE_WEBHOOK_URL variable.', 'error');
+        } else {
+          showStatus('❌ Error: ' + err.message + '. Check your Make.com scenario is active.', 'error');
+        }
+      }
+    }
+
+    /* ── Chat send ── */
+    function sendChat() {
+      const input = document.getElementById('chatInput');
+      const val = input.value.trim();
+      if (!val) return;
+      window.location.href = '/mate?q=' + encodeURIComponent(val);
+    }
+
+    /* ── Sidebar navigation ── */
+    function showSection(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ── Progress bar animation on load ── */
+    window.addEventListener('load', () => {
+      document.querySelectorAll('.progress-fill').forEach(bar => {
+        const target = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = target; }, 300);
+      });
+    });
+  </script>
+
+</body>
+</html>
