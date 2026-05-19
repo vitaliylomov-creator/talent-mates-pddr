@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Content Engine — Talent Mates Creators</title>
+  <meta name="description" content="Sign in or create your account to access AI Content Engine and MUSE AI by Talent Mates Creators." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:  #794DC6;
+      --purple-dk: #6b42b5;
+      --white:   #ffffff;
+      --border:  rgba(255,255,255,0.12);
+      --border-mid: rgba(255,255,255,0.22);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.30);
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { font-family: var(--font-b); cursor: pointer; }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim-1 { animation: fadeUp 0.7s var(--ease) 0.05s both; }
+    .anim-2 { animation: fadeUp 0.7s var(--ease) 0.18s both; }
+    .anim-3 { animation: fadeUp 0.7s var(--ease) 0.30s both; }
+    .anim-4 { animation: fadeUp 0.7s var(--ease) 0.42s both; }
+    .anim-5 { animation: fadeUp 0.7s var(--ease) 0.54s both; }
+    .slide-up { animation: fadeUp 0.5s var(--ease) both; }
+
+    /* ── HOME SCREEN ── */
+    #screen-home {
+      padding: 40px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Glow */
+    #screen-home::before {
+      content: '';
+      position: fixed;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .home-logo {
+      margin-bottom: 16px;
+    }
+
+    .home-logo a {
+      display: inline-block;
+    }
+
+    /* Logo SVG */
+    .logo-svg text { font-family: 'DM Sans', system-ui, sans-serif; }
+
+    .home-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.10);
+      border: 0.5px solid rgba(255,255,255,0.22);
+      border-radius: 100px;
+      padding: 7px 18px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.82);
+      margin-bottom: 32px;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    .home-title {
+      font-family: var(--font-d);
+      font-size: clamp(40px, 7vw, 72px);
+      font-weight: 400;
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      color: var(--t1);
+      margin-bottom: 16px;
+    }
+
+    .home-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.42);
+    }
+
+    .home-sub {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--t3);
+      max-width: 440px;
+      margin: 0 auto 44px;
+      line-height: 1.68;
+    }
+
+    /* Auth buttons */
+    .auth-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn-signin {
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 15px 36px;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-signin:hover  { opacity: 0.88; transform: scale(1.02); }
+    .btn-signin:active { transform: scale(0.98); }
+
+    .btn-create {
+      background: transparent;
+      color: rgba(255,255,255,0.85);
+      border: 0.5px solid rgba(255,255,255,0.35);
+      border-radius: 100px;
+      padding: 15px 36px;
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-create:hover { color: var(--t1); border-color: rgba(255,255,255,0.70); }
+
+    .home-hint {
+      font-size: 12px;
+      color: rgba(255,255,255,0.28);
+      letter-spacing: 0.04em;
+      margin-bottom: 48px;
+    }
+
+    /* Agent pills */
+    .agents-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      border-top: 0.5px solid rgba(255,255,255,0.08);
+      padding-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .agent-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 20px;
+      border-right: 0.5px solid rgba(255,255,255,0.08);
+    }
+    .agent-pill:last-child { border-right: none; }
+
+    .agent-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.28);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    .agent-pill:nth-child(2) .agent-dot { animation-delay: 0.8s; }
+
+    .agent-name {
+      font-size: 12px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+    }
+
+    /* Back to creators link */
+    .back-link {
+      font-size: 12px;
+      color: rgba(255,255,255,0.28);
+      letter-spacing: 0.04em;
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: rgba(255,255,255,0.60); }
+
+    /* ── REG SHELL (Sign In & Create Account screens) ── */
+    #screen-signin,
+    #screen-create {
+      padding: 40px 24px;
+    }
+
+    .reg-shell {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .reg-back-btn {
+      background: none;
+      border: none;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--t3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 28px;
+      padding: 0;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+    .reg-back-btn:hover { color: rgba(255,255,255,0.70); }
+
+    .reg-card {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 20px;
+      padding: 44px 40px 40px;
+    }
+
+    .reg-product-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255,255,255,0.08);
+      border: 0.5px solid rgba(255,255,255,0.16);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 16px;
+    }
+
+    .reg-mark {
+      font-family: var(--font-d);
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--t1);
+      margin-bottom: 4px;
+    }
+
+    .reg-sub {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 28px;
+    }
+
+    .reg-divider {
+      font-size: 13px;
+      color: var(--t3);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 7px;
+    }
+
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--t1);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.18); }
+    .field input:focus {
+      border-color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .reg-submit {
+      width: 100%;
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 10px;
+      padding: 15px 20px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .reg-submit:hover  { opacity: 0.88; }
+    .reg-submit:active { transform: scale(0.99); }
+
+    .reg-terms {
+      font-size: 12px;
+      color: var(--t4);
+      text-align: center;
+      margin-top: 18px;
+      line-height: 1.7;
+    }
+    .reg-terms a { color: var(--t3); text-decoration: none; }
+    .reg-terms a:hover { color: var(--t2); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .auth-row { flex-direction: column; align-items: center; }
+      .btn-signin, .btn-create { width: 100%; justify-content: center; }
+      .reg-card { padding: 32px 24px 28px; border-radius: 16px; }
+      .agent-pill { padding: 8px 14px; border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════
+       SCREEN 1 — HOME (Sign In or Create)
+  ════════════════════════════════════════ -->
+  <div id="screen-home" class="screen active">
+
+    <div class="home-logo anim-1">
+      <a href="https://talent-mates.com" aria-label="Talent Mates home">
+        <svg class="logo-svg" width="160" height="32" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="0" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="500" letter-spacing="4" fill="white">TALENT</text>
+          <text x="76" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="400" letter-spacing="4" fill="rgba(255,255,255,0.52)"> MATES</text>
+        </svg>
+      </a>
+    </div>
+
+    <div class="home-badge anim-2">
+      <div class="badge-dot"></div>
+      Creators Division
+    </div>
+
+    <h1 class="home-title anim-3">
+      AI Content<br><em>Engine.</em>
+    </h1>
+
+    <p class="home-sub anim-4">
+      Your intelligent creative partner — strategy, content planning, brand deals, and IP management. Powered by MUSE AI.
+    </p>
+
+    <div class="auth-row anim-5">
+      <button class="btn-signin" onclick="showSignIn()">
+        Sign in
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="btn-create" onclick="showCreateAccount()">
+        Create new account
+      </button>
+    </div>
+
+    <p class="home-hint anim-5">Free to try &nbsp;·&nbsp; No credit card required</p>
+
+    <div class="agents-strip anim-5">
+      <div class="agent-pill">
+        <div class="agent-dot"></div>
+        <span class="agent-name">AI Content Engine</span>
+      </div>
+      <div class="agent-pill">
+        <div class="agent-dot"></div>
+        <span class="agent-name">MUSE AI</span>
+      </div>
+    </div>
+
+    <a href="https://talent-mates.com/talent-mates-creators" class="back-link anim-5">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <path d="M7 2L3 5l4 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to Creators
+    </a>
+
+  </div>
+
+
+  <!-- ════════════════════════════════════════
+       SCREEN 2 — SIGN IN
+  ════════════════════════════════════════ -->
+  <div id="screen-signin" class="screen">
+    <div class="reg-shell">
+
+      <button class="reg-back-btn" onclick="showHome()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </button>
+
+      <div class="reg-card slide-up">
+        <div class="reg-product-badge">
+          <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white" opacity="0.7"/></svg>
+          AI Content Engine · MUSE AI
+        </div>
+
+        <a href="https://talent-mates.com" style="display:inline-block;margin-bottom:6px;">
+          <svg class="logo-svg" width="140" height="28" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="500" letter-spacing="4" fill="white">TALENT</text>
+            <text x="76" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="400" letter-spacing="4" fill="rgba(255,255,255,0.52)"> MATES</text>
+          </svg>
+        </a>
+        <div class="reg-sub">Creators &nbsp;·&nbsp; Sign in</div>
+
+        <div class="reg-divider">Welcome back — sign in to your account</div>
+
+        <div class="field">
+          <label for="si-email">Email address</label>
+          <input id="si-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="si-password">Password</label>
+          <input id="si-password" type="password" placeholder="Your password" autocomplete="current-password" />
+        </div>
+
+        <button class="reg-submit" id="signin-btn" onclick="handleSignIn()">
+          Sign in
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <p class="reg-terms">
+          <a href="#">Forgot password?</a><br>
+          Don't have an account?
+          <a href="#" onclick="showCreateAccount(); return false;">Create one free →</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════
+       SCREEN 3 — CREATE ACCOUNT
+  ════════════════════════════════════════ -->
+  <div id="screen-create" class="screen">
+    <div class="reg-shell">
+
+      <button class="reg-back-btn" onclick="showHome()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </button>
+
+      <div class="reg-card slide-up">
+        <div class="reg-product-badge">
+          <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white" opacity="0.7"/></svg>
+          AI Content Engine · MUSE AI
+        </div>
+
+        <a href="https://talent-mates.com" style="display:inline-block;margin-bottom:6px;">
+          <svg class="logo-svg" width="140" height="28" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="500" letter-spacing="4" fill="white">TALENT</text>
+            <text x="76" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="400" letter-spacing="4" fill="rgba(255,255,255,0.52)"> MATES</text>
+          </svg>
+        </a>
+        <div class="reg-sub">Creators &nbsp;·&nbsp; Create account</div>
+
+        <div class="reg-divider">Create your free account to continue</div>
+
+        <div class="field">
+          <label for="ca-name">Full name</label>
+          <input id="ca-name" type="text" placeholder="Your name" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="ca-email">Email address</label>
+          <input id="ca-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="ca-password">Password</label>
+          <input id="ca-password" type="password" placeholder="Minimum 8 characters" autocomplete="new-password" />
+        </div>
+
+        <button class="reg-submit" id="create-btn" onclick="handleCreateAccount()">
+          Create account &amp; continue
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <p class="reg-terms">
+          By continuing you agree to the
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.<br>
+          Already have an account?
+          <a href="#" onclick="showSignIn(); return false;">Sign in</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+
+  <script>
+    /* ── Dashboard URL ── */
+    var DASHBOARD_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-dashboard.html';
+
+    /* ── Screen control ── */
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(function(s) {
+        s.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+      var card = document.querySelector('#' + id + ' .reg-card');
+      if (card) {
+        card.classList.remove('slide-up');
+        void card.offsetWidth;
+        card.classList.add('slide-up');
+      }
+    }
+
+    function showHome()          { show('screen-home'); }
+    function showSignIn()        { show('screen-signin');  setTimeout(function(){ var f=document.getElementById('si-email');    if(f) f.focus(); }, 350); }
+    function showCreateAccount() { show('screen-create');  setTimeout(function(){ var f=document.getElementById('ca-name');     if(f) f.focus(); }, 350); }
+
+    /* ── Sign In ── */
+    function handleSignIn() {
+      var email = document.getElementById('si-email').value.trim();
+      var pass  = document.getElementById('si-password').value;
+      var btn   = document.getElementById('signin-btn');
+      if (!email || !pass) { btn.style.opacity='0.5'; setTimeout(function(){ btn.style.opacity=''; }, 300); return; }
+      btn.textContent = 'Signing in…';
+      btn.disabled = true;
+      /* Replace with real auth: fetch('/api/auth/signin', { method:'POST', ... }) */
+      setTimeout(function() { window.location.href = DASHBOARD_URL; }, 800);
+    }
+
+    /* ── Create Account ── */
+    function handleCreateAccount() {
+      var name  = document.getElementById('ca-name').value.trim();
+      var email = document.getElementById('ca-email').value.trim();
+      var pass  = document.getElementById('ca-password').value;
+      var btn   = document.getElementById('create-btn');
+      if (!name || !email || pass.length < 8) { btn.style.opacity='0.5'; setTimeout(function(){ btn.style.opacity=''; }, 300); return; }
+      btn.textContent = 'Creating account…';
+      btn.disabled = true;
+      /* Replace with real auth: fetch('/api/auth/register', { method:'POST', ... }) */
+      setTimeout(function() { window.location.href = DASHBOARD_URL; }, 800);
+    }
+
+    /* ── Enter key ── */
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      var active = document.querySelector('.screen.active');
+      if (!active) return;
+      if (active.id === 'screen-signin') handleSignIn();
+      if (active.id === 'screen-create') handleCreateAccount();
+    });
+  </script>
+
+</body>
+</html>
