@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Talent Mates Creators — Content Engine Dashboard" />
+  <title>Content Engine — Talent Mates Creators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple:      #794DC6;
+      --purple-dk:   #6b42b5;
+      --purple-lt:   #7a50cc;
+      --purple-glass: rgba(121,77,198,0.12);
+      --white:       #ffffff;
+      --ink:         #1a0f2e;
+      --border:      rgba(255,255,255,0.10);
+      --border-mid:  rgba(255,255,255,0.20);
+      --border-strong: rgba(255,255,255,0.35);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.30);
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --success: rgba(80,200,120,0.15);
+      --success-text: rgba(100,220,140,0.95);
+      --warning: rgba(255,200,50,0.12);
+      --warning-text: rgba(255,210,80,0.95);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      min-height: 100vh;
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(121,77,198,0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .nav-brand {
+      font-family: var(--font-b);
+      font-size: 11px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+    }
+    .nav-brand strong { color: var(--white); font-weight: 500; }
+    .nav-brand span { color: var(--t3); font-weight: 400; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-link {
+      font-size: 13px;
+      color: var(--t3);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--t1); }
+    .nav-link.active { color: var(--t1); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.10);
+      border: 0.5px solid rgba(255,255,255,0.25);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+    }
+    .ai-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #fff;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* LAYOUT */
+    .page {
+      padding-top: 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 56px 0 40px;
+      animation: fadeUp 0.7s var(--ease) 0.05s both;
+    }
+    .eyebrow {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--t3); margin-bottom: 16px;
+    }
+    .eyebrow::before {
+      content: '';
+      display: block; width: 28px; height: 0.5px;
+      background: rgba(255,255,255,0.4);
+    }
+    .hero h1 {
+      font-family: var(--font-d);
+      font-size: clamp(36px, 4vw, 54px);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .hero h1 em { color: var(--t3); font-style: italic; }
+    .hero p {
+      font-size: 16px; color: var(--t3); max-width: 560px; line-height: 1.7;
+    }
+
+    /* DIVIDER */
+    .divider {
+      width: 100%;
+      height: 0.5px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 30%, rgba(255,255,255,0.15) 70%, transparent);
+      margin: 0;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 32px 0;
+      animation: fadeUp 0.7s var(--ease) 0.18s both;
+    }
+    .stat-cell {
+      background: var(--purple);
+      padding: 28px 28px 24px;
+      transition: background 0.25s;
+    }
+    .stat-cell:hover { background: rgba(255,255,255,0.04); }
+    .stat-label {
+      font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase;
+      color: var(--t4); margin-bottom: 10px;
+    }
+    .stat-value {
+      font-family: var(--font-d);
+      font-size: 36px; font-weight: 400; letter-spacing: -0.02em;
+      color: var(--t1); line-height: 1;
+    }
+    .stat-sub { font-size: 12px; color: var(--t4); margin-top: 6px; }
+    .stat-up { color: var(--success-text); }
+
+    /* TWO-COL */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.7s var(--ease) 0.30s both;
+    }
+
+    /* SECTION CARD */
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .card:hover { background: rgba(255,255,255,0.07); }
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1.5px;
+      background: rgba(255,255,255,0.6);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s var(--ease);
+    }
+    .card:hover::after { transform: scaleX(1); }
+
+    .card-title {
+      font-family: var(--font-d);
+      font-size: 22px; font-weight: 400;
+      letter-spacing: -0.01em; margin-bottom: 6px;
+    }
+    .card-sub { font-size: 13px; color: var(--t3); margin-bottom: 24px; line-height: 1.5; }
+
+    /* FORM ELEMENTS */
+    .field { margin-bottom: 18px; }
+    .field-label {
+      display: block;
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--t4); margin-bottom: 8px;
+    }
+    .field-required { color: rgba(255,120,120,0.8); margin-left: 4px; }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-family: var(--font-b);
+      font-size: 14px; font-weight: 300;
+      color: var(--t1);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.22); }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.08);
+    }
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    select option { background: #5a38a0; color: #fff; }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+    /* RADIO PILLS */
+    .platform-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .platform-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid rgba(255,255,255,0.18);
+      border-radius: 100px;
+      padding: 9px 18px;
+      cursor: pointer;
+      font-size: 13px; color: var(--t3);
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .platform-pill:hover { background: rgba(255,255,255,0.10); color: var(--t1); }
+    .platform-pill input[type="checkbox"] { display: none; }
+    .platform-pill.selected {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.40);
+      color: var(--t1);
+    }
+    .pill-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transition: background 0.2s;
+    }
+    .platform-pill.selected .pill-dot { background: rgba(255,255,255,0.90); }
+
+    /* TAG INPUT */
+    .tag-container {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex; flex-wrap: wrap; gap: 6px;
+      min-height: 50px;
+      cursor: text;
+      transition: border-color 0.2s;
+    }
+    .tag-container:focus-within { border-color: rgba(255,255,255,0.38); }
+    .tag {
+      background: rgba(255,255,255,0.12);
+      border-radius: 100px;
+      padding: 4px 12px 4px 10px;
+      font-size: 12px; color: var(--t1);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tag-remove {
+      cursor: pointer; color: var(--t4);
+      font-size: 14px; line-height: 1;
+      transition: color 0.15s;
+    }
+    .tag-remove:hover { color: var(--t1); }
+    .tag-input-inline {
+      background: transparent; border: none; outline: none;
+      font-family: var(--font-b); font-size: 14px; font-weight: 300;
+      color: var(--t1); min-width: 120px; flex: 1;
+    }
+    .tag-input-inline::placeholder { color: rgba(255,255,255,0.22); }
+
+    /* SLIDER */
+    .slider-row { display: flex; align-items: center; gap: 14px; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      flex: 1; height: 3px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 100px; outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--white); cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(121,77,198,0.5);
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    .slider-val {
+      font-family: var(--font-d);
+      font-size: 22px; font-weight: 400;
+      color: var(--t1); min-width: 32px; text-align: right;
+    }
+
+    /* TOGGLE */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+      border-top: 0.5px solid var(--border);
+    }
+    .toggle-row:first-child { border-top: none; padding-top: 0; }
+    .toggle-info { flex: 1; }
+    .toggle-title { font-size: 14px; color: var(--t2); font-weight: 400; }
+    .toggle-desc { font-size: 12px; color: var(--t4); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 42px; height: 24px; flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.12);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.25s;
+      border: 0.5px solid rgba(255,255,255,0.20);
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: 3px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.55);
+      transition: transform 0.25s var(--ease), background 0.25s;
+    }
+    .toggle input:checked + .toggle-track { background: rgba(255,255,255,0.25); }
+    .toggle input:checked + .toggle-track::after {
+      transform: translateX(18px);
+      background: var(--white);
+    }
+
+    /* SCHEDULE GRID */
+    .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .time-input-row { display: flex; gap: 10px; }
+    .time-input-row input { flex: 1; }
+
+    /* BUTTONS */
+    .btn-row {
+      display: flex; gap: 12px; justify-content: flex-end;
+      margin-top: 28px; padding-top: 20px;
+      border-top: 0.5px solid var(--border);
+    }
+    .btn-primary {
+      background: var(--white);
+      color: var(--purple);
+      border: none; border-radius: 100px;
+      padding: 13px 32px;
+      font-family: var(--font-b);
+      font-size: 13px; font-weight: 500;
+      letter-spacing: 0.02em; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: scale(1.02); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--t3);
+      border: 0.5px solid var(--border-mid); border-radius: 100px;
+      padding: 13px 28px;
+      font-family: var(--font-b);
+      font-size: 13px; font-weight: 400;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .btn-ghost:hover { color: var(--t1); border-color: var(--border-strong); }
+    .btn-ghost:active { transform: scale(0.98); }
+
+    /* PIPELINE VISUAL */
+    .pipeline {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .pipe-step {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px; flex: 1; min-width: 90px;
+    }
+    .pipe-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .pipe-step.active .pipe-icon {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.40);
+    }
+    .pipe-name { font-size: 11px; color: var(--t3); text-align: center; letter-spacing: 0.01em; }
+    .pipe-connector {
+      flex-shrink: 0; width: 24px; height: 1px;
+      background: rgba(255,255,255,0.18);
+      position: relative; top: -14px;
+    }
+    .pipe-connector::after {
+      content: '';
+      position: absolute; right: -3px; top: -3px;
+      width: 6px; height: 6px;
+      border-top: 1px solid rgba(255,255,255,0.25);
+      border-right: 1px solid rgba(255,255,255,0.25);
+      transform: rotate(45deg);
+    }
+
+    /* POST PREVIEW */
+    .post-preview {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+    .post-preview-label {
+      font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase;
+      color: var(--t4); margin-bottom: 10px;
+    }
+    .post-preview-text {
+      font-size: 13px; color: var(--t2); line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .post-preview-meta {
+      display: flex; gap: 16px; margin-top: 14px;
+      padding-top: 12px; border-top: 0.5px solid var(--border);
+    }
+    .post-meta-item { font-size: 11px; color: var(--t4); display: flex; gap: 5px; align-items: center; }
+
+    /* COMPETITOR TABLE */
+    .competitor-list { display: flex; flex-direction: column; gap: 2px; }
+    .competitor-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      border: 0.5px solid transparent;
+      transition: background 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    .competitor-row:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: var(--border);
+    }
+    .comp-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 500; color: var(--t1);
+      flex-shrink: 0;
+    }
+    .comp-name { font-size: 13px; color: var(--t2); font-weight: 400; flex: 1; }
+    .comp-url { font-size: 11px; color: var(--t4); }
+    .comp-platform {
+      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--t3);
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px; padding: 3px 10px;
+    }
+    .comp-status {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success-text);
+      box-shadow: 0 0 6px rgba(100,220,140,0.4);
+    }
+    .add-competitor-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      background: transparent;
+      border: 0.5px dashed rgba(255,255,255,0.18);
+      border-radius: 10px; cursor: pointer;
+      font-family: var(--font-b); font-size: 13px; color: var(--t4);
+      width: 100%; text-align: left;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .add-competitor-btn:hover { border-color: rgba(255,255,255,0.32); color: var(--t2); }
+
+    /* STATUS BADGE */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 100px; padding: 4px 12px;
+      font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    }
+    .status-active {
+      background: var(--success);
+      color: var(--success-text);
+    }
+    .status-pending {
+      background: var(--warning);
+      color: var(--warning-text);
+    }
+
+    /* FULL-WIDTH CARD */
+    .card-full {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      position: relative; overflow: hidden;
+      margin-bottom: 20px;
+      transition: background 0.3s;
+    }
+    .card-full:hover { background: rgba(255,255,255,0.07); }
+
+    /* SECTION LABEL */
+    .section-label {
+      font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--t4); margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::before {
+      content: '';
+      display: block; width: 16px; height: 0.5px;
+      background: rgba(255,255,255,0.35);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 28px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1200px; margin: 40px auto 0;
+    }
+    .footer-brand { font-size: 12px; color: var(--t4); letter-spacing: 0.04em; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-link { font-size: 12px; color: var(--t4); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: var(--t2); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.08s; }
+    .reveal-d2 { transition-delay: 0.16s; }
+    .reveal-d3 { transition-delay: 0.24s; }
+
+    /* NOTIFICATION */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 999;
+      background: rgba(255,255,255,0.96);
+      color: var(--purple);
+      border-radius: 14px;
+      padding: 16px 24px;
+      font-size: 14px; font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.4s var(--ease);
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* TABS */
+    .tab-nav {
+      display: flex; gap: 2px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 100px; padding: 4px;
+      width: fit-content; margin-bottom: 28px;
+    }
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 100px; border: none;
+      background: transparent;
+      font-family: var(--font-b); font-size: 13px;
+      color: var(--t3); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(255,255,255,0.18);
+      color: var(--t1);
+    }
+    .tab-btn:hover:not(.active) { color: var(--t2); }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      nav { padding: 18px 24px; }
+      .nav-links { display: none; }
+      .page { padding-left: 24px; padding-right: 24px; }
+      .two-col { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .schedule-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="https://talent-mates.com/" style="text-decoration:none;">
+      <div class="nav-brand"><strong>Talent</strong> <span>Mates</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="https://talent-mates.com/talent-mates-creators" class="nav-link active">Creators</a>
+      <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html" class="nav-link">MATE AI</a>
+      <a href="https://talent-mates.com/about" class="nav-link">About</a>
+    </div>
+    <div class="nav-right">
+      <div class="ai-badge">
+        <div class="ai-dot"></div>
+        Content Engine
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="eyebrow">Creators Dashboard</div>
+      <h1>Content Engine <em>Intelligence</em></h1>
+      <p>Track anyone in your niche. Analyze their posts. Generate original content in your voice — automatically, every 24 hours.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-label">Competitors tracked</div>
+        <div class="stat-value" id="stat-competitors">0</div>
+        <div class="stat-sub">LinkedIn profiles</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Posts scraped</div>
+        <div class="stat-value" id="stat-posts">0</div>
+        <div class="stat-sub stat-up">Last 24h</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Generated posts</div>
+        <div class="stat-value" id="stat-generated">0</div>
+        <div class="stat-sub">Ready to publish</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-label">Agent status</div>
+        <div class="stat-value" style="font-size: 20px; padding-top: 6px;">
+          <span class="status-badge status-active">
+            <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+            Active
+          </span>
+        </div>
+        <div class="stat-sub">Daily at 00:00</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-nav reveal reveal-d1">
+      <button class="tab-btn active" onclick="showTab('competitors', this)">Competitors</button>
+      <button class="tab-btn" onclick="showTab('agent', this)">AI Agent Setup</button>
+      <button class="tab-btn" onclick="showTab('schedule', this)">Schedule</button>
+      <button class="tab-btn" onclick="showTab('preview', this)">Post Preview</button>
+    </div>
+
+    <!-- TAB: COMPETITORS -->
+    <div id="tab-competitors">
+      <div class="two-col">
+        <!-- ADD COMPETITOR -->
+        <div class="card reveal">
+          <div class="card-title">Add creator to track</div>
+          <div class="card-sub">Add any LinkedIn or Instagram profile from your niche — blogger, brand, thought leader, or competitor</div>
+
+          <div class="field">
+            <label class="field-label">Full name <span class="field-required">*</span></label>
+            <input type="text" id="comp-name" placeholder="e.g. Marie Forleo, GaryVee, TechWithTim" />
+          </div>
+
+          <div class="field">
+            <label class="field-label">Profile URL <span class="field-required">*</span></label>
+            <input type="url" id="comp-url" placeholder="linkedin.com/in/username or instagram.com/handle" />
+          </div>
+
+          <div class="field">
+            <label class="field-label">Platform source <span class="field-required">*</span></label>
+            <div class="platform-group" id="platform-group">
+              <label class="platform-pill selected" onclick="togglePill(this)">
+                <input type="checkbox" name="platform" value="linkedin" checked>
+                <div class="pill-dot"></div>
+                LinkedIn
+              </label>
+              <label class="platform-pill" onclick="togglePill(this)">
+                <input type="checkbox" name="platform" value="instagram">
+                <div class="pill-dot"></div>
+                Instagram
+              </label>
+              <label class="platform-pill" onclick="togglePill(this)">
+                <input type="checkbox" name="platform" value="pinterest">
+                <div class="pill-dot"></div>
+                Pinterest
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Niche tags</label>
+            <div class="tag-container" id="tag-container">
+              <input type="text" class="tag-input-inline" id="tag-input" placeholder="Type your niche tag and press Enter…" onkeydown="handleTagKey(event)" />
+            </div>
+          </div>
+
+          <div class="btn-row" style="margin-top: 20px; padding-top: 16px;">
+            <button class="btn-ghost" onclick="resetCompetitorForm()">Clear</button>
+            <button class="btn-primary" onclick="addCompetitor()">+ Track this creator</button>
+          </div>
+        </div>
+
+        <!-- COMPETITOR LIST -->
+        <div class="card reveal reveal-d1">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+            <div>
+              <div class="card-title">Tracked profiles</div>
+              <div class="card-sub" style="margin-bottom:0;">Creators and accounts active in your Content Engine</div>
+            </div>
+            <span class="status-badge status-active" style="flex-shrink:0; margin-top:4px;">
+              <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+              Live
+            </span>
+          </div>
+          <div class="competitor-list" id="competitor-list">
+            <div class="competitor-row">
+              <div class="comp-avatar">MF</div>
+              <div style="flex:1; min-width:0;">
+                <div class="comp-name">Marie Forleo</div>
+                <div class="comp-url">linkedin.com/in/marieforleo</div>
+              </div>
+              <span class="comp-platform">LinkedIn</span>
+              <div class="comp-status"></div>
+            </div>
+            <div class="competitor-row">
+              <div class="comp-avatar">GV</div>
+              <div style="flex:1; min-width:0;">
+                <div class="comp-name">GaryVee</div>
+                <div class="comp-url">instagram.com/garyvee</div>
+              </div>
+              <span class="comp-platform">Instagram</span>
+              <div class="comp-status"></div>
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="add-competitor-btn" onclick="document.getElementById('comp-name').focus()">
+              <span style="font-size:16px;">+</span> Track another creator
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: AI AGENT SETUP -->
+    <div id="tab-agent" style="display:none;">
+      <div class="two-col">
+        <div class="card reveal">
+          <div class="card-title">Agent identity</div>
+          <div class="card-sub">Define how the AI agent positions your brand voice</div>
+
+          <div class="field">
+            <label class="field-label">Brand voice <span class="field-required">*</span></label>
+            <select id="brand-voice">
+              <option value="">Select tone…</option>
+              <option value="founder" selected>Founder authority — premium, opinionated, niche-expert</option>
+              <option value="educator">Educator — clear, accessible, trust-building</option>
+              <option value="entertainer">Entertainer — engaging, relatable, high-energy</option>
+              <option value="analyst">Analyst — data-driven, precise, insight-led</option>
+              <option value="visionary">Visionary — forward-looking, bold, contrarian</option>
+              <option value="storyteller">Storyteller — narrative-first, emotional, personal</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Target audience <span class="field-required">*</span></label>
+            <div class="platform-group" id="audience-group">
+              <label class="platform-pill selected" onclick="togglePill(this)">
+                <input type="checkbox" checked>
+                <div class="pill-dot"></div>
+                Professionals
+              </label>
+              <label class="platform-pill selected" onclick="togglePill(this)">
+                <input type="checkbox" checked>
+                <div class="pill-dot"></div>
+                Entrepreneurs
+              </label>
+              <label class="platform-pill" onclick="togglePill(this)">
+                <input type="checkbox">
+                <div class="pill-dot"></div>
+                Creators
+              </label>
+              <label class="platform-pill" onclick="togglePill(this)">
+                <input type="checkbox">
+                <div class="pill-dot"></div>
+                Students
+              </label>
+              <label class="platform-pill" onclick="togglePill(this)">
+                <input type="checkbox">
+                <div class="pill-dot"></div>
+                General audience
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Focus topics</label>
+            <div class="tag-container">
+              <input type="text" class="tag-input-inline" placeholder="e.g. Personal branding, AI tools, Marketing…" onkeydown="handleTagKey(event)" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Your unique angle</label>
+            <textarea placeholder="What makes your content different? e.g. I'm a practitioner, not a theorist. I share real case studies from running my own business. My audience values honesty over hype…" rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="card reveal reveal-d1">
+          <div class="card-title">Generation rules</div>
+          <div class="card-sub">Control how posts are created from competitor intelligence</div>
+
+          <div class="field">
+            <label class="field-label">Posts per competitor per day</label>
+            <div class="slider-row">
+              <input type="range" min="1" max="5" value="1" id="posts-per-comp"
+                oninput="document.getElementById('posts-val').textContent=this.value; updateStat()" />
+              <span class="slider-val" id="posts-val">1</span>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:24px;">
+            <label class="field-label">Post format preference</label>
+            <select id="post-format">
+              <option value="auto" selected>AUTO — AI decides based on topic weight</option>
+              <option value="short">Short — Hook + 3 lines + CTA (always)</option>
+              <option value="long">Long — Full narrative arc (always)</option>
+            </select>
+          </div>
+
+          <div class="field" style="margin-top:20px;">
+            <label class="field-label">Output language</label>
+            <select id="output-lang">
+              <option value="en" selected>English</option>
+              <option value="uk">Ukrainian</option>
+              <option value="ru">Russian</option>
+              <option value="de">German</option>
+              <option value="fr">French</option>
+              <option value="es">Spanish</option>
+              <option value="match">Match source language</option>
+              <option value="both">Bilingual output</option>
+            </select>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <div class="section-label">Advanced filters</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-title">Skip reposts and quotes</div>
+                <div class="toggle-desc">Only analyze original competitor content</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-title">Detect blind spots</div>
+                <div class="toggle-desc">Highlight what competitors miss in each post</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-title">Auto-generate hashtags</div>
+                <div class="toggle-desc">6 targeted hashtags per post</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-title">Include engagement score</div>
+                <div class="toggle-desc">Score competitor posts before generating (0–100)</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox">
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-ghost">Reset defaults</button>
+            <button class="btn-primary" onclick="saveAgent()">Save agent config</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SCHEDULE -->
+    <div id="tab-schedule" style="display:none;">
+      <div style="width:100%;">
+        <div class="card reveal">
+          <div class="card-title">When to run</div>
+          <div class="card-sub">Your agent scrapes and generates content automatically on this schedule</div>
+
+          <div class="field">
+            <label class="field-label">Frequency</label>
+            <select id="freq">
+              <option value="daily" selected>Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="manual">Manual only</option>
+            </select>
+          </div>
+
+          <div class="field schedule-grid">
+            <div>
+              <label class="field-label">Time</label>
+              <input type="text" value="00:00" placeholder="HH:MM" />
+            </div>
+            <div>
+              <label class="field-label">Timezone</label>
+              <select>
+                <option value="Europe/Kiev" selected>Europe/Kyiv</option>
+                <option value="Europe/London">Europe/London</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Look back window</label>
+            <select>
+              <option value="24h" selected>Posts from last 24 hours</option>
+              <option value="week">Posts from last week</option>
+              <option value="month">Posts from last month</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Max posts per profile</label>
+            <div class="slider-row">
+              <input type="range" min="1" max="20" value="5" id="max-posts"
+                oninput="document.getElementById('max-posts-val').textContent=this.value" />
+              <span class="slider-val" id="max-posts-val">5</span>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-ghost" onclick="showToast('Running now…')">Run once now</button>
+            <button class="btn-primary" onclick="saveSchedule()">Save schedule</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: POST PREVIEW -->
+    <div id="tab-preview" style="display:none;">
+      <div class="card-full reveal">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+          <div>
+            <div class="card-title">Generated post preview</div>
+            <div class="card-sub" style="margin-bottom:0;">Latest output from AI Agent — ready to review and publish</div>
+          </div>
+          <button class="btn-primary" style="padding:10px 22px; font-size:12px;" onclick="showToast('Regenerating post…')">↻ Regenerate</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <div>
+            <div class="post-preview-label">Competitor post (source)</div>
+            <div class="post-preview">
+              <div class="post-preview-text">Consistency is the most underrated skill in content creation.
+
+Post every day. Show up every day. The algorithm rewards those who show up.
+
+That's it. That's the secret to growing on LinkedIn in 2025.</div>
+              <div class="post-preview-meta">
+                <span class="post-meta-item">👤 Content Creator X</span>
+                <span class="post-meta-item">💙 1,204 reactions</span>
+                <span class="post-meta-item">💬 93 comments</span>
+              </div>
+            </div>
+            <div style="margin-top:14px; padding:14px 16px; background:rgba(255,200,50,0.06); border:0.5px solid rgba(255,200,50,0.20); border-radius:12px;">
+              <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,210,80,0.8);margin-bottom:8px;">Blind spot detected</div>
+              <div style="font-size:13px;color:var(--t2);line-height:1.6;">Post serves the algorithm, not the reader. "Show up every day" is true but says nothing about what to say or why it matters to anyone. It's motivation dressed as strategy. The 93 comments are almost entirely other creators agreeing — not the audience this creator is trying to reach.</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="post-preview-label">Generated Talent Mates post</div>
+            <div class="post-preview" style="border-color:rgba(255,255,255,0.22);">
+              <div class="post-preview-text">Consistency without clarity is just noise.
+
+I've watched creators post every day for 12 months and go nowhere. I've watched others post twice a week and build an audience that actually buys.
+
+The difference wasn't frequency.
+
+It was specificity. They knew exactly one person they were writing for and what that person needed to hear that day.
+
+"Post every day" is advice designed to keep you busy. It's not a strategy.
+
+The creators who grow sustainably do two things differently:
+They write for one specific reader, not "their audience."
+They say something that makes that reader feel understood, not motivated.
+
+Understanding beats inspiration every time on LinkedIn.
+
+Who are you actually writing for?</div>
+              <div class="post-preview-meta">
+                <span class="post-meta-item">✍️ Vitalii Lomov</span>
+                <span class="post-meta-item">📋 LONG format</span>
+                <span class="post-meta-item">🏷 6 hashtags</span>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#ContentCreation</span>
+              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#PersonalBranding</span>
+              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#LinkedIn</span>
+              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#CreatorEconomy</span>
+              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#Copywriting</span>
+              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#AudienceGrowth</span>
+            </div>
+            <div class="btn-row" style="margin-top:20px;">
+              <button class="btn-ghost" onclick="showToast('Copied to clipboard')">Copy post</button>
+              <button class="btn-primary" onclick="showToast('✓ Saved to Airtable')">Save to Airtable</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">© 2026 Talent Mates</div>
+    <div class="footer-links">
+      <a href="https://talent-mates.com/about" class="footer-link">About</a>
+      <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html" class="footer-link">MATE AI</a>
+      <a href="mailto:creators@talent-mates.com" class="footer-link">Creators</a>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">✓ <span id="toast-msg">Saved</span></div>
+
+  <script>
+    function showTab(name, btn) {
+      ['competitors','agent','schedule','preview'].forEach(t => {
+        document.getElementById('tab-'+t).style.display = t === name ? '' : 'none';
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function togglePill(label) {
+      label.classList.toggle('selected');
+    }
+
+    function removeTag(btn) {
+      btn.parentElement.remove();
+    }
+
+    function handleTagKey(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = e.target.value.trim().replace(',','');
+        if (!val) return;
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.innerHTML = val + ' <span class="tag-remove" onclick="removeTag(this)">×</span>';
+        e.target.parentElement.insertBefore(tag, e.target);
+        e.target.value = '';
+      }
+    }
+
+    function addCompetitor() {
+      const name = document.getElementById('comp-name').value.trim();
+      const url = document.getElementById('comp-url').value.trim();
+      if (!name || !url) { showToast('Please fill in name and URL'); return; }
+
+      const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      const list = document.getElementById('competitor-list');
+      const row = document.createElement('div');
+      row.className = 'competitor-row';
+      row.innerHTML = `
+        <div class="comp-avatar">${initials}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="comp-name">${name}</div>
+          <div class="comp-url">${url}</div>
+        </div>
+        <span class="comp-platform">LinkedIn</span>
+        <div class="comp-status"></div>
+      `;
+      list.appendChild(row);
+
+      const count = list.querySelectorAll('.competitor-row').length;
+      document.getElementById('stat-competitors').textContent = count;
+
+      resetCompetitorForm();
+      showToast(`✓ ${name} added to tracking`);
+    }
+
+    function resetCompetitorForm() {
+      document.getElementById('comp-name').value = '';
+      document.getElementById('comp-url').value = '';
+    }
+
+    function saveAgent() {
+      showToast('✓ Agent configuration saved');
+    }
+
+    function saveSchedule() {
+      showToast('✓ Schedule saved — agent active');
+    }
+
+    function copyWebhook() {
+      showToast('✓ Webhook URL copied');
+    }
+
+    function updateStat() {
+      const competitors = document.getElementById('competitor-list').querySelectorAll('.competitor-row').length;
+      const postsPerComp = parseInt(document.getElementById('posts-per-comp').value);
+      document.getElementById('stat-generated').textContent = competitors * postsPerComp;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Animate stats on load
+    setTimeout(() => {
+      animateNum('stat-competitors', 2, 600);
+      animateNum('stat-posts', 8, 900);
+      animateNum('stat-generated', 2, 1100);
+    }, 300);
+
+    function animateNum(id, target, delay) {
+      setTimeout(() => {
+        let n = 0;
+        const el = document.getElementById(id);
+        const step = setInterval(() => {
+          n++;
+          el.textContent = n;
+          if (n >= target) clearInterval(step);
+        }, 60);
+      }, delay);
+    }
+  </script>
+</body>
+</html>
