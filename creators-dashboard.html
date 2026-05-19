@@ -1166,26 +1166,47 @@
       }
     }
 
-    function addCompetitor() {
+    const MAKE_ADD_COMPETITOR = 'https://hook.eu1.make.com/q5pfogg3i522us803ury8mfq8j5zkndm';
+
+    async function addCompetitor() {
       const name = document.getElementById('comp-name').value.trim();
       const url  = document.getElementById('comp-url').value.trim();
       if (!name || !url) { showToast('Please fill in name and URL'); return; }
-      const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-      const list = document.getElementById('competitor-list');
-      const row  = document.createElement('div');
-      row.className = 'competitor-row';
-      row.innerHTML = `
-        <div class="comp-avatar">${initials}</div>
-        <div style="flex:1; min-width:0;">
-          <div class="comp-name">${name}</div>
-          <div class="comp-url">${url}</div>
-        </div>
-        <span class="comp-platform">LinkedIn</span>
-        <div class="comp-status"></div>`;
-      list.appendChild(row);
-      document.getElementById('stat-competitors').textContent = list.querySelectorAll('.competitor-row').length;
-      resetCompetitorForm();
-      showToast(`✓ ${name} added to tracking`);
+
+      // get selected platform
+      const selected = document.querySelector('#platform-group .platform-pill.selected input');
+      const platform = selected ? selected.value : 'linkedin';
+
+      showToast('⏳ Saving to Airtable…');
+
+      try {
+        await fetch(MAKE_ADD_COMPETITOR, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, url, platform })
+        });
+
+        // add to UI list
+        const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+        const list = document.getElementById('competitor-list');
+        const row  = document.createElement('div');
+        row.className = 'competitor-row';
+        row.innerHTML = `
+          <div class="comp-avatar">${initials}</div>
+          <div style="flex:1; min-width:0;">
+            <div class="comp-name">${name}</div>
+            <div class="comp-url">${url}</div>
+          </div>
+          <span class="comp-platform">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+          <div class="comp-status"></div>`;
+        list.appendChild(row);
+        document.getElementById('stat-competitors').textContent = list.querySelectorAll('.competitor-row').length;
+        resetCompetitorForm();
+        showToast(`✓ ${name} saved to Airtable`);
+
+      } catch {
+        showToast('✗ Could not save. Check your connection.');
+      }
     }
 
     function resetCompetitorForm() {
