@@ -634,9 +634,9 @@
       <div class="nav-brand"><strong>Talent</strong> <span>Mates</span></div>
     </a>
     <div class="nav-links">
-      <a href="https://talent-mates.com/talent-mates-creators" class="nav-link active">Creators</a>
-      <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html" class="nav-link">MATE AI</a>
-      <a href="https://talent-mates.com/about" class="nav-link">About</a>
+      <a href="/creators" class="nav-link active">Creators</a>
+      <a href="/mate" class="nav-link">MATE AI</a>
+      <a href="/about" class="nav-link">About</a>
     </div>
     <div class="nav-right">
       <div class="ai-badge">
@@ -989,7 +989,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn-ghost" onclick="showToast('Running now…')">Run once now</button>
+            <button class="btn-ghost" onclick="runNow()">Run once now</button>
             <button class="btn-primary" onclick="saveSchedule()">Save schedule</button>
           </div>
         </div>
@@ -1001,71 +1001,19 @@
       <div class="card-full reveal">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
           <div>
-            <div class="card-title">Generated post preview</div>
+            <div class="card-title">Generated posts</div>
             <div class="card-sub" style="margin-bottom:0;">Latest output from AI Agent — ready to review and publish</div>
           </div>
-          <button class="btn-primary" style="padding:10px 22px; font-size:12px;" onclick="showToast('Regenerating post…')">↻ Regenerate</button>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span id="posts-loading" style="font-size:12px;color:var(--t3);display:none;">Loading…</span>
+            <button class="btn-primary" style="padding:10px 22px; font-size:12px;" onclick="loadPosts()">↻ Refresh</button>
+          </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-          <div>
-            <div class="post-preview-label">Competitor post (source)</div>
-            <div class="post-preview">
-              <div class="post-preview-text">Consistency is the most underrated skill in content creation.
-
-Post every day. Show up every day. The algorithm rewards those who show up.
-
-That's it. That's the secret to growing on LinkedIn in 2025.</div>
-              <div class="post-preview-meta">
-                <span class="post-meta-item">👤 Content Creator X</span>
-                <span class="post-meta-item">💙 1,204 reactions</span>
-                <span class="post-meta-item">💬 93 comments</span>
-              </div>
-            </div>
-            <div style="margin-top:14px; padding:14px 16px; background:rgba(255,200,50,0.06); border:0.5px solid rgba(255,200,50,0.20); border-radius:12px;">
-              <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,210,80,0.8);margin-bottom:8px;">Blind spot detected</div>
-              <div style="font-size:13px;color:var(--t2);line-height:1.6;">Post serves the algorithm, not the reader. "Show up every day" is true but says nothing about what to say or why it matters to anyone. It's motivation dressed as strategy. The 93 comments are almost entirely other creators agreeing — not the audience this creator is trying to reach.</div>
-            </div>
-          </div>
-
-          <div>
-            <div class="post-preview-label">Generated Talent Mates post</div>
-            <div class="post-preview" style="border-color:rgba(255,255,255,0.22);">
-              <div class="post-preview-text">Consistency without clarity is just noise.
-
-I've watched creators post every day for 12 months and go nowhere. I've watched others post twice a week and build an audience that actually buys.
-
-The difference wasn't frequency.
-
-It was specificity. They knew exactly one person they were writing for and what that person needed to hear that day.
-
-"Post every day" is advice designed to keep you busy. It's not a strategy.
-
-The creators who grow sustainably do two things differently:
-They write for one specific reader, not "their audience."
-They say something that makes that reader feel understood, not motivated.
-
-Understanding beats inspiration every time on LinkedIn.
-
-Who are you actually writing for?</div>
-              <div class="post-preview-meta">
-                <span class="post-meta-item">✍️ Vitalii Lomov</span>
-                <span class="post-meta-item">📋 LONG format</span>
-                <span class="post-meta-item">🏷 6 hashtags</span>
-              </div>
-            </div>
-            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#ContentCreation</span>
-              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#PersonalBranding</span>
-              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#LinkedIn</span>
-              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#CreatorEconomy</span>
-              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#Copywriting</span>
-              <span style="font-size:11px;color:var(--t3);background:rgba(255,255,255,0.07);border-radius:100px;padding:4px 12px;">#AudienceGrowth</span>
-            </div>
-            <div class="btn-row" style="margin-top:20px;">
-              <button class="btn-ghost" onclick="showToast('Copied to clipboard')">Copy post</button>
-              <button class="btn-primary" onclick="showToast('✓ Saved to Airtable')">Save to Airtable</button>
-            </div>
+        <!-- POSTS LIST -->
+        <div id="posts-list">
+          <div style="text-align:center; padding:48px 0; color:var(--t3); font-size:14px;">
+            Loading posts from Airtable…
           </div>
         </div>
       </div>
@@ -1077,8 +1025,8 @@ Who are you actually writing for?</div>
   <footer>
     <div class="footer-brand">© 2026 Talent Mates</div>
     <div class="footer-links">
-      <a href="https://talent-mates.com/about" class="footer-link">About</a>
-      <a href="https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html" class="footer-link">MATE AI</a>
+      <a href="/about" class="footer-link">About</a>
+      <a href="/mate" class="footer-link">MATE AI</a>
       <a href="mailto:creators@talent-mates.com" class="footer-link">Creators</a>
     </div>
   </footer>
@@ -1087,12 +1035,114 @@ Who are you actually writing for?</div>
   <div class="toast" id="toast">✓ <span id="toast-msg">Saved</span></div>
 
   <script>
+    // ─── CONFIG ───────────────────────────────────────────────
+    const MAKE_PROXY   = 'https://hook.eu1.make.com/jne3nomxzyug6hqej8g5vrq9m8tzwupn';
+    const MAKE_WEBHOOK = 'https://hook.eu1.make.com/7yuoedylpj981uapt77megy1sifz7ucj';
+
+    // ─── TABS ─────────────────────────────────────────────────
     function showTab(name, btn) {
       ['competitors','agent','schedule','preview'].forEach(t => {
         document.getElementById('tab-'+t).style.display = t === name ? '' : 'none';
       });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      if (name === 'preview') loadPosts();
+    }
+
+    // ─── MAKE PROXY: LOAD POSTS ───────────────────────────────
+    async function loadPosts() {
+      const loading = document.getElementById('posts-loading');
+      const list    = document.getElementById('posts-list');
+      loading.style.display = 'inline';
+      list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--t3);font-size:14px;">Loading posts…</div>';
+
+      try {
+        const res = await fetch(MAKE_PROXY, { method: 'POST' });
+        if (!res.ok) throw new Error(`Make error: ${res.status}`);
+        const records = await res.json();
+        const data = Array.isArray(records) ? records : (records.records || []);
+
+        // update stats
+        document.getElementById('stat-posts').textContent     = data.length;
+        document.getElementById('stat-generated').textContent = data.filter(r => r['New Post']).length;
+
+        if (!data.length) {
+          list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--t3);font-size:14px;">No posts yet. Run the agent to generate content.</div>';
+          return;
+        }
+
+        list.innerHTML = data.map((f, i) => {
+          const name      = f['Name']      || '—';
+          const content   = f['content']   || '';
+          const newPost   = f['New Post']  || '';
+          const postedAt  = f['postedAt']  ? new Date(f['postedAt']).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—';
+          const sourceUrl = f['URL']        || '#';
+
+          return `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:24px 0;border-top:${i===0?'none':'0.5px solid var(--border)'};">
+            <div>
+              <div class="post-preview-label">Source — ${name}</div>
+              <div class="post-preview">
+                <div class="post-preview-text" style="max-height:180px;overflow:hidden;mask-image:linear-gradient(to bottom,black 70%,transparent);">${content}</div>
+                <div class="post-preview-meta" style="margin-top:10px;">
+                  <span class="post-meta-item">📅 ${postedAt}</span>
+                  ${sourceUrl !== '#' ? `<a href="${sourceUrl}" target="_blank" style="font-size:11px;color:var(--t4);text-decoration:none;">🔗 Original</a>` : ''}
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="post-preview-label">Generated post</div>
+              <div class="post-preview" style="border-color:rgba(255,255,255,0.22);">
+                <div class="post-preview-text">${newPost || '<span style="color:var(--t4);font-style:italic;">Not yet generated</span>'}</div>
+              </div>
+              ${newPost ? `
+              <div class="btn-row" style="margin-top:12px;">
+                <button class="btn-ghost" onclick="copyText(\`${newPost.replace(/`/g,"'").replace(/\n/g,'\\n')}\`)">Copy post</button>
+              </div>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+
+      } catch (err) {
+        list.innerHTML = `<div style="text-align:center;padding:48px 0;color:rgba(255,120,120,0.8);font-size:13px;">
+          Could not load posts. Check your Make scenario is active.<br>
+          <span style="font-size:11px;color:var(--t4);margin-top:6px;display:block;">${err.message}</span>
+        </div>`;
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    // ─── MAKE PROXY: LOAD STATS ───────────────────────────────
+    async function loadStats() {
+      try {
+        const res = await fetch(MAKE_PROXY, { method: 'POST' });
+        if (!res.ok) return;
+        const records = await res.json();
+        const data = Array.isArray(records) ? records : (records.records || []);
+        animateNum('stat-posts',     data.length, 400);
+        animateNum('stat-generated', data.filter(r => r['New Post']).length, 600);
+      } catch {}
+    }
+
+    // ─── MAKE WEBHOOK: RUN NOW ────────────────────────────────
+    async function runNow() {
+      showToast('⏳ Sending request to agent…');
+      try {
+        await fetch(MAKE_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trigger: 'manual', source: 'dashboard', timestamp: new Date().toISOString() })
+        });
+        showToast('✓ Agent triggered — check Post Preview in a few minutes');
+      } catch (err) {
+        showToast('✗ Could not reach webhook. Check your connection.');
+      }
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────────
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => showToast('✓ Copied to clipboard'));
     }
 
     function togglePill(label) {
@@ -1118,12 +1168,11 @@ Who are you actually writing for?</div>
 
     function addCompetitor() {
       const name = document.getElementById('comp-name').value.trim();
-      const url = document.getElementById('comp-url').value.trim();
+      const url  = document.getElementById('comp-url').value.trim();
       if (!name || !url) { showToast('Please fill in name and URL'); return; }
-
       const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
       const list = document.getElementById('competitor-list');
-      const row = document.createElement('div');
+      const row  = document.createElement('div');
       row.className = 'competitor-row';
       row.innerHTML = `
         <div class="comp-avatar">${initials}</div>
@@ -1132,47 +1181,29 @@ Who are you actually writing for?</div>
           <div class="comp-url">${url}</div>
         </div>
         <span class="comp-platform">LinkedIn</span>
-        <div class="comp-status"></div>
-      `;
+        <div class="comp-status"></div>`;
       list.appendChild(row);
-
-      const count = list.querySelectorAll('.competitor-row').length;
-      document.getElementById('stat-competitors').textContent = count;
-
+      document.getElementById('stat-competitors').textContent = list.querySelectorAll('.competitor-row').length;
       resetCompetitorForm();
       showToast(`✓ ${name} added to tracking`);
     }
 
     function resetCompetitorForm() {
       document.getElementById('comp-name').value = '';
-      document.getElementById('comp-url').value = '';
+      document.getElementById('comp-url').value  = '';
     }
 
-    function saveAgent() {
-      showToast('✓ Agent configuration saved');
-    }
-
-    function saveSchedule() {
-      showToast('✓ Schedule saved — agent active');
-    }
-
-    function copyWebhook() {
-      showToast('✓ Webhook URL copied');
-    }
-
-    function updateStat() {
-      const competitors = document.getElementById('competitor-list').querySelectorAll('.competitor-row').length;
-      const postsPerComp = parseInt(document.getElementById('posts-per-comp').value);
-      document.getElementById('stat-generated').textContent = competitors * postsPerComp;
-    }
+    function saveAgent()    { showToast('✓ Agent configuration saved'); }
+    function saveSchedule() { showToast('✓ Schedule saved — agent active'); }
 
     function showToast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toast-msg').textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2800);
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    // ─── INTERSECTION OBSERVER ────────────────────────────────
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
@@ -1180,13 +1211,7 @@ Who are you actually writing for?</div>
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Animate stats on load
-    setTimeout(() => {
-      animateNum('stat-competitors', 2, 600);
-      animateNum('stat-posts', 8, 900);
-      animateNum('stat-generated', 2, 1100);
-    }, 300);
-
+    // ─── INIT ─────────────────────────────────────────────────
     function animateNum(id, target, delay) {
       setTimeout(() => {
         let n = 0;
@@ -1198,6 +1223,10 @@ Who are you actually writing for?</div>
         }, 60);
       }, delay);
     }
+
+    // Load real stats on page load
+    animateNum('stat-competitors', 2, 300);
+    loadStats();
   </script>
 </body>
 </html>
