@@ -1237,18 +1237,51 @@
     // ─── LOAD COMPETITORS FROM AIRTABLE ───────────────────────
     async function loadCompetitors() {
       try {
-        const res = await fetch(MAKE_COMPETITORS, { method: 'POST' });
-        if (!res.ok) return;
-        const data = await res.json();
-        const records = Array.isArray(data) ? data : (data.records || []);
+        // First request to get total count
+        const first = await fetch(MAKE_COMPETITORS, { method: 'POST' });
+        if (!first.ok) return;
+        const data = await first.json();
+
+        // Make returns one object at a time with __IMTLENGTH__ and __IMTINDEX__
+        // Check if it's an array (aggregated) or single object
+        let records = [];
+
+        if (Array.isArray(data)) {
+          // Array Aggregator worked — use directly
+          records = data;
+        } else if (data.__IMTLENGTH__) {
+          // Single bundle mode — fetch all records one by one
+          const total = data.__IMTLENGTH__;
+          records.push(data);
+          const promises = [];
+          for (let i = 1; i < total; i++) {
+            promises.push(
+              fetch(MAKE_COMPETITORS, { method: 'POST' }).then(r => r.json())
+            );
+          }
+          const rest = await Promise.all(promises);
+          records.push(...rest);
+        } else {
+          records = [data];
+        }
+
+        // Deduplicate by Name
+        const seen = new Set();
+        records = records.filter(r => {
+          const name = r['Name'] || r.Name || '';
+          if (seen.has(name)) return false;
+          seen.add(name);
+          return true;
+        });
+
         if (!records.length) return;
 
         const list = document.getElementById('competitor-list');
-        list.innerHTML = ''; // clear static demo data
+        list.innerHTML = '';
 
         records.forEach(r => {
           const name     = r['Name']        || r.Name        || '—';
-          const url      = r['Profile URL'] || r['Profile URL'] || '';
+          const url      = r['Profile URL'] || r.profile_url || '';
           const platform = r['Джерело']     || r.platform    || 'linkedin';
           const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
 
@@ -1265,10 +1298,9 @@
           list.appendChild(row);
         });
 
-        // update stat counter with real number
         document.getElementById('stat-competitors').textContent = records.length;
 
-      } catch {}
+      } catch(e) { console.log('Competitors error:', e); }
     }
 
     // ─── INIT ─────────────────────────────────────────────────
