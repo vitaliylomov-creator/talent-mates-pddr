@@ -1067,6 +1067,9 @@
         let data = [];
         if (Array.isArray(raw)) {
           data = raw;
+        } else if (raw.items && Array.isArray(raw.items) && raw.items[0] && raw.items[0].array) {
+          // Triple nested: {items: [{array: [...]}]}
+          data = raw.items[0].array;
         } else if (raw.items && raw.items.array && Array.isArray(raw.items.array)) {
           data = raw.items.array;
         } else if (raw.items && Array.isArray(raw.items)) {
@@ -1078,7 +1081,7 @@
         } else {
           data = [raw];
         }
-        console.log('POSTS parsed:', data.length, 'records, first:', JSON.stringify(data[0]).substring(0,100));
+        console.log('POSTS parsed:', data.length, 'records');
 
         // update stats
         document.getElementById('stat-posts').textContent     = data.length;
@@ -1140,10 +1143,12 @@
         let data = [];
         if (Array.isArray(raw)) {
           data = raw;
-        } else if (raw.items && Array.isArray(raw.items)) {
-          data = raw.items;
+        } else if (raw.items && Array.isArray(raw.items) && raw.items[0] && raw.items[0].array) {
+          data = raw.items[0].array;
         } else if (raw.items && raw.items.array) {
           data = raw.items.array;
+        } else if (raw.items && Array.isArray(raw.items)) {
+          data = raw.items;
         } else if (raw.array) {
           data = raw.array;
         }
