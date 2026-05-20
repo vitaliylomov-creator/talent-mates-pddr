@@ -1067,17 +1067,18 @@
         let data = [];
         if (Array.isArray(raw)) {
           data = raw;
+        } else if (raw.items && raw.items.array && Array.isArray(raw.items.array)) {
+          data = raw.items.array;
         } else if (raw.items && Array.isArray(raw.items)) {
           data = raw.items;
-        } else if (raw.items && raw.items.array) {
-          data = raw.items.array;
-        } else if (raw.array) {
+        } else if (raw.array && Array.isArray(raw.array)) {
           data = raw.array;
         } else if (raw.records) {
           data = raw.records;
         } else {
           data = [raw];
         }
+        console.log('POSTS parsed:', data.length, 'records, first:', JSON.stringify(data[0]).substring(0,100));
 
         // update stats
         document.getElementById('stat-posts').textContent     = data.length;
