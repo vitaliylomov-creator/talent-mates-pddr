@@ -1060,8 +1060,23 @@
       try {
         const res = await fetch(MAKE_PROXY, { method: 'POST' });
         if (!res.ok) throw new Error(`Make error: ${res.status}`);
-        const records = await res.json();
-        const data = Array.isArray(records) ? records : (records.records || []);
+        const raw = await res.json();
+
+        // Handle all possible Make response structures
+        let data = [];
+        if (Array.isArray(raw)) {
+          data = raw;
+        } else if (raw.items && Array.isArray(raw.items)) {
+          data = raw.items;
+        } else if (raw.items && raw.items.array) {
+          data = raw.items.array;
+        } else if (raw.array) {
+          data = raw.array;
+        } else if (raw.records) {
+          data = raw.records;
+        } else {
+          data = [raw];
+        }
 
         // update stats
         document.getElementById('stat-posts').textContent     = data.length;
@@ -1237,21 +1252,26 @@
     // ─── LOAD COMPETITORS FROM AIRTABLE ───────────────────────
     async function loadCompetitors() {
       try {
-        // First request to get total count
         const first = await fetch(MAKE_COMPETITORS, { method: 'POST' });
         if (!first.ok) return;
-        const data = await first.json();
 
-        // Make returns one object at a time with __IMTLENGTH__ and __IMTINDEX__
-        // Check if it's an array (aggregated) or single object
+        const text = await first.text();
+        if (!text || text.trim() === 'Accepted') {
+          console.log('Competitors: enable Immediately as data arrives in Make scenario');
+          return;
+        }
+
+        let data;
+        try { data = JSON.parse(text); } catch { return; }
+
         let records = [];
-
         if (Array.isArray(data)) {
           records = data;
         } else if (data.items && Array.isArray(data.items)) {
-          // JSON Create module wraps in {items: [...]}
           records = data.items;
-        } else if (data.array && Array.isArray(data.array)) {
+        } else if (data.items && data.items.array) {
+          records = data.items.array;
+        } else if (data.array) {
           records = data.array;
         } else if (data.__IMTLENGTH__) {
           const total = data.__IMTLENGTH__;
