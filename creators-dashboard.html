@@ -1247,10 +1247,13 @@
         let records = [];
 
         if (Array.isArray(data)) {
-          // Array Aggregator worked — use directly
           records = data;
+        } else if (data.items && Array.isArray(data.items)) {
+          // JSON Create module wraps in {items: [...]}
+          records = data.items;
+        } else if (data.array && Array.isArray(data.array)) {
+          records = data.array;
         } else if (data.__IMTLENGTH__) {
-          // Single bundle mode — fetch all records one by one
           const total = data.__IMTLENGTH__;
           records.push(data);
           const promises = [];
