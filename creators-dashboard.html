@@ -1036,8 +1036,9 @@
 
   <script>
     // ─── CONFIG ───────────────────────────────────────────────
-    const MAKE_PROXY   = 'https://hook.eu1.make.com/jne3nomxzyug6hqej8g5vrq9m8tzwupn';
-    const MAKE_WEBHOOK = 'https://hook.eu1.make.com/7yuoedylpj981uapt77megy1sifz7ucj';
+    const MAKE_PROXY        = 'https://hook.eu1.make.com/jne3nomxzyug6hqej8g5vrq9m8tzwupn';
+    const MAKE_WEBHOOK      = 'https://hook.eu1.make.com/7yuoedylpj981uapt77megy1sifz7ucj';
+    const MAKE_COMPETITORS  = 'https://hook.eu1.make.com/9vmhzvn12uhwt9m3wuksb9svi7wvxjte';
 
     // ─── TABS ─────────────────────────────────────────────────
     function showTab(name, btn) {
@@ -1203,6 +1204,7 @@
         document.getElementById('stat-competitors').textContent = list.querySelectorAll('.competitor-row').length;
         resetCompetitorForm();
         showToast(`✓ ${name} saved to Airtable`);
+        loadCompetitors(); // refresh list from Airtable
 
       } catch {
         showToast('✗ Could not save. Check your connection.');
@@ -1232,6 +1234,43 @@
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+    // ─── LOAD COMPETITORS FROM AIRTABLE ───────────────────────
+    async function loadCompetitors() {
+      try {
+        const res = await fetch(MAKE_COMPETITORS, { method: 'POST' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const records = Array.isArray(data) ? data : (data.records || []);
+        if (!records.length) return;
+
+        const list = document.getElementById('competitor-list');
+        list.innerHTML = ''; // clear static demo data
+
+        records.forEach(r => {
+          const name     = r['Name']        || r.Name        || '—';
+          const url      = r['Profile URL'] || r['Profile URL'] || '';
+          const platform = r['Джерело']     || r.platform    || 'linkedin';
+          const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+
+          const row = document.createElement('div');
+          row.className = 'competitor-row';
+          row.innerHTML = `
+            <div class="comp-avatar">${initials}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="comp-name">${name}</div>
+              <div class="comp-url">${url}</div>
+            </div>
+            <span class="comp-platform">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
+            <div class="comp-status"></div>`;
+          list.appendChild(row);
+        });
+
+        // update stat counter with real number
+        document.getElementById('stat-competitors').textContent = records.length;
+
+      } catch {}
+    }
+
     // ─── INIT ─────────────────────────────────────────────────
     function animateNum(id, target, delay) {
       setTimeout(() => {
@@ -1245,9 +1284,9 @@
       }, delay);
     }
 
-    // Load real stats on page load
-    animateNum('stat-competitors', 2, 300);
+    // Load real data on page load
     loadStats();
+    loadCompetitors();
   </script>
 </body>
 </html>
