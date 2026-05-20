@@ -1061,6 +1061,7 @@
         const res = await fetch(MAKE_PROXY, { method: 'POST' });
         if (!res.ok) throw new Error(`Make error: ${res.status}`);
         const raw = await res.json();
+        console.log('POSTS RAW:', JSON.stringify(raw).substring(0, 300));
 
         // Handle all possible Make response structures
         let data = [];
@@ -1134,8 +1135,17 @@
       try {
         const res = await fetch(MAKE_PROXY, { method: 'POST' });
         if (!res.ok) return;
-        const records = await res.json();
-        const data = Array.isArray(records) ? records : (records.records || []);
+        const raw = await res.json();
+        let data = [];
+        if (Array.isArray(raw)) {
+          data = raw;
+        } else if (raw.items && Array.isArray(raw.items)) {
+          data = raw.items;
+        } else if (raw.items && raw.items.array) {
+          data = raw.items.array;
+        } else if (raw.array) {
+          data = raw.array;
+        }
         animateNum('stat-posts',     data.length, 400);
         animateNum('stat-generated', data.filter(r => r['New Post']).length, 600);
       } catch {}
