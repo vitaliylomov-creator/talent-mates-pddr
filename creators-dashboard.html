@@ -690,7 +690,6 @@
     <div class="tab-nav reveal reveal-d1">
       <button class="tab-btn active" onclick="showTab('competitors', this)">Competitors</button>
       <button class="tab-btn" onclick="showTab('agent', this)">AI Agent Setup</button>
-      <button class="tab-btn" onclick="showTab('schedule', this)">Schedule</button>
       <button class="tab-btn" onclick="showTab('preview', this)">Post Preview</button>
     </div>
 
@@ -939,63 +938,6 @@
       </div>
     </div>
 
-    <!-- TAB: SCHEDULE -->
-    <div id="tab-schedule" style="display:none;">
-      <div style="width:100%;">
-        <div class="card reveal">
-          <div class="card-title">When to run</div>
-          <div class="card-sub">Your agent scrapes and generates content automatically on this schedule</div>
-
-          <div class="field">
-            <label class="field-label">Frequency</label>
-            <select id="freq">
-              <option value="daily" selected>Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="manual">Manual only</option>
-            </select>
-          </div>
-
-          <div class="field schedule-grid">
-            <div>
-              <label class="field-label">Time</label>
-              <input type="text" value="00:00" placeholder="HH:MM" />
-            </div>
-            <div>
-              <label class="field-label">Timezone</label>
-              <select>
-                <option value="Europe/Kiev" selected>Europe/Kyiv</option>
-                <option value="Europe/London">Europe/London</option>
-                <option value="UTC">UTC</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="field-label">Look back window</label>
-            <select>
-              <option value="24h" selected>Posts from last 24 hours</option>
-              <option value="week">Posts from last week</option>
-              <option value="month">Posts from last month</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="field-label">Max posts per profile</label>
-            <div class="slider-row">
-              <input type="range" min="1" max="20" value="5" id="max-posts"
-                oninput="document.getElementById('max-posts-val').textContent=this.value" />
-              <span class="slider-val" id="max-posts-val">5</span>
-            </div>
-          </div>
-
-          <div class="btn-row">
-            <button class="btn-ghost" onclick="runNow()">Run once now</button>
-            <button class="btn-primary" onclick="saveSchedule()">Save schedule</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- TAB: POST PREVIEW -->
     <div id="tab-preview" style="display:none;">
       <div class="card-full reveal">
@@ -1037,13 +979,12 @@
   <script>
     // ─── CONFIG ───────────────────────────────────────────────
     const MAKE_PROXY        = 'https://hook.eu1.make.com/jne3nomxzyug6hqej8g5vrq9m8tzwupn';
-    const MAKE_WEBHOOK      = 'https://hook.eu1.make.com/l8z47wxwrcuymeuhpetw7ii8d2iylsyl';
+    const MAKE_WEBHOOK      = 'https://hook.eu1.make.com/7yuoedylpj981uapt77megy1sifz7ucj';
     const MAKE_COMPETITORS  = 'https://hook.eu1.make.com/9vmhzvn12uhwt9m3wuksb9svi7wvxjte';
-    const MAKE_ADD_COMPETITOR = 'https://hook.eu1.make.com/q5pfogg3i522us803ury8mfq8j5zkndm';
 
     // ─── TABS ─────────────────────────────────────────────────
     function showTab(name, btn) {
-      ['competitors','agent','schedule','preview'].forEach(t => {
+      ['competitors','agent','preview'].forEach(t => {
         document.getElementById('tab-'+t).style.display = t === name ? '' : 'none';
       });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
