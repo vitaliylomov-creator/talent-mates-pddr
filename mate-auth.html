@@ -472,7 +472,7 @@
         .single();
 
       if (!profile || !profile.onboarding_complete) {
-        window.location.href = ONBOARDING_URL;
+        window.location.href = DASHBOARD_URL;
       } else {
         window.location.href = DASHBOARD_URL;
       }
@@ -510,7 +510,7 @@
       // Redirect to onboarding to complete player profile
       showMsg('regMsg', '✅ Account created! Redirecting to your player setup...', 'success');
       setTimeout(() => {
-        window.location.href = ONBOARDING_URL;
+        window.location.href = DASHBOARD_URL;
       }, 1500);
     }
 
