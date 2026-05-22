@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to MATE — Talent Mates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #794DC6;
+      --purple-dk:    #6b42b5;
+      --purple-lt:    #7a50cc;
+      --white:        #ffffff;
+      --ink:          #1a0f2e;
+      --border:       rgba(255,255,255,0.10);
+      --border-mid:   rgba(255,255,255,0.20);
+      --border-strong:rgba(255,255,255,0.35);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.35);
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+      /* Make.com webhook URL — replace with your actual URL */
+      --webhook: '';
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(121,77,198,0.80);
+      backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .nav-brand strong { font-weight: 500; color: var(--t1); }
+    .nav-brand span   { color: var(--t3); }
+
+    .nav-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--t3);
+    }
+    .nav-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--white);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── PROGRESS ── */
+    .progress-wrap {
+      position: fixed;
+      top: 60px; left: 0; right: 0;
+      height: 2px;
+      background: var(--border);
+      z-index: 99;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--white);
+      transition: width 0.5s var(--ease);
+      width: 20%;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 24px 80px;
+    }
+
+    .onboarding-wrap {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* ── STEPS ── */
+    .step {
+      display: none;
+      animation: fadeUp 0.5s var(--ease) both;
+    }
+    .step.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STEP HEADER ── */
+    .step-label {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-label::before {
+      content: '';
+      display: block;
+      width: 20px; height: 0.5px;
+      background: rgba(255,255,255,0.3);
+    }
+
+    .step-title {
+      font-family: var(--font-d);
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .step-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .step-sub {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--t2);
+      line-height: 1.65;
+      margin-bottom: 40px;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-family: var(--font-b);
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder, textarea::placeholder { color: var(--t4); }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.08);
+    }
+    select option { background: #5a3aa0; color: #fff; }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Two column grid */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── LANGUAGE SELECTOR ── */
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    .lang-btn {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t2);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .lang-btn:hover { background: rgba(255,255,255,0.08); }
+    .lang-btn.selected {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.50);
+      color: var(--white);
+    }
+    .lang-flag { font-size: 22px; display: block; margin-bottom: 6px; }
+
+    /* ── POSITION SELECTOR ── */
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .pos-btn {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 10px 4px;
+      text-align: center;
+      cursor: pointer;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--t2);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .pos-btn:hover { background: rgba(255,255,255,0.08); }
+    .pos-btn.selected {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.50);
+      color: var(--white);
+    }
+
+    /* ── FOOT SELECTOR ── */
+    .foot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .foot-btn {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--t2);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .foot-btn.selected {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.50);
+      color: var(--white);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 36px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 15px 36px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover  { opacity: 0.88; transform: scale(1.02); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--t3);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 15px 28px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--t1); border-color: var(--border-strong); }
+
+    .step-counter {
+      font-size: 12px;
+      color: var(--t4);
+      margin-left: auto;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome-agent {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .agent-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .agent-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .agent-desc {
+      font-size: 13px;
+      color: var(--t3);
+      font-weight: 300;
+    }
+
+    /* ── SUCCESS SCREEN ── */
+    .success-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 28px;
+    }
+
+    /* ── LOADING ── */
+    .loading-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .loading-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--purple);
+      animation: dot-bounce 1.2s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot-bounce {
+      0%,80%,100% { transform: scale(0.6); opacity:0.5; }
+      40%          { transform: scale(1);   opacity:1; }
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 100%;
+      height: 0.5px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent);
+      margin: 28px 0;
+    }
+
+    /* ── ERROR ── */
+    .field-error {
+      font-size: 12px;
+      color: rgba(255,120,120,0.9);
+      margin-top: 6px;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      nav { padding: 18px 24px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .position-grid { grid-template-columns: repeat(3, 1fr); }
+      .lang-grid { grid-template-columns: repeat(2, 1fr); }
+      .btn-row { flex-direction: column; align-items: stretch; }
+      .step-counter { margin-left: 0; text-align: center; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">
+      <strong>Talent</strong> <span>Mates</span>
+    </div>
+    <div class="nav-badge">
+      <div class="nav-dot"></div>
+      MATE AI — Onboarding
+    </div>
+  </nav>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- MAIN -->
+  <main>
+    <div class="onboarding-wrap">
+
+      <!-- ══ STEP 1: WELCOME ══ -->
+      <div class="step active" id="step-1">
+        <div class="step-label">Welcome</div>
+        <h1 class="step-title">Your personal<br>football agent, <em>powered by AI.</em></h1>
+        <p class="step-sub">MATE learns everything about your career and gives you expert advice on contracts, training, transfers, and life — anytime, in your language.</p>
+
+        <div class="welcome-agent">
+          <div class="agent-avatar">⚽</div>
+          <div>
+            <div class="agent-name">MATE — Talent Mates AI Engine</div>
+            <div class="agent-desc">4 specialists: Legal · Coach · Analyst · Concierge</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Your preferred language</label>
+          <div class="lang-grid">
+            <button class="lang-btn selected" data-lang="en" onclick="selectLang(this)">
+              <span class="lang-flag">🇬🇧</span>English
+            </button>
+            <button class="lang-btn" data-lang="uk" onclick="selectLang(this)">
+              <span class="lang-flag">🇺🇦</span>Українська
+            </button>
+            <button class="lang-btn" data-lang="es" onclick="selectLang(this)">
+              <span class="lang-flag">🇪🇸</span>Español
+            </button>
+            <button class="lang-btn" data-lang="it" onclick="selectLang(this)">
+              <span class="lang-flag">🇮🇹</span>Italiano
+            </button>
+            <button class="lang-btn" data-lang="pl" onclick="selectLang(this)">
+              <span class="lang-flag">🇵🇱</span>Polski
+            </button>
+            <button class="lang-btn" data-lang="de" onclick="selectLang(this)">
+              <span class="lang-flag">🇩🇪</span>Deutsch
+            </button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" onclick="goTo(2)">Get Started →</button>
+          <span class="step-counter">Step 1 of 5</span>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: IDENTITY ══ -->
+      <div class="step" id="step-2">
+        <div class="step-label">About You</div>
+        <h1 class="step-title">Let's build<br>your <em>profile.</em></h1>
+        <p class="step-sub">MATE uses this to personalise every piece of advice to your specific situation.</p>
+
+        <div class="field-grid">
+          <div class="field">
+            <label>Full Name *</label>
+            <input type="text" id="full_name" placeholder="John Smith" />
+          </div>
+          <div class="field">
+            <label>Date of Birth *</label>
+            <input type="date" id="date_of_birth" />
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label>Nationality *</label>
+            <input type="text" id="nationality" placeholder="Ukrainian" />
+          </div>
+          <div class="field">
+            <label>Second Nationality</label>
+            <input type="text" id="second_nationality" placeholder="British (if applicable)" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email Address *</label>
+          <input type="email" id="email" placeholder="your@email.com" />
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="goTo(1)">← Back</button>
+          <button class="btn-primary" onclick="validateStep2()">Continue →</button>
+          <span class="step-counter">Step 2 of 5</span>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: FOOTBALL PROFILE ══ -->
+      <div class="step" id="step-3">
+        <div class="step-label">Football Profile</div>
+        <h1 class="step-title">Your position<br>and <em>club.</em></h1>
+        <p class="step-sub">This helps MATE give you position-specific training and club-relevant contract advice.</p>
+
+        <div class="field">
+          <label>Primary Position *</label>
+          <div class="position-grid" id="positionGrid">
+            <button class="pos-btn" data-pos="Goalkeeper" onclick="selectPos(this)">GK</button>
+            <button class="pos-btn" data-pos="Centre Back" onclick="selectPos(this)">CB</button>
+            <button class="pos-btn" data-pos="Right Back" onclick="selectPos(this)">RB</button>
+            <button class="pos-btn" data-pos="Left Back" onclick="selectPos(this)">LB</button>
+            <button class="pos-btn" data-pos="Defensive Midfielder" onclick="selectPos(this)">DM</button>
+            <button class="pos-btn" data-pos="Central Midfielder" onclick="selectPos(this)">CM</button>
+            <button class="pos-btn" data-pos="Attacking Midfielder" onclick="selectPos(this)">AM</button>
+            <button class="pos-btn" data-pos="Right Winger" onclick="selectPos(this)">RW</button>
+            <button class="pos-btn" data-pos="Left Winger" onclick="selectPos(this)">LW</button>
+            <button class="pos-btn" data-pos="Striker" onclick="selectPos(this)">ST</button>
+            <button class="pos-btn" data-pos="Centre Forward" onclick="selectPos(this)">CF</button>
+            <button class="pos-btn" data-pos="Wing Back" onclick="selectPos(this)">WB</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Dominant Foot *</label>
+          <div class="foot-grid">
+            <button class="foot-btn" data-foot="Right" onclick="selectFoot(this)">Right ⚽</button>
+            <button class="foot-btn" data-foot="Left"  onclick="selectFoot(this)">Left ⚽</button>
+            <button class="foot-btn" data-foot="Both"  onclick="selectFoot(this)">Both ⚽</button>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label>Height (cm)</label>
+            <input type="number" id="height_cm" placeholder="182" min="140" max="220" />
+          </div>
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight_kg" placeholder="76" min="50" max="120" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="goTo(2)">← Back</button>
+          <button class="btn-primary" onclick="validateStep3()">Continue →</button>
+          <span class="step-counter">Step 3 of 5</span>
+        </div>
+      </div>
+
+      <!-- ══ STEP 4: CURRENT SITUATION ══ -->
+      <div class="step" id="step-4">
+        <div class="step-label">Current Situation</div>
+        <h1 class="step-title">Your club<br>and <em>contract.</em></h1>
+        <p class="step-sub">MATE needs to know your current situation to advise on your next move.</p>
+
+        <div class="field">
+          <label>Current Club</label>
+          <input type="text" id="current_club" placeholder="Slough Town FC" />
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label>Current League</label>
+            <input type="text" id="current_league" placeholder="EFL Trophy / Isthmian Premier" />
+          </div>
+          <div class="field">
+            <label>Country</label>
+            <input type="text" id="current_country" placeholder="England" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Contract Expires</label>
+          <input type="date" id="contract_expires" />
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Agent Name (if you have one)</label>
+          <input type="text" id="agent_name" placeholder="Agent full name" />
+        </div>
+
+        <div class="field">
+          <label>Where do you want to play next? (countries)</label>
+          <input type="text" id="preferred_countries" placeholder="England, Italy, Ukraine..." />
+        </div>
+
+        <div class="field">
+          <label>Languages you speak</label>
+          <input type="text" id="languages" placeholder="Ukrainian, English, Italian..." />
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="goTo(3)">← Back</button>
+          <button class="btn-primary" onclick="goTo(5)">Continue →</button>
+          <span class="step-counter">Step 4 of 5</span>
+        </div>
+      </div>
+
+      <!-- ══ STEP 5: GOALS + SUBMIT ══ -->
+      <div class="step" id="step-5">
+        <div class="step-label">Your Goals</div>
+        <h1 class="step-title">What do you<br>want to <em>achieve?</em></h1>
+        <p class="step-sub">Tell MATE what matters most to you. The more you share, the better the advice.</p>
+
+        <div class="field">
+          <label>Your main goal right now</label>
+          <select id="main_goal">
+            <option value="">Select your priority...</option>
+            <option value="get_professional_contract">Get my first professional contract</option>
+            <option value="move_to_bigger_club">Move to a bigger club</option>
+            <option value="go_abroad">Play abroad (international move)</option>
+            <option value="review_current_contract">Review / negotiate my current contract</option>
+            <option value="return_from_injury">Return from injury</option>
+            <option value="improve_performance">Improve my performance data</option>
+            <option value="family_relocation">Manage family relocation</option>
+            <option value="understand_agent_fees">Understand my agent fees</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Anything else MATE should know about you?</label>
+          <textarea id="extra_context" placeholder="E.g. I'm 19, Ukrainian, playing U19 at Slough Town. I have Cagliari Academy experience. Looking for a League One opportunity this summer..." rows="4"></textarea>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="background: rgba(255,255,255,0.04); border: 0.5px solid var(--border-mid); border-radius: 14px; padding: 18px 20px; margin-bottom: 8px;">
+          <div style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Your MATE profile will include:</div>
+          <div style="font-size: 12px; color: var(--t3); line-height: 1.8;">
+            ⚖️ FIFA Legal Advisor — contracts, fees, regulations<br>
+            🏋️ Performance Coach — training, fitness, recovery<br>
+            📊 Transfer Analyst — market value, club fit, intel<br>
+            🏠 Concierge — travel, relocation, daily life
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="goTo(4)">← Back</button>
+          <button class="btn-primary" id="submitBtn" onclick="submitProfile()">Activate MATE →</button>
+          <span class="step-counter">Step 5 of 5</span>
+        </div>
+      </div>
+
+      <!-- ══ STEP SUCCESS ══ -->
+      <div class="step" id="step-success">
+        <div class="success-icon">✅</div>
+        <div class="step-label">Ready</div>
+        <h1 class="step-title">MATE is<br><em>activated.</em></h1>
+        <p class="step-sub">Your profile has been saved. Your personal AI football agent is ready. Let's get to work.</p>
+
+        <div class="welcome-agent">
+          <div class="agent-avatar">⚽</div>
+          <div>
+            <div class="agent-name" id="successName">Welcome, Player.</div>
+            <div class="agent-desc">MATE is ready for your first question.</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" onclick="window.location.href='/mate-chat.html'">Open MATE Chat →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP ERROR ══ -->
+      <div class="step" id="step-error">
+        <div class="success-icon" style="font-size:28px;">⚠️</div>
+        <div class="step-label">Error</div>
+        <h1 class="step-title">Something<br>went <em>wrong.</em></h1>
+        <p class="step-sub" id="errorMessage">We couldn't save your profile. Please try again.</p>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="goTo(5)">← Try Again</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ── STATE ──
+    const state = {
+      currentStep: 1,
+      totalSteps: 5,
+      language: 'en',
+      position: '',
+      foot: '',
+      // Make.com Scenario 1 webhook — replace with your URL
+      webhookUrl: 'https://hook.eu1.make.com/w1nvg4sx255c3s1g34ugmqfbr47fbgdp'
+    };
+
+    // ── PROGRESS ──
+    function updateProgress(step) {
+      const pct = (step / state.totalSteps) * 100;
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    // ── NAVIGATION ──
+    function goTo(step) {
+      document.getElementById('step-' + state.currentStep).classList.remove('active');
+      const target = document.getElementById('step-' + step) ||
+                     document.getElementById('step-success') ||
+                     document.getElementById('step-error');
+
+      if (step === 'success') {
+        document.getElementById('step-success').classList.add('active');
+        document.getElementById('progressBar').style.width = '100%';
+      } else if (step === 'error') {
+        document.getElementById('step-error').classList.add('active');
+      } else {
+        document.getElementById('step-' + step).classList.add('active');
+        state.currentStep = step;
+        updateProgress(step);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── LANGUAGE SELECT ──
+    function selectLang(btn) {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.language = btn.dataset.lang;
+    }
+
+    // ── POSITION SELECT ──
+    function selectPos(btn) {
+      document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.position = btn.dataset.pos;
+    }
+
+    // ── FOOT SELECT ──
+    function selectFoot(btn) {
+      document.querySelectorAll('.foot-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.foot = btn.dataset.foot;
+    }
+
+    // ── VALIDATE STEP 2 ──
+    function validateStep2() {
+      const name = document.getElementById('full_name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const dob = document.getElementById('date_of_birth').value;
+
+      if (!name) { showFieldError('full_name', 'Please enter your full name.'); return; }
+      if (!email || !email.includes('@')) { showFieldError('email', 'Please enter a valid email.'); return; }
+
+      goTo(3);
+    }
+
+    // ── VALIDATE STEP 3 ──
+    function validateStep3() {
+      if (!state.position) {
+        alert('Please select your position.'); return;
+      }
+      if (!state.foot) {
+        alert('Please select your dominant foot.'); return;
+      }
+      goTo(4);
+    }
+
+    // ── FIELD ERROR ──
+    function showFieldError(fieldId, msg) {
+      const field = document.getElementById(fieldId);
+      field.style.borderColor = 'rgba(255,100,100,0.6)';
+      let err = field.parentElement.querySelector('.field-error');
+      if (!err) {
+        err = document.createElement('div');
+        err.className = 'field-error';
+        field.parentElement.appendChild(err);
+      }
+      err.textContent = msg;
+      field.focus();
+      setTimeout(() => {
+        field.style.borderColor = '';
+        if (err) err.remove();
+      }, 3000);
+    }
+
+    // ── SUBMIT ──
+    async function submitProfile() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span style="display:flex;align-items:center;gap:8px;justify-content:center"><span class="loading-dots"><span></span><span></span><span></span></span> Activating...</span>';
+
+      // Build payload
+      const payload = {
+        full_name:           document.getElementById('full_name').value.trim(),
+        email:               document.getElementById('email').value.trim(),
+        date_of_birth:       document.getElementById('date_of_birth').value || null,
+        nationality:         document.getElementById('nationality').value.trim(),
+        second_nationality:  document.getElementById('second_nationality').value.trim() || null,
+        position_primary:    state.position,
+        dominant_foot:       state.foot,
+        height_cm:           parseInt(document.getElementById('height_cm').value) || null,
+        weight_kg:           parseInt(document.getElementById('weight_kg').value) || null,
+        current_club:        document.getElementById('current_club').value.trim() || null,
+        current_league:      document.getElementById('current_league').value.trim() || null,
+        current_country:     document.getElementById('current_country').value.trim() || null,
+        contract_expires:    document.getElementById('contract_expires').value || null,
+        agent_name:          document.getElementById('agent_name').value.trim() || null,
+        preferred_countries: document.getElementById('preferred_countries').value
+                               .split(',').map(s => s.trim()).filter(Boolean),
+        languages:           document.getElementById('languages').value
+                               .split(',').map(s => s.trim()).filter(Boolean),
+        language_preference: state.language,
+        main_goal:           document.getElementById('main_goal').value || null,
+        extra_context:       document.getElementById('extra_context').value.trim() || null,
+        onboarding_complete: true,
+        created_at:          new Date().toISOString(),
+        source:              'mate_onboarding_v1'
+      };
+
+      try {
+        const res = await fetch(state.webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok || res.status === 200) {
+          // Success
+          document.getElementById('successName').textContent =
+            'Welcome, ' + payload.full_name.split(' ')[0] + '.';
+          goTo('success');
+        } else {
+          throw new Error('Webhook returned ' + res.status);
+        }
+      } catch (err) {
+        console.error('MATE onboarding error:', err);
+        document.getElementById('errorMessage').textContent =
+          'Connection error: ' + (err.message || 'Please try again.');
+        goTo('error');
+      }
+    }
+
+    // ── INIT ──
+    updateProgress(1);
+  </script>
+
+</body>
+</html>
