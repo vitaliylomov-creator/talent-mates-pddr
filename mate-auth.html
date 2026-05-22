@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to MATE — Your personal AI football agent" />
+  <title>Sign In — MATE AI — Talent Mates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:        #794DC6;
+      --purple-dk:     #6b42b5;
+      --white:         #ffffff;
+      --border:        rgba(255,255,255,0.10);
+      --border-mid:    rgba(255,255,255,0.20);
+      --border-strong: rgba(255,255,255,0.35);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.35);
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 0.5px solid var(--border);
+      background: rgba(121,77,198,0.80);
+      backdrop-filter: blur(20px);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .brand strong { font-weight: 500; color: var(--t1); }
+    .brand span   { color: var(--t3); }
+
+    .nav-back {
+      font-size: 13px;
+      color: var(--t3);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--t1); }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 60px;
+    }
+
+    .auth-wrap {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.5s var(--ease) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HEADER ── */
+    .auth-label {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .auth-label::before {
+      content: '';
+      display: block;
+      width: 20px; height: 0.5px;
+      background: rgba(255,255,255,0.3);
+    }
+
+    .auth-title {
+      font-family: var(--font-d);
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .auth-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .auth-sub {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--t3);
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t3);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      border: none;
+      background: transparent;
+      font-family: var(--font-b);
+    }
+    .tab.active {
+      background: rgba(255,255,255,0.10);
+      color: var(--t1);
+    }
+
+    /* ── FORM ── */
+    .form { display: flex; flex-direction: column; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+
+    label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t3);
+    }
+
+    input {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-family: var(--font-b);
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      width: 100%;
+    }
+    input::placeholder { color: var(--t4); }
+    input:focus {
+      border-color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 15px 36px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .btn-primary:hover  { opacity: 0.88; transform: scale(1.01); }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--t4);
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--border-mid);
+    }
+
+    /* ── GOOGLE BTN ── */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 13px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--t2);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      width: 100%;
+    }
+    .btn-google:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: var(--border-strong);
+    }
+
+    /* ── MESSAGE ── */
+    .msg {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 300;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .msg.error {
+      display: block;
+      background: rgba(255,80,80,0.10);
+      border: 0.5px solid rgba(255,100,100,0.30);
+      color: rgba(255,150,150,0.95);
+    }
+    .msg.success {
+      display: block;
+      background: rgba(80,220,130,0.10);
+      border: 0.5px solid rgba(80,220,130,0.30);
+      color: rgba(100,220,150,0.95);
+    }
+
+    /* ── FOOTER NOTE ── */
+    .auth-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--t4);
+      margin-top: 24px;
+      line-height: 1.6;
+    }
+    .auth-note a {
+      color: var(--t3);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .auth-note a:hover { color: var(--t1); }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(121,77,198,0.3);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      nav { padding: 18px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="brand"><strong>Talent</strong> <span>Mates</span></div>
+    <a class="nav-back" href="https://talent-mates.com">← Back to site</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+    <div class="auth-wrap">
+
+      <div class="auth-label">MATE AI</div>
+      <h1 class="auth-title">Your football agent,<br><em>always on.</em></h1>
+      <p class="auth-sub" id="authSub">Sign in to access your personal AI football agent.</p>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" id="tabSignin" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <!-- SIGN IN FORM -->
+      <div id="formSignin">
+        <div class="form">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="signinEmail" placeholder="your@email.com" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="signinPassword" placeholder="Your password" autocomplete="current-password"
+              onkeydown="if(event.key==='Enter') signIn()" />
+          </div>
+          <div id="signinMsg" class="msg"></div>
+          <button class="btn-primary" id="signinBtn" onclick="signIn()">Sign In →</button>
+        </div>
+
+        <div class="divider">or</div>
+
+        <button class="btn-google" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+
+        <p class="auth-note">
+          Forgot your password? <a href="#" onclick="resetPassword()">Reset it</a><br>
+          Don't have an account? <a href="#" onclick="switchTab('register')">Create one →</a>
+        </p>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="formRegister" style="display:none;">
+        <div class="form">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="regName" placeholder="John Smith" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="regEmail" placeholder="your@email.com" autocomplete="email" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="Min. 8 characters" autocomplete="new-password"
+              onkeydown="if(event.key==='Enter') register()" />
+          </div>
+          <div id="regMsg" class="msg"></div>
+          <button class="btn-primary" id="regBtn" onclick="register()">Create Account →</button>
+        </div>
+
+        <div class="divider">or</div>
+
+        <button class="btn-google" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+
+        <p class="auth-note">
+          Already have an account? <a href="#" onclick="switchTab('signin')">Sign in →</a><br>
+          By creating an account you agree to our <a href="https://talent-mates.com/privacy">Privacy Policy</a>.
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ══════════════════════════════════════════
+    // SUPABASE CONFIG
+    // Replace with your actual values
+    // ══════════════════════════════════════════
+    const SUPABASE_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+
+    // Dashboard URL (GitHub Pages)
+    const DASHBOARD_URL = 'mate-dashboard-v2.html';
+    const ONBOARDING_URL = 'mate-onboarding.html';
+
+    // Init Supabase client
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ── CHECK IF ALREADY LOGGED IN ──
+    async function checkSession() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        window.location.href = DASHBOARD_URL;
+      }
+    }
+    checkSession();
+
+    // ── SWITCH TAB ──
+    function switchTab(tab) {
+      const isSignin = tab === 'signin';
+      document.getElementById('tabSignin').classList.toggle('active', isSignin);
+      document.getElementById('tabRegister').classList.toggle('active', !isSignin);
+      document.getElementById('formSignin').style.display = isSignin ? 'block' : 'none';
+      document.getElementById('formRegister').style.display = isSignin ? 'none' : 'block';
+      document.getElementById('authSub').textContent = isSignin
+        ? 'Sign in to access your personal AI football agent.'
+        : 'Create your free MATE account and start your AI-powered career journey.';
+    }
+
+    // ── SHOW MESSAGE ──
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'msg ' + type;
+    }
+
+    // ── SIGN IN ──
+    async function signIn() {
+      const email = document.getElementById('signinEmail').value.trim();
+      const password = document.getElementById('signinPassword').value;
+      const btn = document.getElementById('signinBtn');
+
+      if (!email || !password) {
+        showMsg('signinMsg', 'Please enter your email and password.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Signing in...';
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showMsg('signinMsg', error.message || 'Sign in failed. Please check your credentials.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Sign In →';
+        return;
+      }
+
+      // Check if player profile exists
+      const { data: profile } = await sb.from('players')
+        .select('id, onboarding_complete')
+        .eq('auth_user_id', data.user.id)
+        .single();
+
+      if (!profile || !profile.onboarding_complete) {
+        window.location.href = ONBOARDING_URL;
+      } else {
+        window.location.href = DASHBOARD_URL;
+      }
+    }
+
+    // ── REGISTER ──
+    async function register() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const btn = document.getElementById('regBtn');
+
+      if (!name) { showMsg('regMsg', 'Please enter your full name.', 'error'); return; }
+      if (!email || !email.includes('@')) { showMsg('regMsg', 'Please enter a valid email.', 'error'); return; }
+      if (password.length < 8) { showMsg('regMsg', 'Password must be at least 8 characters.', 'error'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name }
+        }
+      });
+
+      if (error) {
+        showMsg('regMsg', error.message || 'Registration failed. Please try again.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Create Account →';
+        return;
+      }
+
+      // Redirect to onboarding to complete player profile
+      showMsg('regMsg', '✅ Account created! Redirecting to your player setup...', 'success');
+      setTimeout(() => {
+        window.location.href = ONBOARDING_URL;
+      }, 1500);
+    }
+
+    // ── GOOGLE SIGN IN ──
+    async function signInGoogle() {
+      await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/' + DASHBOARD_URL
+        }
+      });
+    }
+
+    // ── RESET PASSWORD ──
+    async function resetPassword() {
+      const email = document.getElementById('signinEmail').value.trim();
+      if (!email) {
+        showMsg('signinMsg', 'Enter your email address above first.', 'error');
+        return;
+      }
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/mate-reset.html'
+      });
+      if (error) {
+        showMsg('signinMsg', error.message, 'error');
+      } else {
+        showMsg('signinMsg', '✅ Password reset email sent. Check your inbox.', 'success');
+      }
+    }
+  </script>
+
+</body>
+</html>
