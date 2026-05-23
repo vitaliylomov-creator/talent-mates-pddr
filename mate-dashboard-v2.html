@@ -29,9 +29,6 @@
       --font-d: 'DM Serif Display', Georgia, serif;
       --font-b: 'DM Sans', system-ui, sans-serif;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
-
-      /* MATE AI Webhook — Scenario 2 */
-      --webhook: 'https://hook.eu1.make.com/mv3l1p2s3cs3w07t4b538u378iyeo45n';
     }
 
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
@@ -55,7 +52,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 32px;
+      padding: 14px 32px;
       background: rgba(107,66,181,0.90);
       backdrop-filter: blur(20px);
       border-bottom: 0.5px solid var(--border);
@@ -64,26 +61,17 @@
       z-index: 100;
     }
 
-    .topbar-left {
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+
+    /* Logo link */
+    .brand-link {
       display: flex;
       align-items: center;
-      gap: 16px;
+      text-decoration: none;
     }
+    .brand-link img { height: 32px; width: auto; display: block; }
 
-    .brand {
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-    }
-    .brand strong { font-weight: 500; color: var(--t1); }
-    .brand span   { color: var(--t3); }
-
-    .brand-sep {
-      width: 0.5px;
-      height: 14px;
-      background: var(--border-mid);
-    }
+    .brand-sep { width: 0.5px; height: 14px; background: var(--border-mid); }
 
     .topbar-badge {
       display: flex;
@@ -102,11 +90,7 @@
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
 
     .player-avatar {
       width: 34px; height: 34px;
@@ -119,11 +103,23 @@
       font-size: 14px;
     }
 
-    .player-name-small {
-      font-size: 13px;
+    .player-name-small { font-size: 13px; font-weight: 400; color: var(--t2); }
+
+    /* Sign out button */
+    .btn-signout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 7px 14px;
+      font-size: 12px;
       font-weight: 400;
-      color: var(--t2);
+      color: var(--t3);
+      transition: background 0.2s, color 0.2s;
     }
+    .btn-signout:hover { background: rgba(255,255,255,0.12); color: var(--t1); }
 
     /* ══ SIDEBAR ══ */
     .sidebar {
@@ -136,10 +132,7 @@
       overflow-y: auto;
     }
 
-    .sidebar-section {
-      padding: 0 16px;
-      margin-bottom: 8px;
-    }
+    .sidebar-section { padding: 0 16px; margin-bottom: 8px; }
 
     .sidebar-label {
       font-size: 10px;
@@ -165,19 +158,11 @@
       text-align: left;
     }
     .nav-item:hover { background: rgba(255,255,255,0.06); color: var(--t1); }
-    .nav-item.active {
-      background: rgba(255,255,255,0.10);
-      color: var(--t1);
-    }
+    .nav-item.active { background: rgba(255,255,255,0.10); color: var(--t1); }
     .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-    .sidebar-divider {
-      height: 0.5px;
-      background: var(--border);
-      margin: 8px 16px;
-    }
+    .sidebar-divider { height: 0.5px; background: var(--border); margin: 8px 16px; }
 
-    /* Player card in sidebar */
     .player-card {
       margin: 0 16px 16px;
       background: rgba(255,255,255,0.06);
@@ -195,22 +180,9 @@
       font-size: 20px;
       margin-bottom: 10px;
     }
-    .player-card-name {
-      font-family: var(--font-d);
-      font-size: 16px;
-      font-weight: 400;
-      margin-bottom: 2px;
-    }
-    .player-card-club {
-      font-size: 12px;
-      color: var(--t3);
-      margin-bottom: 10px;
-    }
-    .player-card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
+    .player-card-name { font-family: var(--font-d); font-size: 16px; font-weight: 400; margin-bottom: 2px; }
+    .player-card-club { font-size: 12px; color: var(--t3); margin-bottom: 10px; }
+    .player-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag {
       background: rgba(255,255,255,0.08);
       border: 0.5px solid var(--border-mid);
@@ -221,14 +193,9 @@
       color: var(--t2);
     }
 
-    /* ══ MAIN CONTENT ══ */
-    .main {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* ══ MAIN ══ */
+    .main { display: flex; flex-direction: column; overflow: hidden; }
 
-    /* ══ PANELS ══ */
     .panel {
       display: none;
       flex: 1;
@@ -238,15 +205,9 @@
     .panel.active { display: flex; flex-direction: column; gap: 24px; }
 
     /* ══ CHAT PANEL ══ */
-    .chat-panel {
-      display: none;
-      flex: 1;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .chat-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
     .chat-panel.active { display: flex; }
 
-    /* Agent selector */
     .agent-bar {
       display: flex;
       gap: 8px;
@@ -281,7 +242,6 @@
       color: var(--t1);
     }
 
-    /* Messages */
     .messages {
       flex: 1;
       overflow-y: auto;
@@ -293,12 +253,7 @@
       scrollbar-color: rgba(255,255,255,0.15) transparent;
     }
 
-    .msg-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      animation: fadeUp 0.3s var(--ease) both;
-    }
+    .msg-wrap { display: flex; flex-direction: column; gap: 4px; animation: fadeUp 0.3s var(--ease) both; }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -313,9 +268,6 @@
       text-transform: uppercase;
       color: var(--t4);
       padding: 0 4px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
     }
 
     .msg-bubble {
@@ -340,12 +292,25 @@
       border-radius: 4px 14px 14px 14px;
     }
 
-    /* Typing indicator */
-    .typing-wrap {
-      display: none;
-      align-items: flex-start;
-      gap: 8px;
+    /* File attachment bubble */
+    .msg-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--t2);
+      max-width: 320px;
     }
+    .msg-file-icon { font-size: 18px; flex-shrink: 0; }
+    .msg-file-name { font-weight: 400; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .msg-file-size { font-size: 11px; color: var(--t4); }
+
+    /* Typing */
+    .typing-wrap { display: none; align-items: flex-start; gap: 8px; }
     .typing-wrap.visible { display: flex; }
     .typing-bubble {
       background: rgba(107,66,181,0.60);
@@ -371,13 +336,56 @@
 
     /* Input area */
     .input-area {
-      padding: 16px 24px;
+      padding: 12px 24px 16px;
       border-top: 0.5px solid var(--border);
       background: rgba(107,66,181,0.30);
       display: flex;
-      gap: 12px;
-      align-items: flex-end;
+      flex-direction: column;
+      gap: 8px;
     }
+
+    /* File preview in input */
+    .file-preview {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--t2);
+    }
+    .file-preview.visible { display: flex; }
+    .file-preview-name { flex: 1; font-weight: 400; color: var(--t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-preview-remove {
+      background: none;
+      border: none;
+      color: var(--t4);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0 2px;
+      transition: color 0.2s;
+    }
+    .file-preview-remove:hover { color: var(--t1); }
+
+    .input-row { display: flex; gap: 10px; align-items: flex-end; }
+
+    /* Attach button */
+    .attach-btn {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      color: var(--t3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .attach-btn:hover { background: rgba(255,255,255,0.12); color: var(--t1); }
 
     .chat-input {
       flex: 1;
@@ -417,7 +425,10 @@
     .send-btn:active { transform: scale(0.96); }
     .send-btn:disabled { opacity: 0.35; }
 
-    /* ══ OVERVIEW PANEL ══ */
+    /* Hidden file input */
+    #fileInput { display: none; }
+
+    /* ══ PANELS ══ */
     .section-title {
       font-family: var(--font-d);
       font-size: clamp(24px, 3vw, 36px);
@@ -425,24 +436,11 @@
       letter-spacing: -0.02em;
       margin-bottom: 4px;
     }
-    .section-title em {
-      font-style: italic;
-      color: rgba(255,255,255,0.45);
-    }
+    .section-title em { font-style: italic; color: rgba(255,255,255,0.45); }
 
-    .section-sub {
-      font-size: 14px;
-      font-weight: 300;
-      color: var(--t3);
-      margin-bottom: 24px;
-    }
+    .section-sub { font-size: 14px; font-weight: 300; color: var(--t3); margin-bottom: 24px; }
 
-    /* Stats row */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
     .stat-card {
       background: rgba(255,255,255,0.04);
@@ -453,31 +451,11 @@
     }
     .stat-card:hover { background: rgba(255,255,255,0.07); }
 
-    .stat-label {
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--t4);
-      margin-bottom: 8px;
-    }
-    .stat-value {
-      font-family: var(--font-d);
-      font-size: 28px;
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      margin-bottom: 4px;
-    }
-    .stat-note {
-      font-size: 12px;
-      color: var(--t3);
-    }
+    .stat-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--t4); margin-bottom: 8px; }
+    .stat-value { font-family: var(--font-d); font-size: 28px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .stat-note { font-size: 12px; color: var(--t3); }
 
-    /* Quick actions */
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
+    .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
     .action-card {
       background: rgba(255,255,255,0.04);
@@ -490,10 +468,7 @@
       gap: 16px;
       align-items: flex-start;
     }
-    .action-card:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: var(--border-mid);
-    }
+    .action-card:hover { background: rgba(255,255,255,0.08); border-color: var(--border-mid); }
 
     .action-icon {
       width: 42px; height: 42px;
@@ -505,20 +480,9 @@
       font-size: 20px;
       flex-shrink: 0;
     }
+    .action-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+    .action-desc { font-size: 12px; color: var(--t3); font-weight: 300; line-height: 1.5; }
 
-    .action-title {
-      font-size: 15px;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-    .action-desc {
-      font-size: 12px;
-      color: var(--t3);
-      font-weight: 300;
-      line-height: 1.5;
-    }
-
-    /* Recent activity */
     .activity-list {
       display: flex;
       flex-direction: column;
@@ -527,7 +491,6 @@
       border-radius: 14px;
       overflow: hidden;
     }
-
     .activity-item {
       background: var(--purple);
       padding: 14px 18px;
@@ -537,7 +500,6 @@
       transition: background 0.2s;
     }
     .activity-item:hover { background: rgba(255,255,255,0.04); }
-
     .activity-icon {
       width: 34px; height: 34px;
       border-radius: 8px;
@@ -548,103 +510,43 @@
       font-size: 15px;
       flex-shrink: 0;
     }
-    .activity-text {
-      flex: 1;
-      font-size: 13px;
-      color: var(--t2);
-    }
+    .activity-text { flex: 1; font-size: 13px; color: var(--t2); }
     .activity-text strong { color: var(--t1); font-weight: 500; }
-    .activity-time {
-      font-size: 11px;
-      color: var(--t4);
-    }
+    .activity-time { font-size: 11px; color: var(--t4); }
 
-    /* Section header */
-    .panel-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .panel-header-title {
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-    }
-    .panel-header-action {
-      font-size: 12px;
-      color: var(--t3);
-      cursor: pointer;
-      transition: color 0.2s;
-    }
+    .panel-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+    .panel-header-title { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+    .panel-header-action { font-size: 12px; color: var(--t3); cursor: pointer; transition: color 0.2s; }
     .panel-header-action:hover { color: var(--t1); }
 
-    /* Contract status card */
     .contract-card {
       background: rgba(255,255,255,0.04);
       border: 0.5px solid var(--border);
       border-radius: 16px;
       padding: 22px;
     }
-    .contract-expires {
-      font-family: var(--font-d);
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-    .contract-bar-wrap {
-      margin: 14px 0 8px;
-      height: 3px;
-      background: rgba(255,255,255,0.10);
-      border-radius: 100px;
-      overflow: hidden;
-    }
-    .contract-bar {
-      height: 100%;
-      border-radius: 100px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9));
-      width: 30%; /* months remaining / contract length */
-      transition: width 1s var(--ease);
-    }
-    .contract-warning {
-      font-size: 12px;
-      color: rgba(255,190,60,0.9);
-    }
+    .contract-expires { font-family: var(--font-d); font-size: 22px; margin-bottom: 4px; }
+    .contract-bar-wrap { margin: 14px 0 8px; height: 3px; background: rgba(255,255,255,0.10); border-radius: 100px; overflow: hidden; }
+    .contract-bar { height: 100%; border-radius: 100px; background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9)); width: 30%; transition: width 1s var(--ease); }
+    .contract-warning { font-size: 12px; color: rgba(255,190,60,0.9); }
 
-    /* Divider */
-    .divider {
-      height: 0.5px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent);
-    }
+    .divider { height: 0.5px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent); }
 
     /* ══ MOBILE ══ */
     @media (max-width: 960px) {
-      body {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto 1fr;
-      }
-      .sidebar {
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 12px 16px;
-        gap: 6px;
-        border-right: none;
-        border-bottom: 0.5px solid var(--border);
-        scrollbar-width: none;
-      }
+      body { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+      .sidebar { flex-direction: row; overflow-x: auto; padding: 12px 16px; gap: 6px; border-right: none; border-bottom: 0.5px solid var(--border); scrollbar-width: none; }
       .sidebar::-webkit-scrollbar { display: none; }
       .sidebar-section { display: none; }
       .player-card { display: none; }
       .sidebar-label { display: none; }
       .sidebar-divider { display: none; }
-      .nav-item {
-        white-space: nowrap;
-        padding: 8px 14px;
-        font-size: 13px;
-      }
+      .nav-item { white-space: nowrap; padding: 8px 14px; font-size: 13px; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .quick-actions { grid-template-columns: 1fr; }
       .msg-bubble { max-width: 88%; }
       .panel { padding: 20px; }
+      .btn-signout span { display: none; }
     }
   </style>
 </head>
@@ -653,7 +555,13 @@
   <!-- ══ TOPBAR ══ -->
   <header class="topbar">
     <div class="topbar-left">
-      <div class="brand"><strong>Talent</strong> <span>Mates</span></div>
+      <!-- Logo linked to talent-mates.com -->
+      <a class="brand-link" href="https://talent-mates.com" target="_blank" title="Talent Mates">
+        <svg height="32" viewBox="0 0 2079 1276" xmlns="http://www.w3.org/2000/svg" style="width:auto;">
+          <text x="60" y="900" font-family="'DM Serif Display', Georgia, serif" font-size="900" fill="white" font-weight="400">TM</text>
+          <text x="420" y="1100" font-family="'DM Sans', system-ui, sans-serif" font-size="280" fill="white" font-weight="300" letter-spacing="60">TALENT MATES</text>
+        </svg>
+      </a>
       <div class="brand-sep"></div>
       <div class="topbar-badge">
         <div class="pulse-dot"></div>
@@ -661,23 +569,28 @@
       </div>
     </div>
     <div class="topbar-right">
-      <div class="player-name-small" id="topPlayerName">Yehor Lomov</div>
+      <div class="player-name-small" id="topPlayerName">Loading...</div>
       <div class="player-avatar">⚽</div>
+      <button class="btn-signout" onclick="signOut()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5M9 10l3-3-3-3M12 7H5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Sign out</span>
+      </button>
     </div>
   </header>
 
   <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar">
 
-    <!-- Player card -->
     <div class="player-card">
       <div class="player-card-avatar">⚽</div>
-      <div class="player-card-name" id="sidePlayerName">Yehor Lomov</div>
-      <div class="player-card-club" id="sidePlayerClub">Slough Town FC · U19</div>
+      <div class="player-card-name" id="sidePlayerName">Loading...</div>
+      <div class="player-card-club" id="sidePlayerClub">—</div>
       <div class="player-card-tags">
-        <span class="tag" id="sidePos">Midfielder</span>
-        <span class="tag" id="sideNat">🇺🇦 Ukrainian</span>
-        <span class="tag">Free Plan</span>
+        <span class="tag" id="sidePos">—</span>
+        <span class="tag" id="sideNat">—</span>
+        <span class="tag">Player Plan</span>
       </div>
     </div>
 
@@ -718,8 +631,8 @@
       <button class="nav-item" onclick="showPanel('profile')">
         <span class="nav-icon">👤</span> Profile
       </button>
-      <button class="nav-item" onclick="window.location.href='mate-onboarding.html'">
-        <span class="nav-icon">↗</span> Upgrade Plan
+      <button class="nav-item" onclick="signOut()">
+        <span class="nav-icon">↩</span> Sign Out
       </button>
     </div>
 
@@ -730,18 +643,16 @@
 
     <!-- OVERVIEW PANEL -->
     <div class="panel active" id="panel-overview">
-
       <div>
-        <div class="section-title">Good morning, <em>Yehor.</em></div>
+        <div class="section-title">Good morning, <em>Player.</em></div>
         <div class="section-sub">Here's your career intelligence for today.</div>
       </div>
 
-      <!-- Stats -->
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">Contract</div>
-          <div class="stat-value">5mo</div>
-          <div class="stat-note">Expires Jun 2026</div>
+          <div class="stat-value" id="statContract">—</div>
+          <div class="stat-note" id="statContractNote">Loading...</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">MATE Sessions</div>
@@ -751,7 +662,7 @@
         <div class="stat-card">
           <div class="stat-label">Reports</div>
           <div class="stat-value">1</div>
-          <div class="stat-note">PDDR generated</div>
+          <div class="stat-note">Generated</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Market Value</div>
@@ -760,7 +671,6 @@
         </div>
       </div>
 
-      <!-- Quick actions -->
       <div>
         <div class="panel-header">
           <div class="panel-header-title">Quick Actions</div>
@@ -787,7 +697,7 @@
               <div class="action-desc">Market value, club fit scores, and your next career move.</div>
             </div>
           </div>
-          <div class="action-card" onclick="openChat('concierge', 'I need help with accommodation near my training ground in Slough.')">
+          <div class="action-card" onclick="openChat('concierge', 'I need help with accommodation near my training ground.')">
             <div class="action-icon">🏠</div>
             <div>
               <div class="action-title">Life & Relocation</div>
@@ -797,42 +707,31 @@
         </div>
       </div>
 
-      <!-- Contract status -->
       <div>
         <div class="panel-header">
           <div class="panel-header-title">Contract Status</div>
-          <div class="panel-header-action" onclick="openChat('legal', 'What are my options with my contract expiring in June 2026?')">Ask Legal Advisor →</div>
+          <div class="panel-header-action" onclick="openChat('legal', 'What are my options with my contract expiring soon?')">Ask Legal Advisor →</div>
         </div>
         <div class="contract-card">
           <div class="stat-label">Current Club</div>
-          <div class="contract-expires">Slough Town FC</div>
-          <div style="font-size:13px; color:var(--t3); margin-bottom:12px;">Contract expires: June 2026</div>
-          <div class="contract-bar-wrap">
-            <div class="contract-bar"></div>
-          </div>
-          <div class="contract-warning">⚠️ Contract enters final 6 months — consider your options now.</div>
+          <div class="contract-expires" id="overviewClub">—</div>
+          <div style="font-size:13px; color:var(--t3); margin-bottom:12px;" id="overviewExpiry">Contract expires: —</div>
+          <div class="contract-bar-wrap"><div class="contract-bar"></div></div>
+          <div class="contract-warning">⚠️ Contract enters final period — consider your options now.</div>
         </div>
       </div>
 
-      <!-- Recent activity -->
       <div>
-        <div class="panel-header">
-          <div class="panel-header-title">Recent Activity</div>
-        </div>
+        <div class="panel-header"><div class="panel-header-title">Recent Activity</div></div>
         <div class="activity-list" id="activityList">
           <div class="activity-item">
             <div class="activity-icon">⚖️</div>
-            <div class="activity-text"><strong>Legal Advisor</strong> — Agent fee analysis completed</div>
+            <div class="activity-text"><strong>Legal Advisor</strong> — Contract analysis ready</div>
             <div class="activity-time">Today</div>
           </div>
           <div class="activity-item">
             <div class="activity-icon">🏋️</div>
-            <div class="activity-text"><strong>Performance Coach</strong> — 4-week speed program generated</div>
-            <div class="activity-time">Today</div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">🏠</div>
-            <div class="activity-text"><strong>Concierge</strong> — Accommodation research: Slough area</div>
+            <div class="activity-text"><strong>Performance Coach</strong> — Training program generated</div>
             <div class="activity-time">Today</div>
           </div>
           <div class="activity-item">
@@ -842,47 +741,31 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- CHAT PANEL -->
     <div class="chat-panel" id="panel-chat">
 
-      <!-- Agent selector -->
       <div class="agent-bar">
-        <button class="agent-btn active" id="agent-auto" onclick="selectAgent('auto', this)">
-          🤖 Auto-detect
-        </button>
-        <button class="agent-btn" id="agent-legal" onclick="selectAgent('legal', this)">
-          ⚖️ Legal Advisor
-        </button>
-        <button class="agent-btn" id="agent-coach" onclick="selectAgent('coach', this)">
-          🏋️ Performance Coach
-        </button>
-        <button class="agent-btn" id="agent-analyst" onclick="selectAgent('analyst', this)">
-          📊 Transfer Analyst
-        </button>
-        <button class="agent-btn" id="agent-concierge" onclick="selectAgent('concierge', this)">
-          🏠 Concierge
-        </button>
+        <button class="agent-btn active" id="agent-auto" onclick="selectAgent('auto', this)">🤖 Auto-detect</button>
+        <button class="agent-btn" id="agent-legal" onclick="selectAgent('legal', this)">⚖️ Legal Advisor</button>
+        <button class="agent-btn" id="agent-coach" onclick="selectAgent('coach', this)">🏋️ Performance Coach</button>
+        <button class="agent-btn" id="agent-analyst" onclick="selectAgent('analyst', this)">📊 Transfer Analyst</button>
+        <button class="agent-btn" id="agent-concierge" onclick="selectAgent('concierge', this)">🏠 Concierge</button>
       </div>
 
-      <!-- Messages -->
       <div class="messages" id="messages">
-
-        <!-- Welcome message -->
         <div class="msg-wrap mate">
           <div class="msg-agent-label">⚽ MATE AI</div>
           <div class="msg-bubble">
-            Hello Yehor. I'm MATE — your personal football intelligence agent.<br><br>
-            I have four specialists ready for you: <strong>Legal Advisor</strong> for contracts and FIFA regulations, <strong>Performance Coach</strong> for training and fitness, <strong>Transfer Analyst</strong> for market intelligence, and <strong>Concierge</strong> for life and relocation support.<br><br>
+            Hello. I'm MATE — your personal football intelligence agent.<br><br>
+            I have four specialists ready: <strong>Legal Advisor</strong> for contracts and FIFA regulations, <strong>Performance Coach</strong> for training and fitness, <strong>Transfer Analyst</strong> for market intelligence, and <strong>Concierge</strong> for life and relocation support.<br><br>
+            You can also upload a contract or document using the 📎 button below.<br><br>
             What would you like to work on today?
           </div>
         </div>
-
       </div>
 
-      <!-- Typing indicator -->
       <div class="typing-wrap" id="typingWrap" style="padding: 0 24px 12px;">
         <div class="typing-bubble">
           <div class="typing-dot"></div>
@@ -891,23 +774,41 @@
         </div>
       </div>
 
-      <!-- Input -->
+      <!-- Input area with file attachment -->
       <div class="input-area">
-        <textarea
-          class="chat-input"
-          id="chatInput"
-          placeholder="Ask MATE anything about your career..."
-          rows="1"
-          onkeydown="handleKey(event)"
-          oninput="autoResize(this)"
-        ></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M2 9h14M9 2l7 7-7 7" stroke="#794DC6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
+        <!-- File preview strip -->
+        <div class="file-preview" id="filePreview">
+          <span>📎</span>
+          <span class="file-preview-name" id="filePreviewName">—</span>
+          <span class="file-preview-size" id="filePreviewSize"></span>
+          <button class="file-preview-remove" onclick="clearFile()" title="Remove file">×</button>
+        </div>
 
+        <div class="input-row">
+          <!-- Attach button -->
+          <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Attach contract or document">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M15.5 8.5l-7 7a4.5 4.5 0 01-6.364-6.364l7-7a3 3 0 014.243 4.243l-7 7a1.5 1.5 0 01-2.122-2.122l6.293-6.293" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)" />
+
+          <textarea
+            class="chat-input"
+            id="chatInput"
+            placeholder="Ask MATE anything about your career..."
+            rows="1"
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)"
+          ></textarea>
+
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M2 9h14M9 2l7 7-7 7" stroke="#794DC6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- REPORTS PANEL -->
@@ -937,12 +838,12 @@
       <div class="section-sub">Your current contract status and legal intelligence.</div>
       <div class="contract-card">
         <div class="stat-label">Current Club</div>
-        <div class="contract-expires">Slough Town FC</div>
-        <div style="font-size:13px;color:var(--t3);margin:6px 0 14px;">Contract expires: June 30, 2026</div>
+        <div class="contract-expires" id="contractClub">—</div>
+        <div style="font-size:13px;color:var(--t3);margin:6px 0 14px;" id="contractExpiry">—</div>
         <div class="contract-bar-wrap"><div class="contract-bar"></div></div>
-        <div class="contract-warning">⚠️ 5 months remaining — speak to Legal Advisor now.</div>
+        <div class="contract-warning">⚠️ Speak to Legal Advisor about your options.</div>
       </div>
-      <button class="action-card" onclick="openChat('legal', 'My contract expires June 2026. What are my options as a Ukrainian player in England?')" style="width:100%;">
+      <button class="action-card" onclick="openChat('legal', 'My contract situation needs legal review. What are my options?')" style="width:100%;">
         <div class="action-icon">⚖️</div>
         <div>
           <div class="action-title">Ask Legal Advisor</div>
@@ -955,14 +856,14 @@
     <div class="panel" id="panel-training">
       <div class="section-title">Training <em>Programs</em></div>
       <div class="section-sub">Position-specific development from your AI Coach.</div>
-      <button class="action-card" onclick="openChat('coach', 'I need a weekly training program optimized for a defensive midfielder at U19 level.')" style="width:100%;">
+      <button class="action-card" onclick="openChat('coach', 'I need a weekly training program optimized for my position and level.')" style="width:100%;">
         <div class="action-icon">🏋️</div>
         <div>
           <div class="action-title">Generate Training Plan</div>
           <div class="action-desc">Personalized weekly program based on your position and fitness level.</div>
         </div>
       </button>
-      <button class="action-card" onclick="openChat('coach', 'How can I improve my speed and explosive power as a defensive midfielder?')" style="width:100%;">
+      <button class="action-card" onclick="openChat('coach', 'How can I improve my speed and explosive power?')" style="width:100%;">
         <div class="action-icon">⚡</div>
         <div>
           <div class="action-title">Speed & Power Development</div>
@@ -975,14 +876,14 @@
     <div class="panel" id="panel-transfers">
       <div class="section-title">Transfer <em>Intelligence</em></div>
       <div class="section-sub">Market value, club fit, and your next move.</div>
-      <button class="action-card" onclick="openChat('analyst', 'What is my current market value and which League One or League Two clubs would be the best fit for me?')" style="width:100%;">
+      <button class="action-card" onclick="openChat('analyst', 'What is my current market value and which clubs would be the best fit for me?')" style="width:100%;">
         <div class="action-icon">📊</div>
         <div>
           <div class="action-title">Market Value Assessment</div>
           <div class="action-desc">Estimated value based on age, position, league level, and performance.</div>
         </div>
       </button>
-      <button class="action-card" onclick="openChat('analyst', 'Which clubs in England or Italy would be the best fit for a Ukrainian defensive midfielder aged 19?')" style="width:100%;">
+      <button class="action-card" onclick="openChat('analyst', 'Which clubs would be the best tactical fit for my profile?')" style="width:100%;">
         <div class="action-icon">🎯</div>
         <div>
           <div class="action-title">Club Fit Analysis</div>
@@ -995,40 +896,9 @@
     <div class="panel" id="panel-profile">
       <div class="section-title">My <em>Profile</em></div>
       <div class="section-sub">Your player information stored in MATE AI.</div>
-      <div class="contract-card">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div>
-            <div class="stat-label">Full Name</div>
-            <div style="font-size:15px;margin-top:4px;">Yehor Lomov</div>
-          </div>
-          <div>
-            <div class="stat-label">Date of Birth</div>
-            <div style="font-size:15px;margin-top:4px;">29 Nov 2006</div>
-          </div>
-          <div>
-            <div class="stat-label">Nationality</div>
-            <div style="font-size:15px;margin-top:4px;">🇺🇦 Ukrainian / 🇬🇧 British</div>
-          </div>
-          <div>
-            <div class="stat-label">Position</div>
-            <div style="font-size:15px;margin-top:4px;">Defensive Midfielder</div>
-          </div>
-          <div>
-            <div class="stat-label">Current Club</div>
-            <div style="font-size:15px;margin-top:4px;">Slough Town FC</div>
-          </div>
-          <div>
-            <div class="stat-label">Agent</div>
-            <div style="font-size:15px;margin-top:4px;">Lomov Vitalii</div>
-          </div>
-          <div>
-            <div class="stat-label">Height / Weight</div>
-            <div style="font-size:15px;margin-top:4px;">182cm / 76kg</div>
-          </div>
-          <div>
-            <div class="stat-label">Dominant Foot</div>
-            <div style="font-size:15px;margin-top:4px;">Right</div>
-          </div>
+      <div class="contract-card" id="profileCard">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" id="profileGrid">
+          <div style="color:var(--t4); font-size:13px;">Loading profile...</div>
         </div>
       </div>
     </div>
@@ -1043,13 +913,16 @@
       'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn'
     );
 
-    // ── CONFIG ──
     const CONFIG = {
       webhookUrl: 'https://hook.eu1.make.com/mv3l1p2s3cs3w07t4b538u378iyeo45n',
       playerId:   'e458e26d-a298-4f36-bcc0-a598c916f8a8',
       sessionId:  'sess_' + Date.now(),
       language:   'en'
     };
+
+    // ── FILE STATE ──
+    let selectedFile = null;
+    let selectedFileContent = null;
 
     // ── AUTH CHECK + LOAD PLAYER PROFILE ──
     async function initAuth() {
@@ -1069,28 +942,89 @@
         document.getElementById('topPlayerName').textContent = fullName;
         document.getElementById('sidePlayerName').textContent = fullName;
         document.getElementById('sidePlayerClub').textContent =
-          (profile.current_club || '') + ' · ' + (profile.current_league || '');
+          (profile.current_club || '—') + (profile.current_league ? ' · ' + profile.current_league : '');
         if (document.getElementById('sidePos'))
-          document.getElementById('sidePos').textContent = profile.position_primary || '';
+          document.getElementById('sidePos').textContent = profile.position_primary || '—';
         if (document.getElementById('sideNat'))
-          document.getElementById('sideNat').textContent = '\uD83C\uDF0D ' + (profile.nationality || '');
+          document.getElementById('sideNat').textContent = profile.nationality || '—';
 
+        // Overview panel
         const hour = new Date().getHours();
         const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
         const greetEl = document.querySelector('.section-title');
         if (greetEl) greetEl.innerHTML = greet + ', <em>' + firstName + '.</em>';
 
+        const club = profile.current_club || '—';
+        const expiry = profile.contract_expires ? 'Contract expires: ' + profile.contract_expires : 'Contract status unknown';
+        document.getElementById('overviewClub').textContent = club;
+        document.getElementById('overviewExpiry').textContent = expiry;
+        document.getElementById('contractClub').textContent = club;
+        document.getElementById('contractExpiry').textContent = expiry;
+        document.getElementById('statContract').textContent = profile.contract_expires ? profile.contract_expires.slice(0,7) : '—';
+        document.getElementById('statContractNote').textContent = club;
+
+        // Welcome message personalisation
         const wb = document.querySelector('.msg-bubble');
-        if (wb) wb.innerHTML = 'Hello ' + firstName + '. I am MATE — your personal football intelligence agent.<br><br>What would you like to work on today?';
+        if (wb) wb.innerHTML = 'Hello ' + firstName + '. I\'m MATE — your personal football intelligence agent.<br><br>I have four specialists ready: <strong>Legal Advisor</strong> for contracts and FIFA regulations, <strong>Performance Coach</strong> for training and fitness, <strong>Transfer Analyst</strong> for market intelligence, and <strong>Concierge</strong> for life and relocation support.<br><br>You can also upload a contract or document using the 📎 button below.<br><br>What would you like to work on today?';
+
+        // Profile panel
+        const grid = document.getElementById('profileGrid');
+        if (grid) {
+          grid.innerHTML = `
+            <div><div class="stat-label">Full Name</div><div style="font-size:15px;margin-top:4px;">${profile.full_name || '—'}</div></div>
+            <div><div class="stat-label">Date of Birth</div><div style="font-size:15px;margin-top:4px;">${profile.date_of_birth || '—'}</div></div>
+            <div><div class="stat-label">Nationality</div><div style="font-size:15px;margin-top:4px;">${profile.nationality || '—'}</div></div>
+            <div><div class="stat-label">Position</div><div style="font-size:15px;margin-top:4px;">${profile.position_primary || '—'}</div></div>
+            <div><div class="stat-label">Current Club</div><div style="font-size:15px;margin-top:4px;">${profile.current_club || '—'}</div></div>
+            <div><div class="stat-label">Agent</div><div style="font-size:15px;margin-top:4px;">${profile.agent_name || '—'}</div></div>
+            <div><div class="stat-label">Height / Weight</div><div style="font-size:15px;margin-top:4px;">${profile.height_cm ? profile.height_cm + 'cm' : '—'} / ${profile.weight_kg ? profile.weight_kg + 'kg' : '—'}</div></div>
+            <div><div class="stat-label">Dominant Foot</div><div style="font-size:15px;margin-top:4px;">${profile.dominant_foot || '—'}</div></div>
+          `;
+        }
       }
     }
 
+    // ── SIGN OUT ──
     async function signOut() {
       await sb.auth.signOut();
       window.location.href = 'mate-auth.html';
     }
 
-    // Agent labels
+    // ── FILE HANDLING ──
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      selectedFile = file;
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+      const sizeStr = sizeMB < 0.1 ? (file.size / 1024).toFixed(0) + ' KB' : sizeMB + ' MB';
+
+      document.getElementById('filePreviewName').textContent = file.name;
+      document.getElementById('filePreviewSize').textContent = sizeStr;
+      document.getElementById('filePreview').classList.add('visible');
+
+      // Read file content for text-based files
+      if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+        const reader = new FileReader();
+        reader.onload = (e) => { selectedFileContent = e.target.result; };
+        reader.readAsText(file);
+      } else {
+        // For PDF/DOC — send file name + note to MATE
+        selectedFileContent = `[File attached: ${file.name} (${sizeStr}). Please analyse this document.]`;
+      }
+
+      // Focus input
+      document.getElementById('chatInput').focus();
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      selectedFileContent = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('filePreview').classList.remove('visible');
+    }
+
+    // ── AGENTS ──
     const AGENTS = {
       'auto':      { label: 'MATE AI',           emoji: '🤖' },
       'legal':     { label: 'Legal Advisor',      emoji: '⚖️' },
@@ -1104,26 +1038,15 @@
 
     // ── PANEL NAVIGATION ──
     function showPanel(id) {
-      // Hide all panels
-      document.querySelectorAll('.panel, .chat-panel').forEach(p => {
-        p.classList.remove('active');
-      });
-      // Deactivate all nav items
+      document.querySelectorAll('.panel, .chat-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-      // Show target
       const target = document.getElementById('panel-' + id);
       if (target) target.classList.add('active');
-
-      // Activate nav item
-      const navItems = document.querySelectorAll('.nav-item');
-      navItems.forEach(item => {
+      document.querySelectorAll('.nav-item').forEach(item => {
         if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + id + "'")) {
           item.classList.add('active');
         }
       });
-
-      // Scroll to top
       if (target) target.scrollTop = 0;
     }
 
@@ -1137,10 +1060,8 @@
     // ── OPEN CHAT WITH PRE-FILLED MESSAGE ──
     function openChat(agent, message) {
       showPanel('chat');
-      // Select agent
       const agentBtn = document.getElementById('agent-' + agent);
       if (agentBtn) selectAgent(agent, agentBtn);
-      // Fill input and send
       setTimeout(() => {
         document.getElementById('chatInput').value = message;
         sendMessage();
@@ -1152,41 +1073,52 @@
       if (isLoading) return;
       const input = document.getElementById('chatInput');
       const msg = input.value.trim();
-      if (!msg) return;
+      if (!msg && !selectedFile) return;
 
-      // Add user message
-      addMessage('user', msg, null);
+      const messageText = msg || 'Please analyse the attached document.';
+
+      // Show user message
+      if (selectedFile) {
+        addFileMessage(selectedFile.name);
+      }
+      if (msg) {
+        addMessage('user', msg, null);
+      }
+
       input.value = '';
       input.style.height = 'auto';
 
-      // Show typing
       isLoading = true;
       document.getElementById('sendBtn').disabled = true;
       document.getElementById('typingWrap').classList.add('visible');
-
-      // Scroll to bottom
       scrollToBottom();
 
-      // Build payload
+      // Build payload — append file content to message if present
+      let fullMessage = messageText;
+      if (selectedFileContent) {
+        fullMessage = messageText + '\n\n--- ATTACHED DOCUMENT ---\n' + selectedFileContent;
+      }
+
       const payload = {
         player_id:  CONFIG.playerId,
         session_id: CONFIG.sessionId,
-        message:    msg,
+        message:    fullMessage,
         language:   CONFIG.language
       };
 
-      // Add agent hint to message if specific agent selected
       if (currentAgent !== 'auto') {
         payload.agent_hint = currentAgent;
-        // Prepend keyword to help router
         const keywords = {
           legal:     'contract ',
           coach:     'training ',
           analyst:   'transfer ',
           concierge: 'accommodation '
         };
-        payload.message = keywords[currentAgent] + msg;
+        payload.message = keywords[currentAgent] + fullMessage;
       }
+
+      // Clear file state
+      clearFile();
 
       try {
         const res = await fetch(CONFIG.webhookUrl, {
@@ -1196,29 +1128,23 @@
         });
 
         const text = await res.text();
-
-        // Detect which agent responded
-        let detectedAgent = currentAgent === 'auto' ? detectAgent(msg) : currentAgent;
+        let detectedAgent = currentAgent === 'auto' ? detectAgent(messageText) : currentAgent;
         const agentInfo = AGENTS[detectedAgent] || AGENTS['auto'];
 
-        // Add MATE response
         addMessage('mate', text || 'I received your message but encountered an issue. Please try again.', agentInfo);
-
-        // Add to activity
         addActivity(agentInfo);
 
       } catch (err) {
         addMessage('mate', 'Connection error. Please check your internet connection and try again.', AGENTS['auto']);
       }
 
-      // Hide typing
       isLoading = false;
       document.getElementById('sendBtn').disabled = false;
       document.getElementById('typingWrap').classList.remove('visible');
       scrollToBottom();
     }
 
-    // ── DETECT AGENT FROM MESSAGE ──
+    // ── DETECT AGENT ──
     function detectAgent(msg) {
       const m = msg.toLowerCase();
       if (/contract|fee|fifa|salary|clause|agent|legal|registration/.test(m)) return 'legal';
@@ -1228,7 +1154,24 @@
       return 'auto';
     }
 
-    // ── ADD MESSAGE TO UI ──
+    // ── ADD FILE MESSAGE ──
+    function addFileMessage(fileName) {
+      const messages = document.getElementById('messages');
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-wrap user';
+      wrap.innerHTML = `
+        <div class="msg-file">
+          <span class="msg-file-icon">📎</span>
+          <div>
+            <div class="msg-file-name">${fileName}</div>
+            <div class="msg-file-size">Sent for analysis</div>
+          </div>
+        </div>
+      `;
+      messages.appendChild(wrap);
+    }
+
+    // ── ADD MESSAGE ──
     function addMessage(role, text, agentInfo) {
       const messages = document.getElementById('messages');
       const wrap = document.createElement('div');
@@ -1243,8 +1186,6 @@
 
       const bubble = document.createElement('div');
       bubble.className = 'msg-bubble';
-
-      // Format markdown-like text
       bubble.innerHTML = formatText(text);
       wrap.appendChild(bubble);
       messages.appendChild(wrap);
@@ -1278,15 +1219,11 @@
       list.insertBefore(item, list.firstChild);
     }
 
-    // ── SCROLL TO BOTTOM ──
     function scrollToBottom() {
       const messages = document.getElementById('messages');
-      setTimeout(() => {
-        messages.scrollTop = messages.scrollHeight;
-      }, 50);
+      setTimeout(() => { messages.scrollTop = messages.scrollHeight; }, 50);
     }
 
-    // ── KEYBOARD HANDLER ──
     function handleKey(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -1294,7 +1231,6 @@
       }
     }
 
-    // ── AUTO RESIZE TEXTAREA ──
     function autoResize(el) {
       el.style.height = 'auto';
       el.style.height = Math.min(el.scrollHeight, 120) + 'px';
@@ -1302,6 +1238,7 @@
 
     // ── INIT ──
     document.addEventListener('DOMContentLoaded', () => {
+      initAuth();
       showPanel('overview');
       scrollToBottom();
     });
