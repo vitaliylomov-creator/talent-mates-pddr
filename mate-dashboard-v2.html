@@ -32,7 +32,6 @@
     }
 
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
-    body.auth-pending { visibility: hidden; }
 
     body {
       font-family: var(--font-b);
@@ -551,7 +550,7 @@
     }
   </style>
 </head>
-<body class="auth-pending">
+<body>
 
   <!-- ══ TOPBAR ══ -->
   <header class="topbar">
@@ -748,8 +747,7 @@
     <div class="chat-panel" id="panel-chat">
 
       <div class="agent-bar">
-        <button class="agent-btn active" id="agent-auto" onclick="selectAgent('auto', this)">🤖 Auto-detect</button>
-        <button class="agent-btn" id="agent-legal" onclick="selectAgent('legal', this)">⚖️ Legal Advisor</button>
+<button class="agent-btn" id="agent-legal" onclick="selectAgent('legal', this)">⚖️ Legal Advisor</button>
         <button class="agent-btn" id="agent-coach" onclick="selectAgent('coach', this)">🏋️ Performance Coach</button>
         <button class="agent-btn" id="agent-analyst" onclick="selectAgent('analyst', this)">📊 Transfer Analyst</button>
         <button class="agent-btn" id="agent-concierge" onclick="selectAgent('concierge', this)">🏠 Concierge</button>
@@ -760,9 +758,12 @@
           <div class="msg-agent-label">⚽ MATE AI</div>
           <div class="msg-bubble">
             Hello. I'm MATE — your personal football intelligence agent.<br><br>
-            I have four specialists ready: <strong>Legal Advisor</strong> for contracts and FIFA regulations, <strong>Performance Coach</strong> for training and fitness, <strong>Transfer Analyst</strong> for market intelligence, and <strong>Concierge</strong> for life and relocation support.<br><br>
-            You can also upload a contract or document using the 📎 button below.<br><br>
-            What would you like to work on today?
+            Choose your specialist above to get started:<br>
+            ⚖️ <strong>Legal Advisor</strong> — contracts, FIFA regulations, agent fees<br>
+            🏋️ <strong>Performance Coach</strong> — training, fitness, recovery<br>
+            📊 <strong>Transfer Analyst</strong> — market value, club fit, transfer strategy<br>
+            🏠 <strong>Concierge</strong> — accommodation, travel, schools, relocation<br><br>
+            You can also upload a contract or document using the 📎 button below.
           </div>
         </div>
       </div>
@@ -978,7 +979,7 @@
 
         // Welcome message personalisation
         const wb = document.querySelector('.msg-bubble');
-        if (wb) wb.innerHTML = 'Hello ' + firstName + '. I\'m MATE — your personal football intelligence agent.<br><br>I have four specialists ready: <strong>Legal Advisor</strong> for contracts and FIFA regulations, <strong>Performance Coach</strong> for training and fitness, <strong>Transfer Analyst</strong> for market intelligence, and <strong>Concierge</strong> for life and relocation support.<br><br>You can also upload a contract or document using the 📎 button below.<br><br>What would you like to work on today?';
+        if (wb) wb.innerHTML = 'Hello ' + firstName + '. I\'m MATE — your personal football intelligence agent.<br><br>Choose your specialist above to get started:<br>⚖️ <strong>Legal Advisor</strong> — contracts, FIFA regulations, agent fees<br>🏋️ <strong>Performance Coach</strong> — training, fitness, recovery<br>📊 <strong>Transfer Analyst</strong> — market value, club fit, transfer strategy<br>🏠 <strong>Concierge</strong> — accommodation, travel, schools, relocation<br><br>You can also upload a contract or document using the 📎 button below.';
 
         // Profile panel
         const grid = document.getElementById('profileGrid');
@@ -1046,7 +1047,7 @@
       'concierge': { label: 'Concierge',          emoji: '🏠' }
     };
 
-    let currentAgent = 'auto';
+    let currentAgent = 'legal';
     let isLoading = false;
 
     // ── PANEL NAVIGATION ──
@@ -1251,12 +1252,9 @@
 
     // ── INIT ──
     document.addEventListener('DOMContentLoaded', () => {
-      // Don't show UI until auth check completes
-      initAuth().then(() => {
-        document.body.classList.remove('auth-pending');
-        showPanel('overview');
-        scrollToBottom();
-      });
+      initAuth();
+      showPanel('overview');
+      scrollToBottom();
     });
   </script>
 
