@@ -927,7 +927,13 @@
     // ── AUTH CHECK + LOAD PLAYER PROFILE ──
     async function initAuth() {
       const { data: { session } } = await sb.auth.getSession();
-      if (!session) { window.location.href = 'mate-auth.html'; return; }
+
+      // Hard check — must have real authenticated user with email
+      if (!session || !session.user || !session.user.email) {
+        localStorage.clear();
+        window.location.href = 'mate-auth.html';
+        return;
+      }
 
       const { data: profile } = await sb.from('players')
         .select('*').eq('auth_user_id', session.user.id).single();
