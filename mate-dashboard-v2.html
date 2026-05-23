@@ -935,8 +935,14 @@
         return;
       }
 
-      const { data: profile } = await sb.from('players')
+      const { data: profile, error: profileError } = await sb.from('players')
         .select('*').eq('auth_user_id', session.user.id).single();
+
+      // No profile found → send to onboarding
+      if (profileError || !profile) {
+        window.location.href = 'mate-onboarding.html';
+        return;
+      }
 
       if (profile) {
         CONFIG.playerId = profile.id;
