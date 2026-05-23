@@ -32,6 +32,7 @@
     }
 
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body.auth-pending { visibility: hidden; }
 
     body {
       font-family: var(--font-b);
@@ -550,7 +551,7 @@
     }
   </style>
 </head>
-<body>
+<body class="auth-pending">
 
   <!-- ══ TOPBAR ══ -->
   <header class="topbar">
@@ -915,7 +916,7 @@
 
     const CONFIG = {
       webhookUrl: 'https://hook.eu1.make.com/mv3l1p2s3cs3w07t4b538u378iyeo45n',
-      playerId:   'e458e26d-a298-4f36-bcc0-a598c916f8a8',
+      playerId:   null,
       sessionId:  'sess_' + Date.now(),
       language:   'en'
     };
@@ -1250,9 +1251,12 @@
 
     // ── INIT ──
     document.addEventListener('DOMContentLoaded', () => {
-      initAuth();
-      showPanel('overview');
-      scrollToBottom();
+      // Don't show UI until auth check completes
+      initAuth().then(() => {
+        document.body.classList.remove('auth-pending');
+        showPanel('overview');
+        scrollToBottom();
+      });
     });
   </script>
 
