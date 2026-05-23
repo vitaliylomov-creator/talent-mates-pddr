@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -722,6 +723,13 @@
   </main>
 
   <script>
+    // ── SUPABASE ──
+    const { createClient } = supabase;
+    const sb = createClient(
+      'https://zlkzjeaojpxzccpovygk.supabase.co',
+      'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn'
+    );
+
     // ── STATE ──
     const state = {
       currentStep: 1,
@@ -729,7 +737,6 @@
       language: 'en',
       position: '',
       foot: '',
-      // Make.com Scenario 1 webhook — replace with your URL
       webhookUrl: 'https://hook.eu1.make.com/w1nvg4sx255c3s1g34ugmqfbr47fbgdp'
     };
 
@@ -827,8 +834,13 @@
       btn.disabled = true;
       btn.innerHTML = '<span style="display:flex;align-items:center;gap:8px;justify-content:center"><span class="loading-dots"><span></span><span></span><span></span></span> Activating...</span>';
 
+      // Get auth session to link player profile to Supabase user
+      const { data: { session } } = await sb.auth.getSession();
+      const authUserId = session ? session.user.id : null;
+
       // Build payload
       const payload = {
+        auth_user_id: authUserId,
         full_name:           document.getElementById('full_name').value.trim(),
         email:               document.getElementById('email').value.trim(),
         date_of_birth:       document.getElementById('date_of_birth').value || null,
@@ -867,6 +879,8 @@
           document.getElementById('successName').textContent =
             'Welcome, ' + payload.full_name.split(' ')[0] + '.';
           goTo('success');
+          // Redirect to dashboard after 2.5 seconds
+          setTimeout(() => { window.location.href = 'mate-dashboard-v2.html'; }, 2500);
         } else {
           throw new Error('Webhook returned ' + res.status);
         }
@@ -880,6 +894,14 @@
 
     // ── INIT ──
     updateProgress(1);
+
+    // Auth check — redirect to login if no session
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.href = 'mate-auth.html';
+      }
+    })();
   </script>
 
 </body>
