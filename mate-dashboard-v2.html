@@ -1082,6 +1082,27 @@
       }, 100);
     }
 
+    // ── FETCH CONVERSATION HISTORY FROM SUPABASE ──
+    async function fetchHistory() {
+      if (!CONFIG.playerId) return [];
+      try {
+        const { data, error } = await sb
+          .from('conversations')
+          .select('role, content')
+          .eq('player_id', CONFIG.playerId)
+          .order('created_at', { ascending: true })
+          .limit(10);
+        if (error || !data) return [];
+        // Build proper Claude API messages array
+        return data.map(row => ({
+          role: row.role === 'assistant' ? 'assistant' : 'user',
+          content: row.content || ''
+        }));
+      } catch (e) {
+        return [];
+      }
+    }
+
     // ── SEND MESSAGE ──
     async function sendMessage() {
       if (isLoading) return;
@@ -1107,29 +1128,33 @@
       document.getElementById('typingWrap').classList.add('visible');
       scrollToBottom();
 
-      // Build payload — append file content to message if present
+      // Build full message with file content if present
       let fullMessage = messageText;
       if (selectedFileContent) {
         fullMessage = messageText + '\n\n--- ATTACHED DOCUMENT ---\n' + selectedFileContent;
       }
 
+      // Add keyword prefix for router
+      const keywords = {
+        legal:     'contract ',
+        coach:     'training ',
+        analyst:   'transfer ',
+        concierge: 'accommodation '
+      };
+      const routedMessage = currentAgent !== 'auto'
+        ? keywords[currentAgent] + fullMessage
+        : fullMessage;
+
+      // Fetch conversation history from Supabase
+      const history = await fetchHistory();
+
       const payload = {
         player_id:  CONFIG.playerId,
         session_id: CONFIG.sessionId,
-        message:    fullMessage,
-        language:   CONFIG.language
+        message:    routedMessage,
+        language:   CONFIG.language,
+        history:    history
       };
-
-      if (currentAgent !== 'auto') {
-        payload.agent_hint = currentAgent;
-        const keywords = {
-          legal:     'contract ',
-          coach:     'training ',
-          analyst:   'transfer ',
-          concierge: 'accommodation '
-        };
-        payload.message = keywords[currentAgent] + fullMessage;
-      }
 
       // Clear file state
       clearFile();
@@ -1149,7 +1174,7 @@
         addActivity(agentInfo);
 
       } catch (err) {
-        addMessage('mate', 'Connection error. Please check your internet connection and try again.', AGENTS['auto']);
+        addMessage('mate', 'Connection error. Please check your internet connection and try again.', AGENTS['legal']);
       }
 
       isLoading = false;
