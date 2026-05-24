@@ -916,7 +916,7 @@
     );
 
     const CONFIG = {
-      webhookUrl: 'https://hook.eu1.make.com/mv3l1p2s3cs3w07t4b538u378iyeo45n',
+      webhookUrl: 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat',
       playerId:   null,
       sessionId:  'sess_' + Date.now(),
       language:   'en'
@@ -1127,7 +1127,8 @@
       const payload = {
         player_id:  CONFIG.playerId,
         session_id: CONFIG.sessionId,
-        message:    routedMessage,
+        message:    fullMessage,
+        agent:      currentAgent === 'auto' ? 'legal' : currentAgent,
         language:   CONFIG.language
       };
 
@@ -1141,11 +1142,11 @@
           body: JSON.stringify(payload)
         });
 
-        const text = await res.text();
-        let detectedAgent = currentAgent === 'auto' ? detectAgent(messageText) : currentAgent;
-        const agentInfo = AGENTS[detectedAgent] || AGENTS['auto'];
+        const data = await res.json();
+        const text = data.response || data.error || 'I encountered an issue. Please try again.';
+        const agentInfo = AGENTS[currentAgent === 'auto' ? 'legal' : currentAgent] || AGENTS['legal'];
 
-        addMessage('mate', text || 'I received your message but encountered an issue. Please try again.', agentInfo);
+        addMessage('mate', text, agentInfo);
         addActivity(agentInfo);
 
       } catch (err) {
