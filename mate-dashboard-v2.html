@@ -1148,12 +1148,18 @@
       // Fetch conversation history from Supabase
       const history = await fetchHistory();
 
+      // Add current message to end of history array
+      const messagesArray = [
+        ...history,
+        { role: 'user', content: routedMessage }
+      ];
+
       const payload = {
         player_id:  CONFIG.playerId,
         session_id: CONFIG.sessionId,
         message:    routedMessage,
         language:   CONFIG.language,
-        history:    history
+        history:    messagesArray
       };
 
       // Clear file state
