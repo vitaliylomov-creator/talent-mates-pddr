@@ -3,16 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="MATE AI — Your personal football intelligence dashboard" />
-  <title>MATE Dashboard — Talent Mates</title>
+  <meta name="description" content="MATE AI — Your personal football intelligence agent" />
+  <title>MATE AI — Talent Mates</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --purple:        #794DC6;
       --purple-dk:     #6b42b5;
@@ -31,1233 +27,931 @@
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: var(--font-b);
       background: var(--purple);
       color: var(--t1);
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      grid-template-rows: auto 1fr;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    a { text-decoration: none; color: inherit; }
-    button { font-family: var(--font-b); cursor: pointer; border: none; }
-
-    /* ══ TOPBAR ══ */
+    /* ── TOP BAR ── */
     .topbar {
-      grid-column: 1 / -1;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 32px;
-      background: rgba(107,66,181,0.90);
+      padding: 14px 24px;
+      background: rgba(107,66,181,0.95);
       backdrop-filter: blur(20px);
       border-bottom: 0.5px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      flex-shrink: 0;
+      gap: 12px;
     }
-
-    .topbar-left { display: flex; align-items: center; gap: 16px; }
-
-    /* Logo link */
-    .brand-link {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-    }
-    .brand-link img { height: 32px; width: auto; display: block; }
-
-    .brand-sep { width: 0.5px; height: 14px; background: var(--border-mid); }
-
-    .topbar-badge {
-      display: flex;
-      align-items: center;
-      gap: 7px;
+    .topbar-brand {
+      font-family: var(--font-b);
       font-size: 11px;
-      letter-spacing: 0.14em;
+      font-weight: 500;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--t3);
+      white-space: nowrap;
     }
-    .pulse-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--white);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .topbar-brand span { color: var(--t3); font-weight: 400; }
 
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-
-    .player-avatar {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.12);
-      border: 0.5px solid var(--border-mid);
+    /* ── PLAYER STATS BAR ── */
+    .stats-bar {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 14px;
-    }
-
-    .player-name-small { font-size: 13px; font-weight: 400; color: var(--t2); }
-
-    /* Sign out button */
-    .btn-signout {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.06);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 100px;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--t3);
-      transition: background 0.2s, color 0.2s;
-    }
-    .btn-signout:hover { background: rgba(255,255,255,0.12); color: var(--t1); }
-
-    /* ══ SIDEBAR ══ */
-    .sidebar {
-      background: rgba(107,66,181,0.40);
-      border-right: 0.5px solid var(--border);
-      padding: 28px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      overflow-y: auto;
-    }
-
-    .sidebar-section { padding: 0 16px; margin-bottom: 8px; }
-
-    .sidebar-label {
-      font-size: 10px;
-      letter-spacing: 0.20em;
-      text-transform: uppercase;
-      color: var(--t4);
-      padding: 8px 12px 6px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--t3);
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-    }
-    .nav-item:hover { background: rgba(255,255,255,0.06); color: var(--t1); }
-    .nav-item.active { background: rgba(255,255,255,0.10); color: var(--t1); }
-    .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-
-    .sidebar-divider { height: 0.5px; background: var(--border); margin: 8px 16px; }
-
-    .player-card {
-      margin: 0 16px 16px;
-      background: rgba(255,255,255,0.06);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 14px;
-      padding: 16px;
-    }
-    .player-card-avatar {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.10);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      margin-bottom: 10px;
-    }
-    .player-card-name { font-family: var(--font-d); font-size: 16px; font-weight: 400; margin-bottom: 2px; }
-    .player-card-club { font-size: 12px; color: var(--t3); margin-bottom: 10px; }
-    .player-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-    .tag {
-      background: rgba(255,255,255,0.08);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 100px;
-      padding: 3px 10px;
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      color: var(--t2);
-    }
-
-    /* ══ MAIN ══ */
-    .main { display: flex; flex-direction: column; overflow: hidden; }
-
-    .panel {
-      display: none;
-      flex: 1;
-      overflow-y: auto;
-      padding: 32px;
-    }
-    .panel.active { display: flex; flex-direction: column; gap: 24px; }
-
-    /* ══ CHAT PANEL ══ */
-    .chat-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-    .chat-panel.active { display: flex; }
-
-    .agent-bar {
-      display: flex;
-      gap: 8px;
-      padding: 16px 24px;
+      gap: 0;
+      padding: 0 24px;
+      background: rgba(0,0,0,0.12);
       border-bottom: 0.5px solid var(--border);
-      background: rgba(107,66,181,0.30);
+      flex-shrink: 0;
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .agent-bar::-webkit-scrollbar { display: none; }
-
-    .agent-btn {
+    .stats-bar::-webkit-scrollbar { display: none; }
+    .stat-item {
       display: flex;
-      align-items: center;
-      gap: 7px;
+      flex-direction: column;
       padding: 8px 16px;
-      border-radius: 100px;
-      font-size: 12px;
+      border-right: 0.5px solid var(--border);
+      min-width: fit-content;
+    }
+    .stat-item:first-child { padding-left: 0; }
+    .stat-item:last-child { border-right: none; }
+    .stat-label {
+      font-size: 9px;
       font-weight: 400;
-      letter-spacing: 0.04em;
-      color: var(--t3);
-      background: rgba(255,255,255,0.04);
-      border: 0.5px solid var(--border-mid);
-      cursor: pointer;
-      transition: all 0.2s;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 2px;
+    }
+    .stat-value {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--t2);
       white-space: nowrap;
     }
-    .agent-btn:hover { background: rgba(255,255,255,0.08); color: var(--t2); }
-    .agent-btn.active {
-      background: rgba(255,255,255,0.12);
-      border-color: rgba(255,255,255,0.40);
-      color: var(--t1);
+    .stat-value.urgent { color: #ff9898; }
+    .stat-value.loading {
+      background: var(--border);
+      border-radius: 4px;
+      width: 80px;
+      height: 12px;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0%,100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
     }
 
-    .messages {
+    /* ── AGENT SELECTOR ── */
+    .agent-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 24px;
+      background: rgba(0,0,0,0.08);
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .agent-selector::-webkit-scrollbar { display: none; }
+    .agent-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 0.5px solid var(--border-mid);
+      background: transparent;
+      color: var(--t3);
+      font-family: var(--font-b);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .agent-pill:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--t1);
+      border-color: var(--border-strong);
+    }
+    .agent-pill.active {
+      background: rgba(255,255,255,0.14);
+      color: var(--t1);
+      border-color: rgba(255,255,255,0.5);
+    }
+    .agent-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .agent-pill.active .agent-dot { background: #fff; }
+
+    /* ── CHAT AREA ── */
+    .chat-area {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255,255,255,0.15) transparent;
+      scroll-behavior: smooth;
     }
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-track { background: transparent; }
+    .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 
-    .msg-wrap { display: flex; flex-direction: column; gap: 4px; animation: fadeUp 0.3s var(--ease) both; }
+    /* Welcome state */
+    .welcome-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      padding: 20px;
+      animation: fadeUp 0.6s var(--ease) both;
+    }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
-    .msg-wrap.user { align-items: flex-end; }
-    .msg-wrap.mate { align-items: flex-start; }
-
-    .msg-agent-label {
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--t4);
-      padding: 0 4px;
+    .welcome-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.10);
+      border: 0.5px solid var(--border-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .welcome-title {
+      font-family: var(--font-d);
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+      color: var(--t1);
+    }
+    .welcome-sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t3);
+      max-width: 280px;
+      line-height: 1.6;
     }
 
+    /* Messages */
+    .msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: fadeUp 0.4s var(--ease) both;
+      max-width: 88%;
+    }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; align-items: flex-start; }
+    .msg-meta {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--t4);
+      text-transform: uppercase;
+      padding: 0 4px;
+    }
     .msg-bubble {
-      max-width: 72%;
-      padding: 13px 17px;
+      padding: 12px 16px;
+      border-radius: 14px;
       font-size: 14px;
       font-weight: 300;
       line-height: 1.65;
       color: var(--t2);
     }
-
-    .msg-wrap.user .msg-bubble {
+    .msg.user .msg-bubble {
       background: rgba(255,255,255,0.07);
-      border: 0.5px solid var(--border-mid);
       border-radius: 14px 14px 4px 14px;
+      border: 0.5px solid var(--border-mid);
       color: var(--t1);
     }
-
-    .msg-wrap.mate .msg-bubble {
-      background: rgba(107,66,181,0.60);
-      border: 0.5px solid var(--border);
+    .msg.assistant .msg-bubble {
+      background: var(--purple-dk);
       border-radius: 4px 14px 14px 14px;
+      border: 0.5px solid var(--border);
     }
 
-    /* File attachment bubble */
-    .msg-file {
+    /* Markdown-style formatting inside MATE responses */
+    .msg.assistant .msg-bubble strong { color: var(--t1); font-weight: 500; }
+    .msg.assistant .msg-bubble em { color: rgba(255,255,255,0.6); font-style: italic; }
+    .msg.assistant .msg-bubble p { margin-bottom: 10px; }
+    .msg.assistant .msg-bubble p:last-child { margin-bottom: 0; }
+    .msg.assistant .msg-bubble ol,
+    .msg.assistant .msg-bubble ul { padding-left: 18px; margin-bottom: 10px; }
+    .msg.assistant .msg-bubble li { margin-bottom: 5px; line-height: 1.55; }
+    .msg.assistant .msg-bubble h3 {
+      font-family: var(--font-b);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin: 14px 0 6px;
+    }
+    .msg.assistant .msg-bubble h3:first-child { margin-top: 0; }
+
+    /* PDF attachment indicator */
+    .pdf-indicator {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.07);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: var(--t2);
-      max-width: 320px;
-    }
-    .msg-file-icon { font-size: 18px; flex-shrink: 0; }
-    .msg-file-name { font-weight: 400; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-    .msg-file-size { font-size: 11px; color: var(--t4); }
-
-    /* Typing */
-    .typing-wrap { display: none; align-items: flex-start; gap: 8px; }
-    .typing-wrap.visible { display: flex; }
-    .typing-bubble {
-      background: rgba(107,66,181,0.60);
-      border: 0.5px solid var(--border);
-      border-radius: 4px 14px 14px 14px;
-      padding: 14px 18px;
-      display: flex;
-      gap: 5px;
-      align-items: center;
-    }
-    .typing-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--t3);
-      animation: typing 1.2s ease-in-out infinite;
-    }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing {
-      0%,80%,100% { transform: scale(0.7); opacity: 0.5; }
-      40%          { transform: scale(1);   opacity: 1; }
-    }
-
-    /* Input area */
-    .input-area {
-      padding: 12px 24px 16px;
-      border-top: 0.5px solid var(--border);
-      background: rgba(107,66,181,0.30);
-      display: flex;
-      flex-direction: column;
       gap: 8px;
-    }
-
-    /* File preview in input */
-    .file-preview {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.06);
       border: 0.5px solid var(--border-mid);
       border-radius: 10px;
       padding: 8px 12px;
       font-size: 12px;
-      color: var(--t2);
-    }
-    .file-preview.visible { display: flex; }
-    .file-preview-name { flex: 1; font-weight: 400; color: var(--t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .file-preview-remove {
-      background: none;
-      border: none;
-      color: var(--t4);
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 1;
-      padding: 0 2px;
-      transition: color 0.2s;
-    }
-    .file-preview-remove:hover { color: var(--t1); }
-
-    .input-row { display: flex; gap: 10px; align-items: flex-end; }
-
-    /* Attach button */
-    .attach-btn {
-      width: 46px; height: 46px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.06);
-      border: 0.5px solid var(--border-mid);
       color: var(--t3);
+      margin-bottom: 6px;
+    }
+    .pdf-icon { font-size: 16px; }
+
+    /* Typing indicator */
+    .typing-indicator {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.2s, color 0.2s;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--purple-dk);
+      border: 0.5px solid var(--border);
+      border-radius: 4px 14px 14px 14px;
+      align-self: flex-start;
     }
-    .attach-btn:hover { background: rgba(255,255,255,0.12); color: var(--t1); }
+    .typing-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      animation: typing-bounce 1.4s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-bounce {
+      0%,80%,100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-5px); opacity: 1; }
+    }
 
+    /* ── QUICK ACTIONS ── */
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      padding: 8px 24px 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-shrink: 0;
+    }
+    .quick-actions::-webkit-scrollbar { display: none; }
+    .quick-action {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 100px;
+      border: 0.5px solid var(--border-mid);
+      background: transparent;
+      color: var(--t3);
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .quick-action:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--t1);
+      border-color: var(--border-strong);
+    }
+    .quick-action:active { transform: scale(0.97); }
+
+    /* ── INPUT AREA ── */
+    .input-area {
+      padding: 12px 24px 20px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 16px;
+      padding: 10px 10px 10px 16px;
+      transition: border-color 0.2s;
+    }
+    .input-row:focus-within {
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.09);
+    }
     .chat-input {
       flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 12px;
-      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      outline: none;
       font-family: var(--font-b);
       font-size: 14px;
       font-weight: 300;
-      color: var(--white);
-      outline: none;
+      color: var(--t1);
       resize: none;
-      min-height: 48px;
       max-height: 120px;
-      transition: border-color 0.2s, background 0.2s;
+      overflow-y: auto;
       line-height: 1.5;
+      min-height: 22px;
     }
     .chat-input::placeholder { color: var(--t4); }
-    .chat-input:focus {
-      border-color: rgba(255,255,255,0.35);
-      background: rgba(255,255,255,0.08);
-    }
 
+    /* Upload PDF button */
+    .pdf-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      color: var(--t4);
+      transition: color 0.2s, background 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pdf-btn:hover { color: var(--t2); background: rgba(255,255,255,0.08); }
+    .pdf-btn.has-pdf { color: #fff; }
+    #pdfFileInput { display: none; }
+
+    /* Send button */
     .send-btn {
-      width: 46px; height: 46px;
-      border-radius: 12px;
-      background: var(--white);
-      color: var(--purple);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #ffffff;
+      border: none;
+      border-radius: 10px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
       flex-shrink: 0;
       transition: opacity 0.2s, transform 0.15s;
     }
-    .send-btn:hover  { opacity: 0.88; transform: scale(1.04); }
+    .send-btn:hover { opacity: 0.88; transform: scale(1.04); }
     .send-btn:active { transform: scale(0.96); }
-    .send-btn:disabled { opacity: 0.35; }
+    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .send-btn svg { stroke: var(--purple); }
 
-    /* Hidden file input */
-    #fileInput { display: none; }
-
-    /* ══ PANELS ══ */
-    .section-title {
-      font-family: var(--font-d);
-      font-size: clamp(24px, 3vw, 36px);
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      margin-bottom: 4px;
-    }
-    .section-title em { font-style: italic; color: rgba(255,255,255,0.45); }
-
-    .section-sub { font-size: 14px; font-weight: 300; color: var(--t3); margin-bottom: 24px; }
-
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-
-    .stat-card {
-      background: rgba(255,255,255,0.04);
-      border: 0.5px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      transition: background 0.2s;
-    }
-    .stat-card:hover { background: rgba(255,255,255,0.07); }
-
-    .stat-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--t4); margin-bottom: 8px; }
-    .stat-value { font-family: var(--font-d); font-size: 28px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 4px; }
-    .stat-note { font-size: 12px; color: var(--t3); }
-
-    .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-
-    .action-card {
-      background: rgba(255,255,255,0.04);
-      border: 0.5px solid var(--border);
-      border-radius: 16px;
-      padding: 22px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .action-card:hover { background: rgba(255,255,255,0.08); border-color: var(--border-mid); }
-
-    .action-icon {
-      width: 42px; height: 42px;
-      border-radius: 10px;
+    /* PDF attached pill */
+    .pdf-attached {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
       background: rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--t2);
+      align-self: flex-start;
     }
-    .action-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-    .action-desc { font-size: 12px; color: var(--t3); font-weight: 300; line-height: 1.5; }
+    .pdf-attached.visible { display: flex; }
+    .pdf-remove {
+      background: none; border: none;
+      color: var(--t4); cursor: pointer;
+      font-size: 14px; padding: 0 2px;
+      line-height: 1;
+    }
+    .pdf-remove:hover { color: var(--t1); }
 
-    .activity-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      background: var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-    .activity-item {
-      background: var(--purple);
-      padding: 14px 18px;
-      display: flex;
+    /* Real-time data badge */
+    .rt-badge {
+      display: inline-flex;
       align-items: center;
-      gap: 14px;
-      transition: background 0.2s;
-    }
-    .activity-item:hover { background: rgba(255,255,255,0.04); }
-    .activity-icon {
-      width: 34px; height: 34px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.07);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      flex-shrink: 0;
-    }
-    .activity-text { flex: 1; font-size: 13px; color: var(--t2); }
-    .activity-text strong { color: var(--t1); font-weight: 500; }
-    .activity-time { font-size: 11px; color: var(--t4); }
-
-    .panel-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
-    .panel-header-title { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
-    .panel-header-action { font-size: 12px; color: var(--t3); cursor: pointer; transition: color 0.2s; }
-    .panel-header-action:hover { color: var(--t1); }
-
-    .contract-card {
-      background: rgba(255,255,255,0.04);
+      gap: 5px;
+      background: rgba(255,255,255,0.06);
       border: 0.5px solid var(--border);
-      border-radius: 16px;
-      padding: 22px;
+      border-radius: 100px;
+      padding: 3px 8px;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-top: 6px;
     }
-    .contract-expires { font-family: var(--font-d); font-size: 22px; margin-bottom: 4px; }
-    .contract-bar-wrap { margin: 14px 0 8px; height: 3px; background: rgba(255,255,255,0.10); border-radius: 100px; overflow: hidden; }
-    .contract-bar { height: 100%; border-radius: 100px; background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.9)); width: 30%; transition: width 1s var(--ease); }
-    .contract-warning { font-size: 12px; color: rgba(255,190,60,0.9); }
+    .rt-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: #6dffb3;
+    }
 
-    .divider { height: 0.5px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent); }
+    /* Logout link */
+    .logout-btn {
+      background: none; border: none;
+      font-family: var(--font-b);
+      font-size: 11px;
+      color: var(--t4);
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+    .logout-btn:hover { color: var(--t2); }
 
-    /* ══ MOBILE ══ */
-    @media (max-width: 960px) {
-      body { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
-      .sidebar { flex-direction: row; overflow-x: auto; padding: 12px 16px; gap: 6px; border-right: none; border-bottom: 0.5px solid var(--border); scrollbar-width: none; }
-      .sidebar::-webkit-scrollbar { display: none; }
-      .sidebar-section { display: none; }
-      .player-card { display: none; }
-      .sidebar-label { display: none; }
-      .sidebar-divider { display: none; }
-      .nav-item { white-space: nowrap; padding: 8px 14px; font-size: 13px; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .quick-actions { grid-template-columns: 1fr; }
-      .msg-bubble { max-width: 88%; }
-      .panel { padding: 20px; }
-      .btn-signout span { display: none; }
+    @media (max-width: 400px) {
+      .topbar { padding: 12px 16px; }
+      .stats-bar { padding: 0 16px; }
+      .agent-selector { padding: 10px 16px; }
+      .chat-area { padding: 16px 16px; }
+      .input-area { padding: 10px 16px 18px; }
+      .quick-actions { padding: 8px 16px 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ══ TOPBAR ══ -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <!-- Logo linked to talent-mates.com -->
-      <a class="brand-link" href="https://talent-mates.com" target="_blank" title="Talent Mates">
-        <svg height="32" viewBox="0 0 2079 1276" xmlns="http://www.w3.org/2000/svg" style="width:auto;">
-          <text x="60" y="900" font-family="'DM Serif Display', Georgia, serif" font-size="900" fill="white" font-weight="400">TM</text>
-          <text x="420" y="1100" font-family="'DM Sans', system-ui, sans-serif" font-size="280" fill="white" font-weight="300" letter-spacing="60">TALENT MATES</text>
-        </svg>
-      </a>
-      <div class="brand-sep"></div>
-      <div class="topbar-badge">
-        <div class="pulse-dot"></div>
-        MATE AI
-      </div>
-    </div>
-    <div class="topbar-right">
-      <div class="player-name-small" id="topPlayerName">Loading...</div>
-      <div class="player-avatar">⚽</div>
-      <button class="btn-signout" onclick="signOut()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M5 2H2.5A1.5 1.5 0 001 3.5v7A1.5 1.5 0 002.5 12H5M9 10l3-3-3-3M12 7H5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Sign out</span>
-      </button>
-    </div>
-  </header>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">MATE <span>AI</span></div>
+  <button class="logout-btn" onclick="handleLogout()">Sign out</button>
+</div>
 
-  <!-- ══ SIDEBAR ══ -->
-  <aside class="sidebar">
+<!-- PLAYER STATS BAR -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat-item">
+    <div class="stat-label">Player</div>
+    <div class="stat-value loading" id="statName"></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Club</div>
+    <div class="stat-value loading" id="statClub"></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Position</div>
+    <div class="stat-value loading" id="statPosition"></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Contract</div>
+    <div class="stat-value loading" id="statContract"></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Agent</div>
+    <div class="stat-value loading" id="statAgent"></div>
+  </div>
+</div>
 
-    <div class="player-card">
-      <div class="player-card-avatar">⚽</div>
-      <div class="player-card-name" id="sidePlayerName">Loading...</div>
-      <div class="player-card-club" id="sidePlayerClub">—</div>
-      <div class="player-card-tags">
-        <span class="tag" id="sidePos">—</span>
-        <span class="tag" id="sideNat">—</span>
-        <span class="tag">Player Plan</span>
-      </div>
-    </div>
+<!-- AGENT SELECTOR -->
+<div class="agent-selector">
+  <button class="agent-pill active" data-agent="auto" onclick="selectAgent(this, 'auto')">
+    <div class="agent-dot"></div>
+    Auto
+  </button>
+  <button class="agent-pill" data-agent="legal" onclick="selectAgent(this, 'legal')">
+    <div class="agent-dot"></div>
+    ⚖️ Legal
+  </button>
+  <button class="agent-pill" data-agent="coach" onclick="selectAgent(this, 'coach')">
+    <div class="agent-dot"></div>
+    🏋️ Coach
+  </button>
+  <button class="agent-pill" data-agent="analyst" onclick="selectAgent(this, 'analyst')">
+    <div class="agent-dot"></div>
+    📊 Analyst
+  </button>
+  <button class="agent-pill" data-agent="concierge" onclick="selectAgent(this, 'concierge')">
+    <div class="agent-dot"></div>
+    🏠 Concierge
+  </button>
+</div>
 
-    <div class="sidebar-divider"></div>
+<!-- CHAT AREA -->
+<div class="chat-area" id="chatArea">
+  <div class="welcome-state" id="welcomeState">
+    <div class="welcome-icon">⚽</div>
+    <div class="welcome-title">Good to see you</div>
+    <div class="welcome-sub" id="welcomeSub">Your personal football intelligence agent is ready.</div>
+  </div>
+</div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Dashboard</div>
-      <button class="nav-item active" onclick="showPanel('overview')">
-        <span class="nav-icon">⚡</span> Overview
-      </button>
-      <button class="nav-item" onclick="showPanel('chat')">
-        <span class="nav-icon">💬</span> MATE Chat
-      </button>
-      <button class="nav-item" onclick="showPanel('reports')">
-        <span class="nav-icon">📊</span> Reports
-      </button>
-    </div>
+<!-- QUICK ACTIONS -->
+<div class="quick-actions" id="quickActions">
+  <button class="quick-action" onclick="sendQuick('Review my contract situation')">⚖️ Contract review</button>
+  <button class="quick-action" onclick="sendQuick('Design my training plan for this week')">🏋️ Training plan</button>
+  <button class="quick-action" onclick="sendQuick('What is my current market value and which clubs should I target?')">📊 Market value</button>
+  <button class="quick-action" onclick="sendQuick('What is the weather like today and when is the next train from Slough to London?')">🏠 Daily briefing</button>
+</div>
 
-    <div class="sidebar-divider"></div>
+<!-- INPUT AREA -->
+<div class="input-area">
+  <!-- PDF attached indicator -->
+  <div class="pdf-attached" id="pdfAttached">
+    <span>📄</span>
+    <span id="pdfAttachedName">contract.pdf</span>
+    <button class="pdf-remove" onclick="removePDF()">✕</button>
+  </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">My Career</div>
-      <button class="nav-item" onclick="showPanel('contract')">
-        <span class="nav-icon">⚖️</span> Contract
-      </button>
-      <button class="nav-item" onclick="showPanel('training')">
-        <span class="nav-icon">🏋️</span> Training
-      </button>
-      <button class="nav-item" onclick="showPanel('transfers')">
-        <span class="nav-icon">🔄</span> Transfers
-      </button>
-    </div>
+  <div class="input-row">
+    <!-- PDF upload button -->
+    <button class="pdf-btn" id="pdfBtn" onclick="document.getElementById('pdfFileInput').click()" title="Upload contract PDF">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="12" y1="18" x2="12" y2="12"/>
+        <line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+    </button>
+    <input type="file" id="pdfFileInput" accept=".pdf" onchange="handlePDFSelect(event)" />
 
-    <div class="sidebar-divider"></div>
+    <textarea
+      class="chat-input"
+      id="chatInput"
+      placeholder="Ask MATE anything…"
+      rows="1"
+      onkeydown="handleKeyDown(event)"
+      oninput="autoResize(this)"
+    ></textarea>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Account</div>
-      <button class="nav-item" onclick="showPanel('profile')">
-        <span class="nav-icon">👤</span> Profile
-      </button>
-      <button class="nav-item" onclick="signOut()">
-        <span class="nav-icon">↩</span> Sign Out
-      </button>
-    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
 
-  </aside>
+<script>
+  // ─────────────────────────────────────────────
+  // CONFIG
+  // ─────────────────────────────────────────────
+  const EDGE_FUNCTION_URL = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat';
+  const SUPABASE_URL = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your actual anon key
 
-  <!-- ══ MAIN ══ -->
-  <main class="main">
+  // ─────────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────────
+  let player = null;
+  let sessionId = crypto.randomUUID();
+  let selectedAgent = 'auto';
+  let isLoading = false;
+  let pdfBase64 = null;
+  let pdfName = null;
+  let hasStartedChat = false;
 
-    <!-- OVERVIEW PANEL -->
-    <div class="panel active" id="panel-overview">
-      <div>
-        <div class="section-title">Good morning, <em>Player.</em></div>
-        <div class="section-sub">Here's your career intelligence for today.</div>
-      </div>
+  // ─────────────────────────────────────────────
+  // INIT: Load player from Supabase Auth
+  // ─────────────────────────────────────────────
+  async function init() {
+    // Get session from localStorage (set by auth page)
+    const sessionData = localStorage.getItem('mate_session');
+    if (!sessionData) {
+      window.location.href = 'mate-auth.html';
+      return;
+    }
 
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">Contract</div>
-          <div class="stat-value" id="statContract">—</div>
-          <div class="stat-note" id="statContractNote">Loading...</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">MATE Sessions</div>
-          <div class="stat-value">3</div>
-          <div class="stat-note">This week</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Reports</div>
-          <div class="stat-value">1</div>
-          <div class="stat-note">Generated</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Market Value</div>
-          <div class="stat-value">—</div>
-          <div class="stat-note">Ask MATE Analyst</div>
-        </div>
-      </div>
+    try {
+      const session = JSON.parse(sessionData);
 
-      <div>
-        <div class="panel-header">
-          <div class="panel-header-title">Quick Actions</div>
-        </div>
-        <div class="quick-actions">
-          <div class="action-card" onclick="openChat('legal', 'My contract expires in 5 months. What should I do?')">
-            <div class="action-icon">⚖️</div>
-            <div>
-              <div class="action-title">Review My Contract</div>
-              <div class="action-desc">Get FIFA-compliant legal advice on your current deal and options.</div>
-            </div>
-          </div>
-          <div class="action-card" onclick="openChat('coach', 'I need a weekly training program for a defensive midfielder.')">
-            <div class="action-icon">🏋️</div>
-            <div>
-              <div class="action-title">Build Training Plan</div>
-              <div class="action-desc">Get a personalised weekly program from your AI Performance Coach.</div>
-            </div>
-          </div>
-          <div class="action-card" onclick="openChat('analyst', 'What is my market value and which clubs should I target?')">
-            <div class="action-icon">📊</div>
-            <div>
-              <div class="action-title">Transfer Analysis</div>
-              <div class="action-desc">Market value, club fit scores, and your next career move.</div>
-            </div>
-          </div>
-          <div class="action-card" onclick="openChat('concierge', 'I need help with accommodation near my training ground.')">
-            <div class="action-icon">🏠</div>
-            <div>
-              <div class="action-title">Life & Relocation</div>
-              <div class="action-desc">Travel, accommodation, schools, and daily life support.</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      // Fetch player profile
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/players?auth_user_id=eq.${session.user.id}&select=*`,
+        {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-      <div>
-        <div class="panel-header">
-          <div class="panel-header-title">Contract Status</div>
-          <div class="panel-header-action" onclick="openChat('legal', 'What are my options with my contract expiring soon?')">Ask Legal Advisor →</div>
-        </div>
-        <div class="contract-card">
-          <div class="stat-label">Current Club</div>
-          <div class="contract-expires" id="overviewClub">—</div>
-          <div style="font-size:13px; color:var(--t3); margin-bottom:12px;" id="overviewExpiry">Contract expires: —</div>
-          <div class="contract-bar-wrap"><div class="contract-bar"></div></div>
-          <div class="contract-warning">⚠️ Contract enters final period — consider your options now.</div>
-        </div>
-      </div>
+      if (!res.ok) throw new Error('Failed to fetch player');
+      const players = await res.json();
 
-      <div>
-        <div class="panel-header"><div class="panel-header-title">Recent Activity</div></div>
-        <div class="activity-list" id="activityList">
-          <div class="activity-item">
-            <div class="activity-icon">⚖️</div>
-            <div class="activity-text"><strong>Legal Advisor</strong> — Contract analysis ready</div>
-            <div class="activity-time">Today</div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">🏋️</div>
-            <div class="activity-text"><strong>Performance Coach</strong> — Training program generated</div>
-            <div class="activity-time">Today</div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">👤</div>
-            <div class="activity-text"><strong>Profile</strong> — Onboarding completed</div>
-            <div class="activity-time">Today</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHAT PANEL -->
-    <div class="chat-panel" id="panel-chat">
-
-      <div class="agent-bar">
-<button class="agent-btn" id="agent-legal" onclick="selectAgent('legal', this)">⚖️ Legal Advisor</button>
-        <button class="agent-btn" id="agent-coach" onclick="selectAgent('coach', this)">🏋️ Performance Coach</button>
-        <button class="agent-btn" id="agent-analyst" onclick="selectAgent('analyst', this)">📊 Transfer Analyst</button>
-        <button class="agent-btn" id="agent-concierge" onclick="selectAgent('concierge', this)">🏠 Concierge</button>
-      </div>
-
-      <div class="messages" id="messages">
-        <div class="msg-wrap mate">
-          <div class="msg-agent-label">⚽ MATE AI</div>
-          <div class="msg-bubble">
-            Hello. I'm MATE — your personal football intelligence agent.<br><br>
-            Choose your specialist above to get started:<br>
-            ⚖️ <strong>Legal Advisor</strong> — contracts, FIFA regulations, agent fees<br>
-            🏋️ <strong>Performance Coach</strong> — training, fitness, recovery<br>
-            📊 <strong>Transfer Analyst</strong> — market value, club fit, transfer strategy<br>
-            🏠 <strong>Concierge</strong> — accommodation, travel, schools, relocation<br><br>
-            You can also upload a contract or document using the 📎 button below.
-          </div>
-        </div>
-      </div>
-
-      <div class="typing-wrap" id="typingWrap" style="padding: 0 24px 12px;">
-        <div class="typing-bubble">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-        </div>
-      </div>
-
-      <!-- Input area with file attachment -->
-      <div class="input-area">
-        <!-- File preview strip -->
-        <div class="file-preview" id="filePreview">
-          <span>📎</span>
-          <span class="file-preview-name" id="filePreviewName">—</span>
-          <span class="file-preview-size" id="filePreviewSize"></span>
-          <button class="file-preview-remove" onclick="clearFile()" title="Remove file">×</button>
-        </div>
-
-        <div class="input-row">
-          <!-- Attach button -->
-          <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Attach contract or document">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M15.5 8.5l-7 7a4.5 4.5 0 01-6.364-6.364l7-7a3 3 0 014.243 4.243l-7 7a1.5 1.5 0 01-2.122-2.122l6.293-6.293" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)" />
-
-          <textarea
-            class="chat-input"
-            id="chatInput"
-            placeholder="Ask MATE anything about your career..."
-            rows="1"
-            onkeydown="handleKey(event)"
-            oninput="autoResize(this)"
-          ></textarea>
-
-          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M2 9h14M9 2l7 7-7 7" stroke="#794DC6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- REPORTS PANEL -->
-    <div class="panel" id="panel-reports">
-      <div class="section-title">Reports</div>
-      <div class="section-sub">AI-generated reports and assessments.</div>
-      <div class="activity-list">
-        <div class="activity-item">
-          <div class="activity-icon">📋</div>
-          <div class="activity-text"><strong>PDDR Assessment</strong> — Fibonacci Path diagnostic</div>
-          <div class="activity-time">Pending</div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-icon">⚖️</div>
-          <div class="activity-text"><strong>Agent Fee Analysis</strong> — FIFA compliance check</div>
-          <div class="activity-time">Today</div>
-        </div>
-      </div>
-      <div style="text-align:center; padding:32px; color:var(--t4); font-size:14px;">
-        More reports generated through MATE Chat
-      </div>
-    </div>
-
-    <!-- CONTRACT PANEL -->
-    <div class="panel" id="panel-contract">
-      <div class="section-title">Contract <em>Overview</em></div>
-      <div class="section-sub">Your current contract status and legal intelligence.</div>
-      <div class="contract-card">
-        <div class="stat-label">Current Club</div>
-        <div class="contract-expires" id="contractClub">—</div>
-        <div style="font-size:13px;color:var(--t3);margin:6px 0 14px;" id="contractExpiry">—</div>
-        <div class="contract-bar-wrap"><div class="contract-bar"></div></div>
-        <div class="contract-warning">⚠️ Speak to Legal Advisor about your options.</div>
-      </div>
-      <button class="action-card" onclick="openChat('legal', 'My contract situation needs legal review. What are my options?')" style="width:100%;">
-        <div class="action-icon">⚖️</div>
-        <div>
-          <div class="action-title">Ask Legal Advisor</div>
-          <div class="action-desc">Get FIFA-compliant advice on your contract situation and next steps.</div>
-        </div>
-      </button>
-    </div>
-
-    <!-- TRAINING PANEL -->
-    <div class="panel" id="panel-training">
-      <div class="section-title">Training <em>Programs</em></div>
-      <div class="section-sub">Position-specific development from your AI Coach.</div>
-      <button class="action-card" onclick="openChat('coach', 'I need a weekly training program optimized for my position and level.')" style="width:100%;">
-        <div class="action-icon">🏋️</div>
-        <div>
-          <div class="action-title">Generate Training Plan</div>
-          <div class="action-desc">Personalized weekly program based on your position and fitness level.</div>
-        </div>
-      </button>
-      <button class="action-card" onclick="openChat('coach', 'How can I improve my speed and explosive power?')" style="width:100%;">
-        <div class="action-icon">⚡</div>
-        <div>
-          <div class="action-title">Speed & Power Development</div>
-          <div class="action-desc">Sprint mechanics, acceleration, and explosive movement training.</div>
-        </div>
-      </button>
-    </div>
-
-    <!-- TRANSFERS PANEL -->
-    <div class="panel" id="panel-transfers">
-      <div class="section-title">Transfer <em>Intelligence</em></div>
-      <div class="section-sub">Market value, club fit, and your next move.</div>
-      <button class="action-card" onclick="openChat('analyst', 'What is my current market value and which clubs would be the best fit for me?')" style="width:100%;">
-        <div class="action-icon">📊</div>
-        <div>
-          <div class="action-title">Market Value Assessment</div>
-          <div class="action-desc">Estimated value based on age, position, league level, and performance.</div>
-        </div>
-      </button>
-      <button class="action-card" onclick="openChat('analyst', 'Which clubs would be the best tactical fit for my profile?')" style="width:100%;">
-        <div class="action-icon">🎯</div>
-        <div>
-          <div class="action-title">Club Fit Analysis</div>
-          <div class="action-desc">Tactical system compatibility and playing time projection.</div>
-        </div>
-      </button>
-    </div>
-
-    <!-- PROFILE PANEL -->
-    <div class="panel" id="panel-profile">
-      <div class="section-title">My <em>Profile</em></div>
-      <div class="section-sub">Your player information stored in MATE AI.</div>
-      <div class="contract-card" id="profileCard">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" id="profileGrid">
-          <div style="color:var(--t4); font-size:13px;">Loading profile...</div>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <script>
-    // ── SUPABASE ──
-    const { createClient } = supabase;
-    const sb = createClient(
-      'https://zlkzjeaojpxzccpovygk.supabase.co',
-      'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn'
-    );
-
-    const CONFIG = {
-      webhookUrl: 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat',
-      playerId:   null,
-      sessionId:  'sess_' + Date.now(),
-      language:   'en'
-    };
-
-    // ── FILE STATE ──
-    let selectedFile = null;
-    let selectedFileContent = null;
-
-    // ── AUTH CHECK + LOAD PLAYER PROFILE ──
-    async function initAuth() {
-      const { data: { session } } = await sb.auth.getSession();
-
-      // Hard check — must have real authenticated user with email
-      if (!session || !session.user || !session.user.email) {
-        localStorage.clear();
-        window.location.href = 'mate-auth.html';
-        return;
-      }
-
-      const { data: profile, error: profileError } = await sb.from('players')
-        .select('*').eq('auth_user_id', session.user.id).single();
-
-      // No profile found → send to onboarding
-      if (profileError || !profile) {
+      if (!players || players.length === 0) {
         window.location.href = 'mate-onboarding.html';
         return;
       }
 
-      if (profile) {
-        CONFIG.playerId = profile.id;
-        CONFIG.language = profile.language_preference || 'en';
+      player = players[0];
+      populateStats();
+      setWelcomeMessage();
 
-        const firstName = profile.full_name ? profile.full_name.split(' ')[0] : 'Player';
-        const fullName  = profile.full_name || 'Player';
-
-        document.getElementById('topPlayerName').textContent = fullName;
-        document.getElementById('sidePlayerName').textContent = fullName;
-        document.getElementById('sidePlayerClub').textContent =
-          (profile.current_club || '—') + (profile.current_league ? ' · ' + profile.current_league : '');
-        if (document.getElementById('sidePos'))
-          document.getElementById('sidePos').textContent = profile.position_primary || '—';
-        if (document.getElementById('sideNat'))
-          document.getElementById('sideNat').textContent = profile.nationality || '—';
-
-        // Overview panel
-        const hour = new Date().getHours();
-        const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-        const greetEl = document.querySelector('.section-title');
-        if (greetEl) greetEl.innerHTML = greet + ', <em>' + firstName + '.</em>';
-
-        const club = profile.current_club || '—';
-        const expiry = profile.contract_expires ? 'Contract expires: ' + profile.contract_expires : 'Contract status unknown';
-        document.getElementById('overviewClub').textContent = club;
-        document.getElementById('overviewExpiry').textContent = expiry;
-        document.getElementById('contractClub').textContent = club;
-        document.getElementById('contractExpiry').textContent = expiry;
-        document.getElementById('statContract').textContent = profile.contract_expires ? profile.contract_expires.slice(0,7) : '—';
-        document.getElementById('statContractNote').textContent = club;
-
-        // Welcome message personalisation
-        const wb = document.querySelector('.msg-bubble');
-        if (wb) wb.innerHTML = 'Hello ' + firstName + '. I\'m MATE — your personal football intelligence agent.<br><br>Choose your specialist above to get started:<br>⚖️ <strong>Legal Advisor</strong> — contracts, FIFA regulations, agent fees<br>🏋️ <strong>Performance Coach</strong> — training, fitness, recovery<br>📊 <strong>Transfer Analyst</strong> — market value, club fit, transfer strategy<br>🏠 <strong>Concierge</strong> — accommodation, travel, schools, relocation<br><br>You can also upload a contract or document using the 📎 button below.';
-
-        // Profile panel
-        const grid = document.getElementById('profileGrid');
-        if (grid) {
-          grid.innerHTML = `
-            <div><div class="stat-label">Full Name</div><div style="font-size:15px;margin-top:4px;">${profile.full_name || '—'}</div></div>
-            <div><div class="stat-label">Date of Birth</div><div style="font-size:15px;margin-top:4px;">${profile.date_of_birth || '—'}</div></div>
-            <div><div class="stat-label">Nationality</div><div style="font-size:15px;margin-top:4px;">${profile.nationality || '—'}</div></div>
-            <div><div class="stat-label">Position</div><div style="font-size:15px;margin-top:4px;">${profile.position_primary || '—'}</div></div>
-            <div><div class="stat-label">Current Club</div><div style="font-size:15px;margin-top:4px;">${profile.current_club || '—'}</div></div>
-            <div><div class="stat-label">Agent</div><div style="font-size:15px;margin-top:4px;">${profile.agent_name || '—'}</div></div>
-            <div><div class="stat-label">Height / Weight</div><div style="font-size:15px;margin-top:4px;">${profile.height_cm ? profile.height_cm + 'cm' : '—'} / ${profile.weight_kg ? profile.weight_kg + 'kg' : '—'}</div></div>
-            <div><div class="stat-label">Dominant Foot</div><div style="font-size:15px;margin-top:4px;">${profile.dominant_foot || '—'}</div></div>
-          `;
-        }
-      }
-    }
-
-    // ── SIGN OUT ──
-    async function signOut() {
-      await sb.auth.signOut();
+    } catch (err) {
+      console.error('Init error:', err);
       window.location.href = 'mate-auth.html';
     }
+  }
 
-    // ── FILE HANDLING ──
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+  // ─────────────────────────────────────────────
+  // POPULATE STATS BAR
+  // ─────────────────────────────────────────────
+  function populateStats() {
+    if (!player) return;
 
-      selectedFile = file;
-      const sizeMB = (file.size / 1024 / 1024).toFixed(1);
-      const sizeStr = sizeMB < 0.1 ? (file.size / 1024).toFixed(0) + ' KB' : sizeMB + ' MB';
-
-      document.getElementById('filePreviewName').textContent = file.name;
-      document.getElementById('filePreviewSize').textContent = sizeStr;
-      document.getElementById('filePreview').classList.add('visible');
-
-      // Read file content for text-based files
-      if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-        const reader = new FileReader();
-        reader.onload = (e) => { selectedFileContent = e.target.result; };
-        reader.readAsText(file);
-      } else {
-        // For PDF/DOC — send file name + note to MATE
-        selectedFileContent = `[File attached: ${file.name} (${sizeStr}). Please analyse this document.]`;
-      }
-
-      // Focus input
-      document.getElementById('chatInput').focus();
-    }
-
-    function clearFile() {
-      selectedFile = null;
-      selectedFileContent = null;
-      document.getElementById('fileInput').value = '';
-      document.getElementById('filePreview').classList.remove('visible');
-    }
-
-    // ── AGENTS ──
-    const AGENTS = {
-      'auto':      { label: 'MATE AI',           emoji: '🤖' },
-      'legal':     { label: 'Legal Advisor',      emoji: '⚖️' },
-      'coach':     { label: 'Performance Coach',  emoji: '🏋️' },
-      'analyst':   { label: 'Transfer Analyst',   emoji: '📊' },
-      'concierge': { label: 'Concierge',          emoji: '🏠' }
-    };
-
-    let currentAgent = 'legal';
-    let isLoading = false;
-
-    // ── PANEL NAVIGATION ──
-    function showPanel(id) {
-      document.querySelectorAll('.panel, .chat-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      const target = document.getElementById('panel-' + id);
-      if (target) target.classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(item => {
-        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + id + "'")) {
-          item.classList.add('active');
-        }
-      });
-      if (target) target.scrollTop = 0;
-    }
-
-    // ── AGENT SELECTOR ──
-    function selectAgent(agent, btn) {
-      currentAgent = agent;
-      document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    // ── OPEN CHAT WITH PRE-FILLED MESSAGE ──
-    function openChat(agent, message) {
-      showPanel('chat');
-      const agentBtn = document.getElementById('agent-' + agent);
-      if (agentBtn) selectAgent(agent, agentBtn);
-      setTimeout(() => {
-        document.getElementById('chatInput').value = message;
-        sendMessage();
-      }, 100);
-    }
-
-    // ── SEND MESSAGE ──
-    async function sendMessage() {
-      if (isLoading) return;
-      const input = document.getElementById('chatInput');
-      const msg = input.value.trim();
-      if (!msg && !selectedFile) return;
-
-      const messageText = msg || 'Please analyse the attached document.';
-
-      // Show user message
-      if (selectedFile) {
-        addFileMessage(selectedFile.name);
-      }
-      if (msg) {
-        addMessage('user', msg, null);
-      }
-
-      input.value = '';
-      input.style.height = 'auto';
-
-      isLoading = true;
-      document.getElementById('sendBtn').disabled = true;
-      document.getElementById('typingWrap').classList.add('visible');
-      scrollToBottom();
-
-      // Build full message with file content if present
-      let fullMessage = messageText;
-      if (selectedFileContent) {
-        fullMessage = messageText + '\n\n--- ATTACHED DOCUMENT ---\n' + selectedFileContent;
-      }
-
-      // Add keyword prefix for router
-      const keywords = {
-        legal:     'contract ',
-        coach:     'training ',
-        analyst:   'transfer ',
-        concierge: 'accommodation '
-      };
-      const routedMessage = currentAgent !== 'auto'
-        ? keywords[currentAgent] + fullMessage
-        : fullMessage;
-
-      const payload = {
-        player_id:  CONFIG.playerId,
-        session_id: CONFIG.sessionId,
-        message:    fullMessage,
-        agent:      currentAgent === 'auto' ? 'legal' : currentAgent,
-        language:   CONFIG.language
-      };
-
-      // Clear file state
-      clearFile();
-
-      try {
-        const res = await fetch(CONFIG.webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        const text = data.response || data.error || 'I encountered an issue. Please try again.';
-        const agentInfo = AGENTS[currentAgent === 'auto' ? 'legal' : currentAgent] || AGENTS['legal'];
-
-        addMessage('mate', text, agentInfo);
-        addActivity(agentInfo);
-
-      } catch (err) {
-        addMessage('mate', 'Connection error. Please check your internet connection and try again.', AGENTS['legal']);
-      }
-
-      isLoading = false;
-      document.getElementById('sendBtn').disabled = false;
-      document.getElementById('typingWrap').classList.remove('visible');
-      scrollToBottom();
-    }
-
-    // ── DETECT AGENT ──
-    function detectAgent(msg) {
-      const m = msg.toLowerCase();
-      if (/contract|fee|fifa|salary|clause|agent|legal|registration/.test(m)) return 'legal';
-      if (/training|fitness|injury|workout|recovery|speed|strength|drill/.test(m)) return 'coach';
-      if (/transfer|market|value|club|scout|signing|move/.test(m)) return 'analyst';
-      if (/accommodation|travel|school|visa|hotel|flight|family|relocation|apartment|rent/.test(m)) return 'concierge';
-      return 'auto';
-    }
-
-    // ── ADD FILE MESSAGE ──
-    function addFileMessage(fileName) {
-      const messages = document.getElementById('messages');
-      const wrap = document.createElement('div');
-      wrap.className = 'msg-wrap user';
-      wrap.innerHTML = `
-        <div class="msg-file">
-          <span class="msg-file-icon">📎</span>
-          <div>
-            <div class="msg-file-name">${fileName}</div>
-            <div class="msg-file-size">Sent for analysis</div>
-          </div>
-        </div>
-      `;
-      messages.appendChild(wrap);
-    }
-
-    // ── ADD MESSAGE ──
-    function addMessage(role, text, agentInfo) {
-      const messages = document.getElementById('messages');
-      const wrap = document.createElement('div');
-      wrap.className = 'msg-wrap ' + role;
-
-      if (role === 'mate' && agentInfo) {
-        const label = document.createElement('div');
-        label.className = 'msg-agent-label';
-        label.textContent = agentInfo.emoji + ' ' + agentInfo.label;
-        wrap.appendChild(label);
-      }
-
-      const bubble = document.createElement('div');
-      bubble.className = 'msg-bubble';
-      bubble.innerHTML = formatText(text);
-      wrap.appendChild(bubble);
-      messages.appendChild(wrap);
-    }
-
-    // ── FORMAT TEXT ──
-    function formatText(text) {
-      if (!text) return '';
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>')
-        .replace(/^- (.+)/gm, '• $1');
-    }
-
-    // ── ADD ACTIVITY ──
-    function addActivity(agentInfo) {
-      const list = document.getElementById('activityList');
-      if (!list) return;
-      const item = document.createElement('div');
-      item.className = 'activity-item';
-      item.innerHTML = `
-        <div class="activity-icon">${agentInfo.emoji}</div>
-        <div class="activity-text"><strong>${agentInfo.label}</strong> — New conversation</div>
-        <div class="activity-time">Just now</div>
-      `;
-      list.insertBefore(item, list.firstChild);
-    }
-
-    function scrollToBottom() {
-      const messages = document.getElementById('messages');
-      setTimeout(() => { messages.scrollTop = messages.scrollHeight; }, 50);
-    }
-
-    function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    }
-
-    function autoResize(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-    }
-
-    // ── INIT ──
-    document.addEventListener('DOMContentLoaded', () => {
-      initAuth();
-      showPanel('overview');
-      scrollToBottom();
+    // Remove loading shimmer
+    document.querySelectorAll('.stat-value.loading').forEach(el => {
+      el.classList.remove('loading');
     });
-  </script>
 
+    document.getElementById('statName').textContent =
+      player.full_name?.split(' ')[0] ?? '—';
+    document.getElementById('statClub').textContent =
+      player.current_club ?? '—';
+    document.getElementById('statPosition').textContent =
+      player.position_primary ?? '—';
+
+    // Contract expiry — flag if within 6 months
+    const contractEl = document.getElementById('statContract');
+    if (player.contract_expires) {
+      const expiry = new Date(player.contract_expires);
+      const now = new Date();
+      const monthsLeft = (expiry - now) / (1000 * 60 * 60 * 24 * 30);
+      contractEl.textContent = player.contract_expires;
+      if (monthsLeft < 6) contractEl.classList.add('urgent');
+    } else {
+      contractEl.textContent = '—';
+    }
+
+    document.getElementById('statAgent').textContent =
+      player.agent_name ?? '—';
+  }
+
+  // ─────────────────────────────────────────────
+  // WELCOME MESSAGE
+  // ─────────────────────────────────────────────
+  function setWelcomeMessage() {
+    if (!player) return;
+    const firstName = player.full_name?.split(' ')[0] ?? 'there';
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+    document.querySelector('.welcome-title').textContent = `${greeting}, ${firstName}`;
+    document.getElementById('welcomeSub').textContent =
+      'Your personal football intelligence agent. Ask about your contract, training, market value, or anything you need.';
+  }
+
+  // ─────────────────────────────────────────────
+  // AGENT SELECTOR
+  // ─────────────────────────────────────────────
+  function selectAgent(el, agent) {
+    document.querySelectorAll('.agent-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    selectedAgent = agent;
+  }
+
+  // ─────────────────────────────────────────────
+  // PDF HANDLING
+  // ─────────────────────────────────────────────
+  function handlePDFSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('PDF must be under 5MB');
+      return;
+    }
+
+    pdfName = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Extract base64 data (remove data:application/pdf;base64, prefix)
+      pdfBase64 = e.target.result.split(',')[1];
+
+      // Show attached indicator
+      document.getElementById('pdfAttachedName').textContent = file.name;
+      document.getElementById('pdfAttached').classList.add('visible');
+      document.getElementById('pdfBtn').classList.add('has-pdf');
+
+      // Auto-select Legal agent for PDF
+      const legalPill = document.querySelector('[data-agent="legal"]');
+      selectAgent(legalPill, 'legal');
+
+      // Set placeholder
+      document.getElementById('chatInput').placeholder =
+        'Ask MATE to analyse this contract…';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removePDF() {
+    pdfBase64 = null;
+    pdfName = null;
+    document.getElementById('pdfAttached').classList.remove('visible');
+    document.getElementById('pdfBtn').classList.remove('has-pdf');
+    document.getElementById('pdfFileInput').value = '';
+    document.getElementById('chatInput').placeholder = 'Ask MATE anything…';
+  }
+
+  // ─────────────────────────────────────────────
+  // SEND MESSAGE
+  // ─────────────────────────────────────────────
+  function sendQuick(text) {
+    document.getElementById('chatInput').value = text;
+    sendMessage();
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+
+    if ((!message && !pdfBase64) || isLoading || !player) return;
+
+    isLoading = true;
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('sendBtn').disabled = true;
+
+    // Hide welcome state on first message
+    if (!hasStartedChat) {
+      document.getElementById('welcomeState').style.display = 'none';
+      document.getElementById('quickActions').style.display = 'none';
+      hasStartedChat = true;
+    }
+
+    const displayMessage = message || `Analyse this contract: ${pdfName}`;
+
+    // Show user message
+    appendUserMessage(displayMessage);
+
+    // Clear PDF after sending
+    const currentPdfBase64 = pdfBase64;
+    const currentPdfName = pdfName;
+    if (pdfBase64) removePDF();
+
+    // Show typing indicator
+    const typingEl = appendTyping();
+
+    try {
+      const payload = {
+        message: displayMessage,
+        player_id: player.id,
+        session_id: sessionId,
+        agent_type: selectedAgent === 'auto' ? null : selectedAgent,
+      };
+
+      if (currentPdfBase64) {
+        payload.pdf_base64 = currentPdfBase64;
+        payload.pdf_name = currentPdfName;
+      }
+
+      const res = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      typingEl.remove();
+
+      if (data.error) {
+        appendMATEMessage('I encountered an issue. Please try again.', null, false);
+      } else {
+        appendMATEMessage(
+          data.response,
+          data.agent_type,
+          data.had_real_time_data
+        );
+      }
+    } catch (err) {
+      typingEl.remove();
+      appendMATEMessage('Connection issue. Please check your internet and try again.', null, false);
+    }
+
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+
+  // ─────────────────────────────────────────────
+  // RENDER MESSAGES
+  // ─────────────────────────────────────────────
+  function appendUserMessage(text) {
+    const chatArea = document.getElementById('chatArea');
+    const el = document.createElement('div');
+    el.className = 'msg user';
+    el.innerHTML = `<div class="msg-bubble">${escapeHTML(text)}</div>`;
+    chatArea.appendChild(el);
+    scrollToBottom();
+  }
+
+  function appendMATEMessage(text, agentType, hadRealTimeData) {
+    const chatArea = document.getElementById('chatArea');
+    const el = document.createElement('div');
+    el.className = 'msg assistant';
+
+    const agentLabels = {
+      legal: '⚖️ Legal Advisor',
+      coach: '🏋️ Performance Coach',
+      analyst: '📊 Transfer Analyst',
+      concierge: '🏠 Concierge',
+    };
+    const agentLabel = agentLabels[agentType] ?? '✦ MATE';
+
+    const rtBadge = hadRealTimeData
+      ? `<div class="rt-badge"><div class="rt-dot"></div>Live data</div>`
+      : '';
+
+    el.innerHTML = `
+      <div class="msg-meta">${agentLabel}</div>
+      <div class="msg-bubble">${formatMATEResponse(text)}</div>
+      ${rtBadge}
+    `;
+    chatArea.appendChild(el);
+    scrollToBottom();
+  }
+
+  function appendTyping() {
+    const chatArea = document.getElementById('chatArea');
+    const el = document.createElement('div');
+    el.className = 'typing-indicator';
+    el.innerHTML = `
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    `;
+    chatArea.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  // ─────────────────────────────────────────────
+  // TEXT FORMATTING
+  // ─────────────────────────────────────────────
+  function formatMATEResponse(text) {
+    // Convert markdown-lite to HTML for premium rendering
+    return text
+      // Headers: ### Header
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      // Bold: **text**
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // Italic: *text*
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Numbered lists
+      .replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
+      // Bullet lists
+      .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+      // Wrap consecutive <li> in <ol>/<ul>
+      .replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`)
+      // Paragraphs (double newline)
+      .replace(/\n\n/g, '</p><p>')
+      // Single newlines
+      .replace(/\n/g, '<br/>')
+      // Wrap in paragraph
+      .replace(/^(.+)$/, '<p>$1</p>')
+      .replace(/<p><\/p>/g, '');
+  }
+
+  function escapeHTML(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function scrollToBottom() {
+    const chatArea = document.getElementById('chatArea');
+    setTimeout(() => {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }, 50);
+  }
+
+  // ─────────────────────────────────────────────
+  // LOGOUT
+  // ─────────────────────────────────────────────
+  function handleLogout() {
+    localStorage.removeItem('mate_session');
+    window.location.href = 'mate-auth.html';
+  }
+
+  // ─────────────────────────────────────────────
+  // START
+  // ─────────────────────────────────────────────
+  init();
+</script>
 </body>
 </html>
