@@ -590,114 +590,58 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ─────────────────────────────────────────────
-  // CONFIG — замін SUPABASE_ANON_KEY на свій
+  // CONFIG
   // ─────────────────────────────────────────────
   const EDGE_FUNCTION_URL = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat';
-  const SUPABASE_URL = 'https://zlkzjeaojpxzccpovygk.supabase.co';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ⚠️ ЗАМІН ЦЕ
+
+  // Supabase SDK — той самий що в v2
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://zlkzjeaojpxzccpovygk.supabase.co',
+    'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn'
+  );
 
   // ─────────────────────────────────────────────
   // STATE
   // ─────────────────────────────────────────────
   let player = null;
-  let sessionId = crypto.randomUUID();
+  let sessionId = 'sess_' + Date.now();
   let selectedAgent = 'auto';
   let isLoading = false;
   let pdfBase64 = null;
   let pdfName = null;
   let hasStartedChat = false;
-  let supabaseClient = null;
 
   // ─────────────────────────────────────────────
-  // INIT: Load player via Supabase SDK (no loop)
+  // INIT — точно той самий auth патерн що в v2
   // ─────────────────────────────────────────────
   async function init() {
-    // Захист від redirect loop
-    if (SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-      document.body.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:sans-serif;color:white;">
-          <div style="font-size:32px">⚠️</div>
-          <div style="font-size:16px;opacity:0.8">SUPABASE_ANON_KEY not set in dashboard HTML</div>
-          <div style="font-size:13px;opacity:0.5">Open mate-dashboard-v3.html and replace YOUR_SUPABASE_ANON_KEY</div>
-        </div>`;
+    const { data: { session } } = await sb.auth.getSession();
+
+    // Hard check — must have real authenticated user with email
+    if (!session || !session.user || !session.user.email) {
+      localStorage.clear();
+      window.location.href = 'mate-auth.html';
       return;
     }
 
-    try {
-      // Ініціалізуємо Supabase SDK
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data: profile, error: profileError } = await sb
+      .from('players')
+      .select('*')
+      .eq('auth_user_id', session.user.id)
+      .single();
 
-      // Читаємо сесію через SDK — працює з будь-яким ключем localStorage
-      const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-
-      if (sessionError || !session) {
-        // Спробуємо також старий ключ mate_session
-        const legacyData = localStorage.getItem('mate_session');
-        if (legacyData) {
-          try {
-            const legacy = JSON.parse(legacyData);
-            // Відновлюємо сесію з legacy токену
-            const { data: restored } = await supabaseClient.auth.setSession({
-              access_token: legacy.access_token,
-              refresh_token: legacy.refresh_token,
-            });
-            if (!restored.session) throw new Error('Legacy session invalid');
-          } catch {
-            window.location.href = 'mate-auth.html';
-            return;
-          }
-        } else {
-          window.location.href = 'mate-auth.html';
-          return;
-        }
-      }
-
-      // Отримуємо актуальну сесію після відновлення
-      const { data: { session: activeSession } } = await supabaseClient.auth.getSession();
-      if (!activeSession) {
-        window.location.href = 'mate-auth.html';
-        return;
-      }
-
-      // Fetch player profile
-      const { data: players, error: playerError } = await supabaseClient
-        .from('players')
-        .select('*')
-        .eq('auth_user_id', activeSession.user.id)
-        .limit(1);
-
-      if (playerError) {
-        console.error('Player fetch error:', playerError);
-        // Не редіректимо — показуємо дашборд без профілю
-        player = { full_name: activeSession.user.email?.split('@')[0] ?? 'Player' };
-        populateStats();
-        setWelcomeMessage();
-        return;
-      }
-
-      if (!players || players.length === 0) {
-        window.location.href = 'mate-onboarding.html';
-        return;
-      }
-
-      player = players[0];
-      populateStats();
-      setWelcomeMessage();
-
-    } catch (err) {
-      console.error('Init error:', err);
-      // Не робимо redirect при помилці — показуємо повідомлення
-      document.body.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:sans-serif;color:white;background:#794DC6;">
-          <div style="font-size:32px">⚽</div>
-          <div style="font-size:16px;opacity:0.8">Connection error</div>
-          <div style="font-size:13px;opacity:0.5">${err.message}</div>
-          <button onclick="window.location.href='mate-auth.html'" style="margin-top:8px;padding:10px 24px;background:white;color:#794DC6;border:none;border-radius:100px;cursor:pointer;font-size:14px;">Back to login</button>
-        </div>`;
+    if (profileError || !profile) {
+      window.location.href = 'mate-onboarding.html';
+      return;
     }
+
+    player = profile;
+    populateStats();
+    setWelcomeMessage();
   }
 
   // ─────────────────────────────────────────────
@@ -990,8 +934,8 @@
   // ─────────────────────────────────────────────
   // LOGOUT
   // ─────────────────────────────────────────────
-  function handleLogout() {
-    localStorage.removeItem('mate_session');
+  async function handleLogout() {
+    await sb.auth.signOut();
     window.location.href = 'mate-auth.html';
   }
 
