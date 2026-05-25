@@ -204,6 +204,58 @@
     }
     .sidebar-signout:hover { color: var(--t2); }
 
+    /* ── CHAT ITEM DELETE MENU ── */
+    .chat-history-item {
+      position: relative;
+    }
+    .chat-item-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--t4);
+      cursor: pointer;
+      padding: 3px 5px;
+      border-radius: 5px;
+      font-size: 13px;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: color 0.15s, background 0.15s;
+    }
+    .chat-history-item:hover .chat-item-menu-btn { display: flex; }
+    .chat-item-menu-btn:hover { color: var(--t1); background: rgba(255,255,255,0.1); }
+
+    .chat-item-dropdown {
+      display: none;
+      position: absolute;
+      right: 8px;
+      top: 32px;
+      background: #3d2680;
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 4px;
+      z-index: 300;
+      min-width: 130px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .chat-item-dropdown.open { display: block; }
+    .chat-item-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 10px;
+      background: none;
+      border: none;
+      border-radius: 7px;
+      color: rgba(255,120,120,0.9);
+      font-family: var(--font-b);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-align: left;
+    }
+    .chat-item-dropdown-btn:hover { background: rgba(255,100,100,0.12); }
+
     /* Mobile overlay */
     .sidebar-overlay {
       display: none;
@@ -858,8 +910,14 @@
           <div class="chat-history-text">
             <div class="chat-history-title">${escapeHTML(title)}</div>
             <div class="chat-history-time">${time}</div>
+          </div>
+          <button class="chat-item-menu-btn" onclick="toggleItemMenu(event, '${s.session_id}')">☰</button>
+          <div class="chat-item-dropdown" id="menu-${s.session_id}">
+            <button class="chat-item-dropdown-btn" onclick="deleteChat(event, '${s.session_id}')">
+              🗑 Delete chat
+            </button>
           </div>`;
-        item.onclick = () => loadSession(s.session_id, title);
+        item.onclick = (e) => { if (!e.target.closest('.chat-item-menu-btn, .chat-item-dropdown')) loadSession(s.session_id, title); };
         container.appendChild(item);
       });
     });
@@ -1104,8 +1162,14 @@
       <div class="chat-history-text">
         <div class="chat-history-title">${escapeHTML(title)}</div>
         <div class="chat-history-time">${time}</div>
+      </div>
+      <button class="chat-item-menu-btn" onclick="toggleItemMenu(event, '${sessionId}')">☰</button>
+      <div class="chat-item-dropdown" id="menu-${sessionId}">
+        <button class="chat-item-dropdown-btn" onclick="deleteChat(event, '${sessionId}')">
+          🗑 Delete chat
+        </button>
       </div>`;
-    item.onclick = () => loadSession(sessionId, title);
+    item.onclick = (e) => { if (!e.target.closest('.chat-item-menu-btn, .chat-item-dropdown')) loadSession(sessionId, title); };
 
     // Remove active from others
     document.querySelectorAll('.chat-history-item').forEach(el => el.classList.remove('active'));
@@ -1173,6 +1237,65 @@
   function scrollToBottom() {
     const c = document.getElementById('chatArea');
     setTimeout(() => { c.scrollTop = c.scrollHeight; }, 50);
+  }
+
+  // ── ITEM MENU ──
+  function toggleItemMenu(e, sid) {
+    e.stopPropagation();
+    // Close all other open menus first
+    document.querySelectorAll('.chat-item-dropdown.open').forEach(el => {
+      if (el.id !== 'menu-' + sid) el.classList.remove('open');
+    });
+    const menu = document.getElementById('menu-' + sid);
+    if (menu) menu.classList.toggle('open');
+  }
+
+  // Close menus when clicking outside
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.chat-item-dropdown.open').forEach(el => el.classList.remove('open'));
+  });
+
+  // ── DELETE CHAT ──
+  async function deleteChat(e, sid) {
+    e.stopPropagation();
+    document.querySelectorAll('.chat-item-dropdown.open').forEach(el => el.classList.remove('open'));
+
+    if (!player) return;
+
+    // Delete from Supabase
+    const { error } = await sb
+      .from('conversations')
+      .delete()
+      .eq('player_id', player.id)
+      .eq('session_id', sid);
+
+    if (error) {
+      console.error('Delete error:', error);
+      return;
+    }
+
+    // Remove from sidebar UI
+    const item = document.querySelector(`.chat-history-item[data-session="${sid}"]`);
+    if (item) {
+      // Remove section label if it was the last item in that group
+      const prev = item.previousElementSibling;
+      const next = item.nextElementSibling;
+      const prevIsLabel = prev?.classList.contains('history-section-label');
+      const nextIsLabel = next?.classList.contains('history-section-label') || !next;
+      if (prevIsLabel && nextIsLabel) prev.remove();
+      item.remove();
+    }
+
+    // If deleted current session — start new chat
+    if (sid === sessionId) {
+      startNewChat();
+    }
+
+    // Show empty state if no more items
+    const remaining = document.querySelectorAll('.chat-history-item');
+    if (remaining.length === 0) {
+      document.getElementById('historyEmpty').style.display = 'block';
+    }
   }
 
   // ── LOGOUT ──
