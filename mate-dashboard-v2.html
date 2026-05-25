@@ -679,13 +679,8 @@
     </div>
   </div>
 
-  <!-- QUICK ACTIONS -->
-  <div class="quick-actions" id="quickActions">
-    <button class="quick-action" onclick="sendQuick('Review my contract situation')">⚖️ Contract review</button>
-    <button class="quick-action" onclick="sendQuick('Design my training plan for this week')">🏋️ Training plan</button>
-    <button class="quick-action" onclick="sendQuick('What is my current market value and which clubs should I target?')">📊 Market value</button>
-    <button class="quick-action" onclick="sendQuick('What is the weather in London today?')">🏠 Daily briefing</button>
-  </div>
+  <!-- QUICK ACTIONS removed -->
+  <div class="quick-actions" id="quickActions" style="display:none"></div>
 
   <!-- INPUT AREA -->
   <div class="input-area">
@@ -1052,9 +1047,15 @@
         payload.pdf_name   = currentPdfName;
       }
 
+      const { data: { session: activeSession } } = await sb.auth.getSession();
+      const token = activeSession?.access_token ?? '';
+
       const res  = await fetch(EDGE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
