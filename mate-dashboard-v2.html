@@ -613,6 +613,133 @@
     .send-btn:disabled { opacity:.3;cursor:not-allowed;transform:none; }
     .send-btn svg { stroke: var(--purple); }
 
+    /* ── MSG COUNTER ── */
+    .msg-counter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--t4);
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+    .msg-counter.warning { color: rgba(255,180,80,0.9); }
+    .msg-counter.critical { color: rgba(255,120,120,0.9); }
+
+    /* ── PAYWALL OVERLAY ── */
+    .paywall-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(80,40,160,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .paywall-overlay.visible { display: flex; }
+
+    .paywall-card {
+      background: #5c3a9e;
+      border: 0.5px solid var(--border-mid);
+      border-radius: 20px;
+      padding: 36px 32px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      animation: fadeUp 0.4s var(--ease) both;
+    }
+    .paywall-icon { font-size: 40px; margin-bottom: 16px; }
+    .paywall-title {
+      font-family: var(--font-d);
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .paywall-sub {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--t3);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .paywall-price {
+      font-size: 36px;
+      font-weight: 500;
+      color: var(--t1);
+      margin-bottom: 4px;
+    }
+    .paywall-price span {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--t3);
+    }
+    .paywall-features {
+      list-style: none;
+      margin: 16px 0 24px;
+      text-align: left;
+    }
+    .paywall-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t2);
+      padding: 6px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .paywall-features li:last-child { border-bottom: none; }
+    .paywall-features li::before {
+      content: '✓';
+      color: #6dffb3;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .paywall-btn {
+      width: 100%;
+      padding: 14px;
+      background: #ffffff;
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      font-family: var(--font-b);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-bottom: 12px;
+    }
+    .paywall-btn:hover { opacity: 0.88; transform: scale(1.02); }
+    .paywall-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .paywall-btn-loading::after { content: '…'; }
+    .paywall-dismiss {
+      font-size: 12px;
+      color: var(--t4);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-b);
+    }
+    .paywall-dismiss:hover { color: var(--t2); }
+
+    /* Pro badge in topbar */
+    .pro-badge {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      background: rgba(109,255,179,0.15);
+      border: 0.5px solid rgba(109,255,179,0.3);
+      border-radius: 100px;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #6dffb3;
+    }
+    .pro-badge.visible { display: flex; }
+
     /* ══════════════════════════════════
        MOBILE
     ══════════════════════════════════ */
@@ -687,6 +814,8 @@
       </svg>
     </button>
     <div class="topbar-title" id="topbarTitle">MATE AI</div>
+    <div class="pro-badge" id="proBadge">✦ Pro</div>
+    <div class="msg-counter" id="msgCounter"></div>
   </div>
 
   <!-- STATS BAR -->
@@ -764,10 +893,35 @@
 
 </div><!-- /main -->
 
+<!-- PAYWALL OVERLAY -->
+<div class="paywall-overlay" id="paywallOverlay">
+  <div class="paywall-card">
+    <div class="paywall-icon">⚽</div>
+    <div class="paywall-title">Upgrade to Pro</div>
+    <div class="paywall-sub">You've used your 10 free messages. Unlock unlimited access to MATE AI.</div>
+    <div class="paywall-price">€10 <span>/ month</span></div>
+    <ul class="paywall-features">
+      <li>Unlimited messages</li>
+      <li>All 4 AI agents (Legal, Coach, Analyst, Concierge)</li>
+      <li>PDF contract analysis</li>
+      <li>Real-time data (weather, trains, fixtures)</li>
+      <li>Full conversation history</li>
+    </ul>
+    <button class="paywall-btn" id="upgradeBtn" onclick="startCheckout()">
+      Upgrade Now — €10/month
+    </button>
+    <button class="paywall-dismiss" onclick="dismissPaywall()">Maybe later</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ── CONFIG ──
-  const EDGE_URL = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat';
+  const EDGE_URL      = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat';
+  const CHECKOUT_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/create-checkout';
+  const STRIPE_PK     = 'pk_test_51Tb4oJ0iX3hBaut7U2XFBr1Zns2aeqDvooJaRvsnl5HIHaNdIuMwGFGmu0Dy9hIGHzMRE8Q9YAqRCCT1kLSHOfvk00dB4iUfkx';
+  const FREE_MSG_LIMIT = 10;
+
   const { createClient } = supabase;
   const sb = createClient(
     'https://zlkzjeaojpxzccpovygk.supabase.co',
@@ -775,14 +929,16 @@
   );
 
   // ── STATE ──
-  let player       = null;
-  let sessionId    = 'sess_' + Date.now();
-  let selectedAgent = 'auto';
-  let isLoading    = false;
-  let pdfBase64    = null;
-  let pdfName      = null;
-  let hasStartedChat = false;
+  let player           = null;
+  let sessionId        = 'sess_' + Date.now();
+  let selectedAgent    = 'auto';
+  let isLoading        = false;
+  let pdfBase64        = null;
+  let pdfName          = null;
+  let hasStartedChat   = false;
   let currentChatTitle = null;
+  let isPro            = false;
+  let msgCount         = 0;
 
   // ── INIT ──
   async function init() {
@@ -807,6 +963,8 @@
     populateStats();
     setWelcomeMessage();
     loadChatHistory();
+    await checkSubscription();
+    checkPaymentReturn();
   }
 
   // ── STATS BAR ──
@@ -1067,6 +1225,12 @@
     const message = input.value.trim();
     if ((!message && !pdfBase64) || isLoading || !player) return;
 
+    // Check free tier limit
+    if (!isPro && msgCount >= FREE_MSG_LIMIT) {
+      showPaywall();
+      return;
+    }
+
     isLoading = true;
     input.value = ''; input.style.height = 'auto';
     document.getElementById('sendBtn').disabled = true;
@@ -1123,6 +1287,7 @@
         appendMATEMessage('I encountered an issue. Please try again.', null, false, true);
       } else {
         appendMATEMessage(data.response, data.agent_type, data.had_real_time_data, true);
+        if (!isPro) { msgCount++; updateMsgCounter(); }
         // Refresh sidebar history after first message
         if (!document.querySelector(`.chat-history-item[data-session="${sessionId}"]`)) {
           refreshSidebarItem();
@@ -1295,6 +1460,116 @@
     const remaining = document.querySelectorAll('.chat-history-item');
     if (remaining.length === 0) {
       document.getElementById('historyEmpty').style.display = 'block';
+    }
+  }
+
+  // ── SUBSCRIPTION CHECK ──
+  async function checkSubscription() {
+    if (!player) return;
+    const { data } = await sb
+      .from('subscriptions')
+      .select('plan, status, current_period_end')
+      .eq('player_id', player.id)
+      .eq('status', 'active')
+      .single();
+
+    if (data) {
+      isPro = true;
+      document.getElementById('proBadge').classList.add('visible');
+      document.getElementById('msgCounter').style.display = 'none';
+    } else {
+      isPro = false;
+      await loadMessageCount();
+    }
+  }
+
+  async function loadMessageCount() {
+    if (!player) return;
+    // Count messages this month
+    const monthStart = new Date();
+    monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+
+    const { count } = await sb
+      .from('conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('player_id', player.id)
+      .eq('role', 'user')
+      .gte('created_at', monthStart.toISOString());
+
+    msgCount = count ?? 0;
+    updateMsgCounter();
+  }
+
+  function updateMsgCounter() {
+    if (isPro) return;
+    const el = document.getElementById('msgCounter');
+    const remaining = Math.max(0, FREE_MSG_LIMIT - msgCount);
+    el.textContent = `${remaining} free msg left`;
+    el.className = 'msg-counter' + (remaining <= 3 ? ' critical' : remaining <= 5 ? ' warning' : '');
+    if (remaining === 0) showPaywall();
+  }
+
+  function showPaywall() {
+    document.getElementById('paywallOverlay').classList.add('visible');
+  }
+
+  function dismissPaywall() {
+    document.getElementById('paywallOverlay').classList.remove('visible');
+  }
+
+  async function startCheckout() {
+    const btn = document.getElementById('upgradeBtn');
+    btn.disabled = true;
+    btn.textContent = 'Redirecting to Stripe…';
+
+    try {
+      const { data: { session: activeSession } } = await sb.auth.getSession();
+      const token = activeSession?.access_token ?? '';
+      const origin = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+
+      const res = await fetch(CHECKOUT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ origin }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error ?? 'No checkout URL');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      btn.disabled = false;
+      btn.textContent = 'Upgrade Now — €10/month';
+      alert('Something went wrong. Please try again.');
+    }
+  }
+
+  // Handle return from Stripe
+  function checkPaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      // Show success message
+      setTimeout(() => {
+        appendMATEMessage(
+          '🎉 **Welcome to MATE Pro!** Your subscription is now active. You have unlimited access to all agents, PDF analysis, and real-time data. Let's get to work.',
+          'concierge', false, true
+        );
+        if (!hasStartedChat) {
+          document.getElementById('welcomeState').style.display = 'none';
+          hasStartedChat = true;
+        }
+      }, 500);
+    }
+    if (params.get('payment') === 'cancelled') {
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }
 
