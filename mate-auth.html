@@ -407,7 +407,7 @@
     const SUPABASE_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
 
     // Dashboard URL (GitHub Pages)
-    const DASHBOARD_URL = 'mate-dashboard-v4.html';
+    const DASHBOARD_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/mate-dashboard-v4.html';
     const ONBOARDING_URL = 'mate-onboarding.html';
 
     // Init Supabase client
@@ -519,7 +519,7 @@
       await sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.href.replace(/\/[^\/]*$/, '/') + DASHBOARD_URL
+          redirectTo: window.location.origin + '/' + DASHBOARD_URL
         }
       });
     }
