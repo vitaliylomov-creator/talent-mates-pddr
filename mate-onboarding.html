@@ -704,7 +704,7 @@
         </div>
 
         <div class="btn-row">
-          <button class="btn-primary" onclick="window.location.href='mate-dashboard-v4.html'">Open MATE Chat →</button>
+          <button class="btn-primary" onclick="window.location.href='mate-dashboard-v5.html'">Open MATE Chat →</button>
         </div>
       </div>
 
@@ -880,7 +880,7 @@
             'Welcome, ' + payload.full_name.split(' ')[0] + '.';
           goTo('success');
           // Redirect to dashboard after 2.5 seconds
-          setTimeout(() => { window.location.href = 'mate-dashboard-v4.html'; }, 2500);
+          setTimeout(() => { window.location.href = 'mate-dashboard-v5.html'; }, 2500);
         } else {
           throw new Error('Webhook returned ' + res.status);
         }
