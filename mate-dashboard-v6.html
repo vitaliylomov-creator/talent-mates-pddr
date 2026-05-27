@@ -1040,6 +1040,66 @@
     .tlc-metric strong { color: var(--t2); }
     .tlc-notes { font-size: 12px; color: var(--t3); margin-top: 6px; font-style: italic; }
 
+    /* ── TOOLTIPS ── */
+    .tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: help;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .tip-icon {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: 0.5px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.5);
+      font-size: 9px;
+      font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      font-style: normal;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .tip:hover .tip-icon { background: rgba(255,255,255,0.22); color: #fff; }
+    .tip-text {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a1560;
+      border: 0.5px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 11px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.55;
+      white-space: normal;
+      width: 220px;
+      z-index: 999;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .tip-text::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: rgba(255,255,255,0.2);
+    }
+    .tip:hover .tip-text,
+    .tip:focus-within .tip-text { display: block; }
+
+    /* Mobile: tap to show */
+    @media (max-width: 768px) {
+      .tip-text { width: 180px; }
+    }
+
     /* ══════════════════════════════════
        MOBILE
     ══════════════════════════════════ */
@@ -1219,11 +1279,11 @@
     <div id="trainingLogTab">
       <div class="tr2">
         <div class="tf">
-          <label>Date</label>
+          <label>Date <span class="tip"><i class="tip-icon">?</i><span class="tip-text">The date this training session took place. Defaults to today.</span></span></label>
           <input type="date" id="tl_date" />
         </div>
         <div class="tf">
-          <label>Session Type</label>
+          <label>Session Type <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Type of training: Technical (pitch work, tactics), Strength (gym), Speed (sprints), Endurance (cardio), Match (game), Recovery (rehab/rest).</span></span></label>
           <select id="tl_type">
             <option value="technical">⚽ Technical / Pitch</option>
             <option value="strength">💪 Strength / Gym</option>
@@ -1237,46 +1297,46 @@
 
       <div class="tr2">
         <div class="tf">
-          <label>Duration (minutes)</label>
+          <label>Duration (minutes) <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Total length of the session in minutes, including warm-up and cool-down.</span></span></label>
           <input type="number" id="tl_duration" placeholder="e.g. 90" min="10" max="300" />
         </div>
         <div class="tf">
-          <label>Distance (km)</label>
+          <label>Distance (km) <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Total distance covered during the session. Use GPS watch, phone app, or club data. Leave blank if unknown.</span></span></label>
           <input type="number" id="tl_distance" placeholder="e.g. 8.5" step="0.1" min="0" max="30" />
         </div>
       </div>
 
       <div class="section-label">Training Load</div>
       <div class="scale-field">
-        <label>Intensity (RPE) <span id="tl_intensity_val">5</span>/10</label>
+        <label>Intensity — Rate of Perceived Exertion <span class="tip"><i class="tip-icon">?</i><span class="tip-text">How hard was the session overall? 1-3 = Easy/warmup, 4-6 = Moderate, 7-8 = Hard, 9-10 = Maximum effort. Be honest — this helps MATE track your load.</span></span> <span id="tl_intensity_val">5</span>/10</label>
         <input type="range" id="tl_intensity" min="1" max="10" value="5"
           oninput="document.getElementById('tl_intensity_val').textContent=this.value" />
         <div class="scale-dots"><span>Easy</span><span>Moderate</span><span>Max</span></div>
       </div>
       <div class="scale-field">
-        <label>Fatigue after session <span id="tl_fatigue_val">5</span>/10</label>
+        <label>Fatigue after session <span class="tip"><i class="tip-icon">?</i><span class="tip-text">How tired did you feel immediately after finishing? 1 = Fresh, 5 = Moderately tired, 10 = Completely exhausted. Key signal for recovery planning.</span></span> <span id="tl_fatigue_val">5</span>/10</label>
         <input type="range" id="tl_fatigue" min="1" max="10" value="5"
           oninput="document.getElementById('tl_fatigue_val').textContent=this.value" />
         <div class="scale-dots"><span>Fresh</span><span>Tired</span><span>Exhausted</span></div>
       </div>
 
       <div class="tf">
-        <label>Exercises / Drills</label>
+        <label>Exercises / Drills <span class="tip"><i class="tip-icon">?</i><span class="tip-text">List the main exercises or drills you did. Example: Sprint 6x30m, Box jumps 4x8, Possession rondos 20min, Crossing drills.</span></span></label>
         <textarea id="tl_exercises" placeholder="e.g. Sprint 6x30m, Box jumps 4x8, Possession drills 20min"></textarea>
       </div>
       <div class="tf">
-        <label>Sets & Reps (if gym)</label>
+        <label>Sets & Reps (if gym) <span class="tip"><i class="tip-icon">?</i><span class="tip-text">For gym sessions, list key lifts with sets, reps and weight. Example: Squat 4x8@80kg, RDL 3x10@60kg, Nordic curl 3x6.</span></span></label>
         <input type="text" id="tl_sets" placeholder="e.g. Squat 4x8@80kg, RDL 3x10@60kg" />
       </div>
 
       <div class="section-label">Speed Metrics</div>
       <div class="tr2">
         <div class="tf">
-          <label>Top Speed (km/h)</label>
+          <label>Top Speed (km/h) <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Your maximum sprint speed reached during this session. Available from GPS vest, Catapult, or phone running app. Useful for tracking speed development over time.</span></span></label>
           <input type="number" id="tl_topspeed" placeholder="e.g. 31.2" step="0.1" />
         </div>
         <div class="tf">
-          <label>Sprint Count</label>
+          <label>Sprint Count <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Number of high-intensity sprints (above ~85% max speed) during the session. Helps MATE monitor sprint load and flag overtraining risk.</span></span></label>
           <input type="number" id="tl_sprints" placeholder="e.g. 24" />
         </div>
       </div>
@@ -1284,11 +1344,11 @@
       <div class="section-label">Recovery & Wellness</div>
       <div class="tr2">
         <div class="tf">
-          <label>Sleep (hours)</label>
+          <label>Sleep (hours) <span class="tip"><i class="tip-icon">?</i><span class="tip-text">How many hours did you sleep the night before this session? Sleep is the #1 recovery tool. Under 7h significantly impacts speed and decision-making.</span></span></label>
           <input type="number" id="tl_sleep_h" placeholder="e.g. 8" step="0.5" min="3" max="12" />
         </div>
         <div class="tf">
-          <label>Recovery Status</label>
+          <label>Recovery Status <span class="tip"><i class="tip-icon">?</i><span class="tip-text">How does your body feel going into this session? Fully Recovered = ready to perform. Slightly Sore = muscle soreness but functional. Fatigued = heavy legs, reduced output. Injured = active injury.</span></span></label>
           <select id="tl_recovery">
             <option value="fully_recovered">✅ Fully Recovered</option>
             <option value="slightly_sore">🟡 Slightly Sore</option>
@@ -1299,17 +1359,17 @@
       </div>
       <div class="tr3">
         <div class="scale-field">
-          <label>Sleep Quality <span id="tl_sleepq_val">3</span>/5</label>
+          <label>Sleep Quality <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Rate the quality of your sleep 1-5. 1 = Broken/very poor, 3 = Average, 5 = Deep and restful. Poor quality sleep affects recovery even if hours are adequate.</span></span> <span id="tl_sleepq_val">3</span>/5</label>
           <input type="range" id="tl_sleepq" min="1" max="5" value="3"
             oninput="document.getElementById('tl_sleepq_val').textContent=this.value" />
         </div>
         <div class="scale-field">
-          <label>Nutrition <span id="tl_nutrition_val">3</span>/5</label>
+          <label>Nutrition <span class="tip"><i class="tip-icon">?</i><span class="tip-text">How well did you fuel today? 1 = Skipped meals/poor choices, 3 = Average, 5 = Optimal pre/post session nutrition. Proper fueling directly impacts training quality.</span></span> <span id="tl_nutrition_val">3</span>/5</label>
           <input type="range" id="tl_nutrition" min="1" max="5" value="3"
             oninput="document.getElementById('tl_nutrition_val').textContent=this.value" />
         </div>
         <div class="scale-field">
-          <label>Motivation <span id="tl_motivation_val">7</span>/10</label>
+          <label>Motivation <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Your mental drive and focus during the session. Low motivation over multiple sessions can signal overtraining, burnout, or personal stress worth discussing with MATE.</span></span> <span id="tl_motivation_val">7</span>/10</label>
           <input type="range" id="tl_motivation" min="1" max="10" value="7"
             oninput="document.getElementById('tl_motivation_val').textContent=this.value" />
         </div>
@@ -1318,7 +1378,7 @@
       <div class="section-label">Injury Tracking</div>
       <div class="tr2">
         <div class="tf">
-          <label>Injury Area (if any)</label>
+          <label>Injury Area (if any) <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Select the body part if you felt pain, tightness, or discomfort. Select None if fully healthy. Consistent logging here helps MATE track injury patterns and advise on prevention.</span></span></label>
           <select id="tl_injury_area">
             <option value="none">None ✅</option>
             <option value="hamstring">Hamstring</option>
@@ -1334,18 +1394,18 @@
           </select>
         </div>
         <div class="scale-field">
-          <label>Pain Level <span id="tl_injury_val">0</span>/10</label>
+          <label>Pain Level <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Rate pain or discomfort intensity. 0 = No pain, 1-3 = Mild discomfort, 4-6 = Moderate pain affecting performance, 7-10 = Severe — seek medical attention.</span></span> <span id="tl_injury_val">0</span>/10</label>
           <input type="range" id="tl_injury_sev" min="0" max="10" value="0"
             oninput="document.getElementById('tl_injury_val').textContent=this.value" />
         </div>
       </div>
 
       <div class="tf">
-        <label>Coach Feedback</label>
+        <label>Coach Feedback <span class="tip"><i class="tip-icon">?</i><span class="tip-text">What did your coach say after the session? Even brief notes like 'good pressing' or 'improve first touch' help MATE track your development areas over time.</span></span></label>
         <input type="text" id="tl_coach" placeholder="e.g. Good pressing, work on first touch" />
       </div>
       <div class="tf">
-        <label>Personal Notes</label>
+        <label>Personal Notes <span class="tip"><i class="tip-icon">?</i><span class="tip-text">Your honest reflection on the session. How did you feel physically and mentally? What worked? What needs work? The more detail, the better MATE can personalise your advice.</span></span></label>
         <textarea id="tl_notes" placeholder="How did you feel? What worked? What needs improvement?"></textarea>
       </div>
 
