@@ -516,12 +516,21 @@
 
     // ── GOOGLE SIGN IN ──
     async function signInGoogle() {
-      await sb.auth.signInWithOAuth({
+      // For OAuth, redirectTo must be a Supabase-registered URL
+      // We redirect to auth page itself — Supabase handles the rest
+      const { error } = await sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: DASHBOARD_URL
+          redirectTo: 'https://vitaliylomov-creator.github.io/talent-mates-pddr/mate-auth.html',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
+      if (error) {
+        showMsg('signinMsg', 'Google sign in failed: ' + error.message, 'error');
+      }
     }
 
     // ── RESET PASSWORD ──
