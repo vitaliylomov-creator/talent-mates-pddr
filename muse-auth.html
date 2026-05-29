@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MUSE AI — Personal AI Producer for performing artists. Six minds: rights, career, content, revenue, image, logistics. By Talent Mates AI Lab." />
+  <meta name="theme-color" content="#794DC6" />
+  <title>MUSE AI — Personal AI Producer · Talent Mates</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── RESET ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── TOKENS (Talent Mates design system + MUSE gold) ── */
+    :root {
+      --purple:       #794DC6;
+      --purple-dk:    #6b42b5;
+      --purple-lt:    #7a50cc;
+      --ink:          #1a0f2e;
+      --white:        #ffffff;
+
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.32);
+
+      --border:       rgba(255,255,255,0.10);
+      --border-mid:   rgba(255,255,255,0.20);
+      --border-strong:rgba(255,255,255,0.38);
+
+      --gold:         #C6A24D;
+      --gold-warm:    #d4b46a;
+      --gold-soft:    rgba(198,162,77,0.18);
+      --gold-glow:    rgba(198,162,77,0.10);
+
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease:   cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { background: none; border: none; font: inherit; color: inherit; cursor: pointer; }
+    input { font: inherit; color: inherit; }
+
+    /* ─── AMBIENT BACKDROP ──────────────────────────────── */
+    /* A single, intentional, slow-breathing gold ring + film grain.
+       Cinematic, not decorative — sets the mood that MUSE is a studio,
+       not a sign-in screen. */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .ambient-glow {
+      position: absolute;
+      top: 50%;
+      left: 60%;
+      width: 900px;
+      height: 900px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(198,162,77,0.14) 0%, rgba(198,162,77,0.04) 35%, transparent 65%);
+      filter: blur(2px);
+      animation: breathe 12s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.85; }
+      50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+    }
+    .ambient-grain {
+      position: absolute;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)' opacity='0.55'/></svg>");
+      background-size: 240px 240px;
+      opacity: 0.05;
+      mix-blend-mode: overlay;
+    }
+
+    /* ─── TOP BAR ──────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 52px;
+      background: rgba(121,77,198,0.80);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .brand {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t3);
+    }
+    .brand strong { color: var(--white); font-weight: 500; }
+    .brand-divider {
+      display: inline-block;
+      width: 20px;
+      height: 0.5px;
+      background: var(--border-mid);
+      margin: 0 14px;
+      vertical-align: middle;
+    }
+    .brand-product {
+      color: var(--gold);
+      font-weight: 400;
+      letter-spacing: 0.22em;
+    }
+    .topbar-back {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--t3);
+      transition: color 0.2s var(--ease);
+    }
+    .topbar-back:hover { color: var(--white); }
+    .topbar-back-arrow { margin-right: 6px; }
+
+    /* ─── LAYOUT ───────────────────────────────────────── */
+    .stage {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      padding-top: 90px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      align-items: stretch;
+    }
+
+    /* ─── LEFT: HERO + MANIFESTO ───────────────────────── */
+    .hero {
+      padding: 64px 64px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 720px;
+      margin-left: auto;
+      position: relative;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.7s var(--ease) 0.05s forwards;
+    }
+    .eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 0.5px;
+      background: var(--gold);
+    }
+    .eyebrow-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold-warm);
+      animation: pulseDot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1;    transform: scale(1); }
+      50%      { opacity: 0.35; transform: scale(0.72); }
+    }
+
+    .title {
+      font-family: var(--font-d);
+      font-size: clamp(72px, 9vw, 132px);
+      font-weight: 400;
+      line-height: 0.92;
+      letter-spacing: -0.025em;
+      color: var(--white);
+      margin-bottom: 18px;
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease) 0.18s forwards;
+    }
+
+    .subtitle {
+      font-family: var(--font-b);
+      font-size: clamp(15px, 1.4vw, 17px);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      color: var(--t2);
+      max-width: 460px;
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease) 0.30s forwards;
+    }
+
+    /* The slogan — the centerpiece. */
+    .slogan {
+      font-family: var(--font-d);
+      font-size: clamp(34px, 4.2vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -0.015em;
+      margin: 0 0 36px 0;
+      padding-left: 26px;
+      border-left: 1px solid var(--gold);
+      opacity: 0;
+      animation: fadeUp 0.9s var(--ease) 0.46s forwards;
+    }
+    .slogan-line-1 {
+      display: block;
+      font-style: italic;
+      color: rgba(255,255,255,0.92);
+    }
+    .slogan-line-2 {
+      display: block;
+      font-style: italic;
+      color: var(--gold);
+      letter-spacing: -0.01em;
+    }
+    .slogan-attribution {
+      display: block;
+      margin-top: 18px;
+      padding-left: 0;
+      font-family: var(--font-b);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t4);
+      font-style: normal;
+    }
+
+    .blurb {
+      font-family: var(--font-b);
+      font-size: clamp(15px, 1.05vw, 16px);
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--t2);
+      max-width: 480px;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.85s var(--ease) 0.60s forwards;
+    }
+    .blurb strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    /* Six agent chips — the product's surface area in a glance */
+    .agents {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 540px;
+      opacity: 0;
+      animation: fadeUp 0.85s var(--ease) 0.74s forwards;
+    }
+    .agent-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px 7px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--t2);
+      transition: background 0.25s var(--ease), border-color 0.25s var(--ease), color 0.25s var(--ease);
+    }
+    .agent-chip:hover {
+      background: var(--gold-soft);
+      border-color: var(--gold);
+      color: var(--white);
+    }
+    .agent-emoji {
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    /* ─── RIGHT: AUTH PANEL ────────────────────────────── */
+    .panel-wrap {
+      padding: 64px 64px 64px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 24px;
+      padding: 40px 36px 32px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position: relative;
+      opacity: 0;
+      animation: fadeUp 0.85s var(--ease) 0.40s forwards;
+    }
+    /* a thin gold thread at the top — like a brass railing on a stage */
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 36px;
+      right: 36px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+      opacity: 0.65;
+    }
+
+    .panel-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 6px;
+    }
+    .panel-title {
+      font-family: var(--font-d);
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--white);
+      margin-bottom: 26px;
+    }
+    .panel-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(0,0,0,0.18);
+      border-radius: 100px;
+      margin-bottom: 22px;
+    }
+    .tab {
+      flex: 1;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--t3);
+      border-radius: 100px;
+      transition: background 0.25s var(--ease), color 0.25s var(--ease);
+    }
+    .tab.active {
+      background: var(--white);
+      color: var(--purple);
+    }
+    .tab:not(.active):hover { color: var(--white); }
+
+    /* form */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--t4);
+      padding-left: 2px;
+    }
+    .field-input-wrap {
+      position: relative;
+    }
+    .field-input {
+      width: 100%;
+      background: rgba(0,0,0,0.18);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--font-b);
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+      -webkit-appearance: none;
+    }
+    .field-input::placeholder { color: rgba(255,255,255,0.28); }
+    .field-input:focus {
+      border-color: var(--gold);
+      background: rgba(0,0,0,0.28);
+    }
+    .field-input:focus + .field-glow {
+      opacity: 1;
+    }
+    .field-glow {
+      position: absolute;
+      inset: -1px;
+      border-radius: 12px;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px var(--gold-soft);
+      opacity: 0;
+      transition: opacity 0.25s var(--ease);
+    }
+    .field-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 6px;
+      color: var(--t3);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s var(--ease);
+    }
+    .field-toggle:hover { color: var(--white); }
+
+    /* primary CTA */
+    .cta {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(180deg, var(--gold-warm) 0%, var(--gold) 100%);
+      color: var(--ink);
+      padding: 15px 24px;
+      border-radius: 100px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.18s var(--ease), box-shadow 0.25s var(--ease), opacity 0.2s var(--ease);
+      box-shadow: 0 6px 24px -8px rgba(198,162,77,0.55);
+    }
+    .cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 32px -8px rgba(198,162,77,0.75);
+    }
+    .cta:active {
+      transform: translateY(0);
+      opacity: 0.92;
+    }
+    .cta svg { width: 13px; height: 13px; }
+
+    .legal {
+      font-size: 11px;
+      line-height: 1.55;
+      color: var(--t4);
+      margin-top: 14px;
+      text-align: center;
+      padding: 0 12px;
+    }
+    .legal a {
+      color: var(--t3);
+      border-bottom: 0.5px solid var(--border-mid);
+      padding-bottom: 1px;
+      transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+    }
+    .legal a:hover { color: var(--white); border-color: var(--gold); }
+
+    /* divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 26px 0 18px;
+      font-size: 10px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--t4);
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--border);
+    }
+
+    /* oauth row */
+    .oauth {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .oauth-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.94);
+      color: var(--ink);
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+    }
+    .oauth-btn:hover {
+      background: var(--white);
+      transform: translateY(-1px);
+    }
+    .oauth-btn svg { width: 16px; height: 16px; }
+
+    /* ─── SUCCESS MODAL ────────────────────────────────── */
+    .modal-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(26,15,46,0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--ease);
+    }
+    .modal-veil.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal {
+      max-width: 460px;
+      width: 100%;
+      background: var(--purple-dk);
+      border: 0.5px solid var(--gold);
+      border-radius: 24px;
+      padding: 44px 40px 36px;
+      text-align: center;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.45s var(--ease);
+      position: relative;
+      overflow: hidden;
+    }
+    .modal-veil.open .modal {
+      transform: translateY(0) scale(1);
+    }
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 30%; right: 30%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .modal-mark {
+      font-family: var(--font-d);
+      font-size: 44px;
+      line-height: 1;
+      margin-bottom: 22px;
+      color: var(--gold);
+    }
+    .modal-title {
+      font-family: var(--font-d);
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+    .modal-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .modal-body {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.65;
+      color: var(--t2);
+      max-width: 340px;
+      margin: 0 auto 28px;
+    }
+    .modal-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      border-radius: 100px;
+      background: transparent;
+      color: var(--t1);
+      border: 0.5px solid var(--border-strong);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+    }
+    .modal-cta:hover {
+      border-color: var(--gold);
+      background: var(--gold-glow);
+    }
+
+    /* ─── RESPONSIVE ───────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .hero { padding: 56px 40px 40px; }
+      .panel-wrap { padding: 56px 40px 56px 20px; }
+    }
+
+    @media (max-width: 960px) {
+      .topbar { padding: 18px 24px; }
+      .stage {
+        grid-template-columns: 1fr;
+        padding-top: 80px;
+      }
+      .hero {
+        padding: 48px 28px 24px;
+        max-width: 100%;
+        margin-left: 0;
+      }
+      .panel-wrap {
+        padding: 24px 28px 64px;
+        justify-content: center;
+      }
+      .panel { max-width: 100%; }
+      .title { font-size: clamp(56px, 14vw, 88px); }
+      .slogan { font-size: clamp(28px, 7vw, 44px); }
+      .ambient-glow {
+        top: 30%;
+        left: 50%;
+        width: 600px;
+        height: 600px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar { padding: 16px 20px; }
+      .brand-divider { display: none; }
+      .brand-product { display: none; }
+      .topbar-back span { display: none; }
+      .hero { padding: 36px 22px 18px; }
+      .panel-wrap { padding: 18px 22px 56px; }
+      .panel { padding: 32px 26px 26px; border-radius: 20px; }
+      .slogan { padding-left: 18px; }
+      .oauth { grid-template-columns: 1fr; }
+    }
+
+    /* ─── KEYFRAMES ────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── AMBIENT BACKDROP ─── -->
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient-glow"></div>
+    <div class="ambient-grain"></div>
+  </div>
+
+  <!-- ─── TOP BAR ─── -->
+  <header class="topbar">
+    <a href="https://talent-mates.com" class="brand" aria-label="Back to Talent Mates">
+      <strong>Talent</strong> Mates
+      <span class="brand-divider"></span>
+      <span class="brand-product">MUSE AI</span>
+    </a>
+    <a href="https://talent-mates.com" class="topbar-back">
+      <span class="topbar-back-arrow">←</span><span>Back to Talent Mates</span>
+    </a>
+  </header>
+
+  <!-- ─── STAGE: LEFT MANIFESTO + RIGHT AUTH ─── -->
+  <main class="stage">
+
+    <!-- LEFT: HERO -->
+    <section class="hero">
+      <div class="eyebrow">
+        Talent Mates AI Lab
+        <span class="eyebrow-dot" aria-hidden="true"></span>
+        Now in tuning
+      </div>
+
+      <h1 class="title">MUSE AI</h1>
+      <p class="subtitle">Personal AI Producer for performing artists — musicians, singers, actors, and the multi-hyphenates who refuse to fit one box.</p>
+
+      <blockquote class="slogan">
+        <span class="slogan-line-1">He who was not mistaken</span>
+        <span class="slogan-line-2">is dangerous.</span>
+        <span class="slogan-attribution">— A note to the new artist</span>
+      </blockquote>
+
+      <p class="blurb">
+        <strong>Six minds. One muse.</strong> Rights, career, content, revenue, image, logistics — always on, fluent in your craft, opinionated by design. The personal producer you cannot yet afford, available to every artist who chooses to risk being seen.
+      </p>
+
+      <div class="agents" role="list" aria-label="The six MUSE agents">
+        <span class="agent-chip" role="listitem"><span class="agent-emoji">⚖️</span>Rights Advisor</span>
+        <span class="agent-chip" role="listitem"><span class="agent-emoji">🎯</span>Career Strategist</span>
+        <span class="agent-chip" role="listitem"><span class="agent-emoji">📣</span>Content Director</span>
+        <span class="agent-chip" role="listitem"><span class="agent-emoji">💰</span>Revenue Architect</span>
+        <span class="agent-chip" role="listitem"><span class="agent-emoji">🎨</span>Image Architect</span>
+        <span class="agent-chip" role="listitem"><span class="agent-emoji">🏠</span>Concierge</span>
+      </div>
+    </section>
+
+    <!-- RIGHT: AUTH PANEL -->
+    <aside class="panel-wrap">
+      <div class="panel" role="region" aria-label="Sign in or create account">
+        <div class="panel-eyebrow">Step inside</div>
+        <h2 class="panel-title">Enter the <em>studio</em>.</h2>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" id="tab-signin"  role="tab" aria-selected="true"  data-mode="signin">Sign in</button>
+          <button class="tab"        id="tab-signup"  role="tab" aria-selected="false" data-mode="signup">Create account</button>
+        </div>
+
+        <form class="form-group" id="auth-form" autocomplete="on" novalidate>
+          <div class="field">
+            <label class="field-label" for="email">Email</label>
+            <div class="field-input-wrap">
+              <input id="email" name="email" type="email" required autocomplete="email"
+                     class="field-input" placeholder="you@stagewise.com" />
+              <span class="field-glow" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="password">Password</label>
+            <div class="field-input-wrap">
+              <input id="password" name="password" type="password" required minlength="8"
+                     autocomplete="current-password" class="field-input" placeholder="At least 8 characters" />
+              <button type="button" class="field-toggle" id="pw-toggle" aria-label="Show password">Show</button>
+              <span class="field-glow" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <button class="cta" type="submit" id="cta">
+            <span id="cta-label">Enter the studio</span>
+            <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="divider"><span>or</span></div>
+
+        <div class="oauth">
+          <button class="oauth-btn" data-provider="google" type="button" aria-label="Continue with Google">
+            <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 01-1.79 2.72v2.26h2.9c1.7-1.57 2.69-3.88 2.69-6.62z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.34A9 9 0 009 18z" fill="#34A853"/>
+              <path d="M3.95 10.7A5.4 5.4 0 013.66 9c0-.59.1-1.17.29-1.7V4.96H.96A9 9 0 000 9c0 1.45.35 2.83.96 4.04l2.99-2.34z" fill="#FBBC05"/>
+              <path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 009 0 9 9 0 00.96 4.96L3.95 7.3C4.66 5.17 6.65 3.58 9 3.58z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+          <button class="oauth-btn" data-provider="apple" type="button" aria-label="Continue with Apple">
+            <svg viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM260.6 80c19.2-22.8 28.9-49.9 26.4-77.7-25.8 2.6-48.9 14-67.3 31.3-17.7 16.6-28 37.2-25.3 64.4 26.3 1.7 50.7-11 66.2-18z"/>
+            </svg>
+            Apple
+          </button>
+        </div>
+
+        <p class="legal">
+          By continuing you accept the Talent Mates
+          <a href="https://talent-mates.com/terms">Terms</a> and
+          <a href="https://talent-mates.com/privacy">Privacy</a>.
+        </p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ─── SUCCESS MODAL ─── -->
+  <div class="modal-veil" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-mark">✦</div>
+      <h3 class="modal-title" id="modal-title">You're <em>early</em>.</h3>
+      <p class="modal-body">
+        MUSE is still in tuning. We've noted your name in the first chair — when she's ready to play, you'll hear from us before anyone else.
+      </p>
+      <button class="modal-cta" id="modal-close">Got it</button>
+    </div>
+  </div>
+
+  <script>
+    /* Tab switcher */
+    const tabs = document.querySelectorAll('.tab');
+    const ctaLabel = document.getElementById('cta-label');
+    const pwInput = document.getElementById('password');
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        tabs.forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+        t.classList.add('active');
+        t.setAttribute('aria-selected', 'true');
+        const mode = t.dataset.mode;
+        ctaLabel.textContent = mode === 'signup' ? 'Reserve my chair' : 'Enter the studio';
+        pwInput.autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+      });
+    });
+
+    /* Password show/hide */
+    const pwToggle = document.getElementById('pw-toggle');
+    pwToggle.addEventListener('click', () => {
+      const showing = pwInput.type === 'text';
+      pwInput.type = showing ? 'password' : 'text';
+      pwToggle.textContent = showing ? 'Show' : 'Hide';
+      pwToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+
+    /* Form + OAuth: visual capture for now. Real Supabase Auth wires in Sprint 1. */
+    const modal = document.getElementById('modal');
+    const closeModal = document.getElementById('modal-close');
+    const openModal  = () => { modal.classList.add('open');  modal.setAttribute('aria-hidden', 'false'); };
+    const hideModal  = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');  };
+
+    document.getElementById('auth-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email || !email.includes('@')) {
+        document.getElementById('email').focus();
+        return;
+      }
+      // TODO Sprint 1 — replace with supabase.auth.signInWithPassword / signUp
+      openModal();
+    });
+
+    document.querySelectorAll('.oauth-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        // TODO Sprint 1 — wire supabase.auth.signInWithOAuth({ provider })
+        openModal();
+      });
+    });
+
+    closeModal.addEventListener('click', hideModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideModal(); });
+  </script>
+
+</body>
+</html>
