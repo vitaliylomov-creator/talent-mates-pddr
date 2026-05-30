@@ -2053,29 +2053,18 @@
     chatArea.appendChild(el);
     scrollToBottom();
 
-    // Evolve label so 8-15s tool-use responses don't feel like lag
+    // After 3.5s reveal an iconic line so longer tool-use responses feel intentional, not laggy
     const label = el.querySelector('.typing-label');
     const t1 = setTimeout(() => {
       if (!el.isConnected || !label) return;
-      label.textContent = 'Searching the web…';
+      label.textContent = "I'll be back… 🕶";
       label.classList.add('visible');
       scrollToBottom();
     }, 3500);
-    const t2 = setTimeout(() => {
-      if (!el.isConnected || !label) return;
-      label.textContent = 'Cross-checking sources…';
-      scrollToBottom();
-    }, 10000);
-    const t3 = setTimeout(() => {
-      if (!el.isConnected || !label) return;
-      label.textContent = 'Almost there…';
-      scrollToBottom();
-    }, 18000);
 
-    // Clean up timers when typing element is removed from DOM
     const origRemove = el.remove.bind(el);
     el.remove = () => {
-      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+      clearTimeout(t1);
       origRemove();
     };
 
