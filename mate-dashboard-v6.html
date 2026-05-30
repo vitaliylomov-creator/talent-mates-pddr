@@ -592,6 +592,7 @@
     .chat-input::placeholder { color: var(--t4); }
 
     .pdf-btn {
+      position:relative;
       background:transparent;border:none;cursor:pointer;
       padding:5px;border-radius:7px;color:var(--t4);
       transition:color .2s,background .2s;
@@ -599,6 +600,18 @@
     }
     .pdf-btn:hover { color:var(--t2);background:rgba(255,255,255,0.08); }
     .pdf-btn.has-pdf { color:#fff; }
+    .pdf-btn.loading { pointer-events:none; cursor:default; color:var(--t2); }
+    .pdf-btn.loading svg { opacity:0; }
+    .pdf-btn.loading::after {
+      content:'';
+      position:absolute;
+      width:14px; height:14px;
+      border:1.5px solid rgba(255,255,255,0.22);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation: pdfSpin 0.7s linear infinite;
+    }
+    @keyframes pdfSpin { to { transform: rotate(360deg); } }
     #pdfFileInput { display:none; }
 
     .send-btn {
@@ -1239,7 +1252,7 @@
       <button class="pdf-remove" onclick="removePDF()">✕</button>
     </div>
     <div class="input-row">
-      <button class="pdf-btn" id="pdfBtn" onclick="document.getElementById('pdfFileInput').click()" title="Upload contract PDF">
+      <button type="button" class="pdf-btn" id="pdfBtn" onclick="openPDFPicker()" title="Upload contract PDF">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
@@ -1804,26 +1817,49 @@
   }
 
   // ── PDF ──
+  function openPDFPicker() {
+    const input = document.getElementById('pdfFileInput');
+    // Reset value so re-selecting the same file still fires onchange
+    input.value = '';
+    input.click();
+  }
   function handlePDFSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { alert('PDF must be under 5MB'); return; }
+
+    const btn = document.getElementById('pdfBtn');
+    btn.classList.remove('has-pdf');
+    btn.classList.add('loading');
+    btn.setAttribute('title', 'Reading PDF…');
+
     pdfName = file.name;
     const reader = new FileReader();
     reader.onload = (e) => {
       pdfBase64 = e.target.result.split(',')[1];
       document.getElementById('pdfAttachedName').textContent = file.name;
       document.getElementById('pdfAttached').classList.add('visible');
-      document.getElementById('pdfBtn').classList.add('has-pdf');
+      btn.classList.remove('loading');
+      btn.classList.add('has-pdf');
+      btn.setAttribute('title', 'Contract attached');
       selectAgent(document.querySelector('[data-agent="legal"]'), 'legal');
       document.getElementById('chatInput').placeholder = 'Ask MATE to analyse this contract…';
+    };
+    reader.onerror = () => {
+      btn.classList.remove('loading');
+      btn.setAttribute('title', 'Upload contract PDF');
+      pdfBase64 = null; pdfName = null;
+      alert('Failed to read PDF. Please try another file.');
     };
     reader.readAsDataURL(file);
   }
   function removePDF() {
     pdfBase64 = null; pdfName = null;
     document.getElementById('pdfAttached').classList.remove('visible');
-    document.getElementById('pdfBtn').classList.remove('has-pdf');
+    const btn = document.getElementById('pdfBtn');
+    btn.classList.remove('has-pdf');
+    btn.classList.remove('loading');
+    btn.setAttribute('title', 'Upload contract PDF');
     document.getElementById('pdfFileInput').value = '';
     document.getElementById('chatInput').placeholder = 'Ask MATE anything…';
   }
