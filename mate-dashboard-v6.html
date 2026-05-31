@@ -503,6 +503,36 @@
     }
     .rt-dot { width:4px;height:4px;border-radius:50%;background:#6dffb3; }
 
+    /* Markdown tables inside MATE responses */
+    .md-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 13px;
+      border: 0.5px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.03);
+    }
+    .md-table th, .md-table td {
+      padding: 9px 12px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+      line-height: 1.45;
+    }
+    .md-table th {
+      background: rgba(255,255,255,0.08);
+      font-family: var(--font-b);
+      font-weight: 500;
+      color: rgba(255,255,255,0.95);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .md-table tr:last-child td { border-bottom: none; }
+    .md-table tr:nth-child(even) td { background: rgba(255,255,255,0.025); }
+
     /* Typing */
     .typing-indicator {
       display: flex; align-items: center; gap: 7px;
@@ -1729,7 +1759,18 @@
 
   // ── LOAD A PAST SESSION ──
   async function loadSession(sid, title) {
-    if (sid === sessionId) { closeSidebar(); return; }
+    console.log('[loadSession] called with sid:', sid, 'current sessionId:', sessionId);
+
+    if (!player || !player.id) {
+      console.warn('[loadSession] player not loaded yet — aborting');
+      return;
+    }
+
+    // Re-clicking the currently open chat: just close the sidebar on mobile
+    if (sid === sessionId) {
+      closeSidebar();
+      return;
+    }
 
     sessionId = sid;
     currentChatTitle = title;
@@ -1756,25 +1797,46 @@
     loadingEl.textContent = 'Loading conversation…';
     chatArea.appendChild(loadingEl);
 
-    // Fetch messages
-    const { data, error } = await sb
-      .from('conversations')
-      .select('role, content, agent_type, created_at')
-      .eq('player_id', player.id)
-      .eq('session_id', sid)
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error } = await sb
+        .from('conversations')
+        .select('role, content, agent_type, created_at')
+        .eq('player_id', player.id)
+        .eq('session_id', sid)
+        .order('created_at', { ascending: true });
 
-    loadingEl.remove();
+      loadingEl.remove();
 
-    if (error || !data) return;
-
-    data.forEach(msg => {
-      if (msg.role === 'user') {
-        appendUserMessage(msg.content);
-      } else {
-        appendMATEMessage(msg.content, msg.agent_type, false, false);
+      if (error) {
+        console.error('[loadSession] Supabase error:', error);
+        const errEl = document.createElement('div');
+        errEl.style.cssText = 'text-align:center;padding:32px;color:rgba(255,150,150,0.7);font-size:13px;';
+        errEl.textContent = 'Could not load this chat. Please try again.';
+        chatArea.appendChild(errEl);
+        return;
       }
-    });
+      if (!data || data.length === 0) {
+        console.warn('[loadSession] no messages found for session', sid);
+        const emptyEl = document.createElement('div');
+        emptyEl.style.cssText = 'text-align:center;padding:32px;color:rgba(255,255,255,0.35);font-size:13px;';
+        emptyEl.textContent = 'This conversation appears empty.';
+        chatArea.appendChild(emptyEl);
+        return;
+      }
+
+      console.log('[loadSession] rendering', data.length, 'messages');
+      data.forEach(msg => {
+        if (msg.role === 'user') {
+          appendUserMessage(msg.content);
+        } else {
+          appendMATEMessage(msg.content, msg.agent_type, false, false);
+        }
+      });
+      scrollToBottom();
+    } catch (err) {
+      console.error('[loadSession] unexpected error:', err);
+      loadingEl.remove();
+    }
 
     closeSidebar();
   }
@@ -2072,6 +2134,33 @@
   }
 
   function formatResponse(text) {
+    // 1) Convert markdown tables FIRST (before paragraph/line-break rewrites)
+    text = text.replace(/(?:^|\n)((?:\|[^\n]*\|\n?){2,})/g, (match, block) => {
+      const rows = block.trim().split('\n').filter(r => r.trim().startsWith('|'));
+      if (rows.length < 2) return match;
+      const sep = rows[1].trim();
+      // Second row must look like a separator (---|---|---)
+      if (!/^\|[\s\-:|]+\|$/.test(sep)) return match;
+      const parseCells = r => r.trim().slice(1, -1).split('|').map(c => c.trim());
+      const headers   = parseCells(rows[0]);
+      const dataRows  = rows.slice(2).map(parseCells);
+      let html = '<table class="md-table"><thead><tr>';
+      headers.forEach(h => html += `<th>${h}</th>`);
+      html += '</tr></thead><tbody>';
+      dataRows.forEach(row => {
+        html += '<tr>';
+        row.forEach(c => {
+          // Allow inline bold inside cells
+          const cell = c.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          html += `<td>${cell}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      return '\n' + html + '\n';
+    });
+
+    // 2) Standard markdown bits
     return text
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -2081,7 +2170,11 @@
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br/>')
       .replace(/^(.+)$/, '<p>$1</p>')
-      .replace(/<p><\/p>/g, '');
+      .replace(/<p><\/p>/g, '')
+      // Don't wrap our tables in <p> or break them with <br/>
+      .replace(/<p>(<table[\s\S]*?<\/table>)<\/p>/g, '$1')
+      .replace(/<br\/>(<table)/g, '$1')
+      .replace(/(<\/table>)<br\/>/g, '$1');
   }
 
   function escapeHTML(str) {
