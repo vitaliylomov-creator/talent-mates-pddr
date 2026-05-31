@@ -2048,24 +2048,30 @@
       container.insertBefore(label, container.firstChild);
     }
 
+    // CRITICAL: capture this chat's id NOW so the onclick keeps pointing at
+    // THIS chat after the user navigates to other chats. Without the snapshot,
+    // the closure reads the global `sessionId` at click time — which is the
+    // OTHER chat the user is currently viewing — causing loadSession to bail
+    // out via the "sid === sessionId" early-return.
+    const thisSessionId = sessionId;
     const title = (currentChatTitle || 'New conversation').slice(0, 38);
     const time  = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
     const item  = document.createElement('div');
     item.className = 'chat-history-item active';
-    item.dataset.session = sessionId;
+    item.dataset.session = thisSessionId;
     item.innerHTML = `
       <div class="chat-history-icon">✦</div>
       <div class="chat-history-text">
         <div class="chat-history-title">${escapeHTML(title)}</div>
         <div class="chat-history-time">${time}</div>
       </div>
-      <button class="chat-item-menu-btn" onclick="toggleItemMenu(event, '${sessionId}')">☰</button>
-      <div class="chat-item-dropdown" id="menu-${sessionId}">
-        <button class="chat-item-dropdown-btn" onclick="deleteChat(event, '${sessionId}')">
+      <button class="chat-item-menu-btn" onclick="toggleItemMenu(event, '${thisSessionId}')">☰</button>
+      <div class="chat-item-dropdown" id="menu-${thisSessionId}">
+        <button class="chat-item-dropdown-btn" onclick="deleteChat(event, '${thisSessionId}')">
           🗑 Delete chat
         </button>
       </div>`;
-    item.onclick = (e) => { if (!e.target.closest('.chat-item-menu-btn, .chat-item-dropdown')) loadSession(sessionId, title); };
+    item.onclick = (e) => { if (!e.target.closest('.chat-item-menu-btn, .chat-item-dropdown')) loadSession(thisSessionId, title); };
 
     // Remove active from others
     document.querySelectorAll('.chat-history-item').forEach(el => el.classList.remove('active'));
