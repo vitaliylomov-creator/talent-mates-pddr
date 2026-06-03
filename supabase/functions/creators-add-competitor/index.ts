@@ -61,7 +61,10 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // getUser() must receive the token explicitly — global headers
+    // are forwarded to PostgREST, not to the Auth endpoint.
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) {
       return json({ error: "Invalid or expired token" }, 401);
     }
