@@ -698,8 +698,8 @@
 
     // ── If already signed in → route based on onboarding state ──
     // Also handles the OAuth callback: Supabase processes the URL hash
-    // automatically on createClient(), and getSession() will return the
-    // newly-established session.
+    // automatically on createClient(), and the auth checks below will
+    // pick up the newly-established session.
     async function routeAfterAuth(userId) {
       // Look up onboarding flag. RLS allows the user to read their own row.
       // If the profile row doesn't exist yet (e.g. race with the trigger),
@@ -713,10 +713,30 @@
     }
 
     (async function checkExistingSession() {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        await routeAfterAuth(session.user.id);
+      // ── Escape hatch: ?logout=1 forces sign-out and shows the auth UI
+      //    even if there's a session in localStorage. Use this if you ever
+      //    get stuck in a redirect loop (e.g. token for a deleted user).
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('logout')) {
+        await sb.auth.signOut();
+        // Strip the param so a refresh doesn't repeat the sign-out
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
       }
+
+      // ── Validate the cached session against the server.
+      //    getSession() only reads localStorage — it would happily return a
+      //    session whose user was deleted in the Dashboard. getUser() hits
+      //    the auth server, so a stale token resolves to an error and we
+      //    clean up instead of redirecting into a broken state.
+      const { data: { user }, error } = await sb.auth.getUser();
+      if (error || !user) {
+        // No session, OR session is stale → wipe and show the auth UI
+        if (error) await sb.auth.signOut();
+        return;
+      }
+
+      await routeAfterAuth(user.id);
     })();
 
     // ── Screen control ───────────────────────────────────────

@@ -576,14 +576,26 @@
       competitor: { platform: 'linkedin', name: '', profile_url: '' }
     };
 
-    // ── Auth gate: bounce to login if no session ──────────────
+    // ── Auth gate: bounce to login if no session, validate against server ──
     (async function init() {
-      const { data } = await sb.auth.getSession();
-      if (!data.session) {
+      // We need the access_token for Edge Function calls, so grab the session
+      const { data: sessionData } = await sb.auth.getSession();
+      if (!sessionData.session) {
         window.location.href = AUTH_URL;
         return;
       }
-      session = data.session;
+
+      // Validate with the auth server (catches deleted users whose token
+      // is still cached in localStorage). Without this we'd later hit a
+      // foreign-key error when upserting the profile.
+      const { data: userData, error: userErr } = await sb.auth.getUser();
+      if (userErr || !userData.user) {
+        await sb.auth.signOut();
+        window.location.href = AUTH_URL + '?logout=1';
+        return;
+      }
+
+      session = sessionData.session;
 
       // If onboarding already complete, skip straight to dashboard
       const { data: profile } = await sb
