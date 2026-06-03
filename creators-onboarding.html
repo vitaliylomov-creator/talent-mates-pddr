@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setting up your workspace — Content Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #794DC6;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap {
+      max-width: 420px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.10);
+      border: 0.5px solid rgba(255,255,255,0.22);
+      border-radius: 100px;
+      padding: 7px 18px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.82);
+      margin-bottom: 24px;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    h1 em { font-style: italic; color: rgba(255,255,255,0.45); }
+    p {
+      font-size: 15px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid rgba(255,255,255,0.18);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="badge"><div class="dot"></div>Creators Division</div>
+    <h1>Setting up your<br><em>workspace.</em></h1>
+    <p>Welcome to AI Content Engine. We're preparing your dashboard — this takes just a moment.</p>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // ──────────────────────────────────────────────────────────
+    // TEMPORARY PLACEHOLDER for the full 3-step onboarding flow
+    // (niche tags → brand voice → first competitor). The real
+    // multi-step UI is Sprint 1 Task #6 and will replace this file.
+    //
+    // Behaviour right now:
+    //   1. Verify the user has a live Supabase session (signUp just
+    //      created one, or OAuth callback handed one back).
+    //   2. After a short delay for visual continuity, send them on
+    //      to the dashboard so they can poke around the app shell.
+    // ──────────────────────────────────────────────────────────
+    const SUPABASE_URL  = 'https://cwoedvxltgtwmjazekal.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_bSaKsm6r7ehIvkdDZlA5TQ_gBE54prH';
+    const DASHBOARD_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-dashboard.html';
+    const AUTH_URL      = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    (async function go() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        // Reached this page without auth — bounce back to sign in
+        window.location.href = AUTH_URL;
+        return;
+      }
+      setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1400);
+    })();
+  </script>
+</body>
+</html>
