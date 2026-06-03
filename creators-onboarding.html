@@ -790,15 +790,18 @@
       btn.disabled = true;
       label.innerHTML = '<span class="spinner"></span> Saving…';
 
-      // 1. Upsert profile
+      // 1. Upsert profile. Using upsert (not update) so it works even when
+      //    the handle_new_user trigger didn't fire — e.g. for users who
+      //    signed up before the profiles table existed.
       const { error: profileError } = await sb
         .from('profiles')
-        .update({
+        .upsert({
+          user_id: session.user.id,
+          full_name: session.user.user_metadata?.full_name ?? null,
           niche_tags: state.niche_tags,
           brand_voice: state.brand_voice,
           onboarding_complete: true,
-        })
-        .eq('user_id', session.user.id);
+        }, { onConflict: 'user_id' });
 
       if (profileError) {
         showMsg('Could not save profile: ' + profileError.message);
