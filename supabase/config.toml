@@ -1,0 +1,16 @@
+# Talent Mates Content Engine — Supabase project config
+# Linked to project: cwoedvxltgtwmjazekal (Frankfurt)
+#
+# This file is used by the Supabase CLI when running `supabase functions ...`
+# commands locally. Production deploys target the project via --project-ref.
+
+project_id = "talent-mates-creators"
+
+# creators-save-post is a server-to-server webhook called by Make.com after
+# the AI agent generates a rewrite. It does NOT accept user JWTs — it
+# authenticates via the X-Webhook-Secret header (validated inside the
+# function) and uses the SERVICE_ROLE key to bypass RLS. Therefore we
+# disable the default JWT gate at the Supabase Edge runtime layer.
+[functions.creators-save-post]
+verify_jwt = false
+
