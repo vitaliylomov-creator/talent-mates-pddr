@@ -1,0 +1,17 @@
+# Supabase CLI local cache — not source of truth
+supabase/.temp/
+supabase/.branches/
+
+# Local env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
