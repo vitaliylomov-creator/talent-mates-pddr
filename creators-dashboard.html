@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <!-- Supabase JS SDK — used for auth gate, profile lookup, and stats counts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root {
       --purple:      #794DC6;
@@ -94,6 +98,22 @@
       animation: pulse-dot 2s ease-in-out infinite;
     }
     @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .nav-signout {
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.25);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-family: var(--font-b);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .nav-signout:hover { color: var(--t1); border-color: rgba(255,255,255,0.55); }
 
     /* LAYOUT */
     .page {
@@ -643,6 +663,7 @@
         <div class="ai-dot"></div>
         Content Engine
       </div>
+      <button class="nav-signout" onclick="signOut()" title="Sign out and return to login">Sign out</button>
     </div>
   </nav>
 
@@ -724,11 +745,6 @@
                 <div class="pill-dot"></div>
                 Instagram
               </label>
-              <label class="platform-pill" onclick="togglePill(this)">
-                <input type="checkbox" name="platform" value="pinterest">
-                <div class="pill-dot"></div>
-                Pinterest
-              </label>
             </div>
           </div>
 
@@ -758,23 +774,8 @@
             </span>
           </div>
           <div class="competitor-list" id="competitor-list">
-            <div class="competitor-row">
-              <div class="comp-avatar">MF</div>
-              <div style="flex:1; min-width:0;">
-                <div class="comp-name">Marie Forleo</div>
-                <div class="comp-url">linkedin.com/in/marieforleo</div>
-              </div>
-              <span class="comp-platform">LinkedIn</span>
-              <div class="comp-status"></div>
-            </div>
-            <div class="competitor-row">
-              <div class="comp-avatar">GV</div>
-              <div style="flex:1; min-width:0;">
-                <div class="comp-name">GaryVee</div>
-                <div class="comp-url">instagram.com/garyvee</div>
-              </div>
-              <span class="comp-platform">Instagram</span>
-              <div class="comp-status"></div>
+            <div id="competitor-empty" style="padding:24px 0;color:var(--t3);font-size:13px;text-align:center;">
+              Loading…
             </div>
           </div>
           <div style="margin-top:10px;">
@@ -977,150 +978,356 @@
   <div class="toast" id="toast">✓ <span id="toast-msg">Saved</span></div>
 
   <script>
-    // ─── CONFIG ───────────────────────────────────────────────
-    const MAKE_PROXY        = 'https://hook.eu1.make.com/jne3nomxzyug6hqej8g5vrq9m8tzwupn';
-    const MAKE_WEBHOOK      = 'https://hook.eu1.make.com/7yuoedylpj981uapt77megy1sifz7ucj';
-    const MAKE_COMPETITORS  = 'https://hook.eu1.make.com/9vmhzvn12uhwt9m3wuksb9svi7wvxjte';
+    // ════════════════════════════════════════════════════════
+    // SUPABASE CONFIG — Content Engine project (cwoedvxltgtwmjazekal)
+    // ════════════════════════════════════════════════════════
+    const SUPABASE_URL  = 'https://cwoedvxltgtwmjazekal.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_bSaKsm6r7ehIvkdDZlA5TQ_gBE54prH';
 
-    // ─── TABS ─────────────────────────────────────────────────
+    const AUTH_URL       = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html';
+    const ONBOARDING_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-onboarding.html';
+
+    // Edge Functions
+    const FN_GET_COMPETITORS = SUPABASE_URL + '/functions/v1/creators-get-competitors';
+    const FN_ADD_COMPETITOR  = SUPABASE_URL + '/functions/v1/creators-add-competitor';
+    const FN_GET_POSTS       = SUPABASE_URL + '/functions/v1/creators-get-posts';
+
+    // Legacy Make webhook — still used to manually trigger the daily Apify scrape
+    // (Task #8 will rewrite the Make scenario to read from Supabase under the
+    // hood; this URL stays the same because it's just a trigger.)
+    const MAKE_RUN_NOW = 'https://hook.eu1.make.com/7yuoedylpj981uapt77megy1sifz7ucj';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    let session = null;
+    let profile = null;
+
+    // ════════════════════════════════════════════════════════
+    // BOOT — validate session, load profile, populate everything
+    // ════════════════════════════════════════════════════════
+    (async function boot() {
+      // Server-validated user check. getSession() trusts localStorage; getUser()
+      // hits Supabase Auth, which catches deleted users with stale tokens.
+      const { data: sessionData } = await sb.auth.getSession();
+      if (!sessionData.session) {
+        window.location.href = AUTH_URL;
+        return;
+      }
+      const { data: userData, error: userErr } = await sb.auth.getUser();
+      if (userErr || !userData.user) {
+        await sb.auth.signOut();
+        window.location.href = AUTH_URL + '?logout=1';
+        return;
+      }
+      session = sessionData.session;
+
+      // If the user somehow landed here without completing onboarding, bounce them
+      const { data: prof } = await sb
+        .from('profiles')
+        .select('full_name, niche_tags, brand_voice, onboarding_complete')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      if (!prof || !prof.onboarding_complete) {
+        window.location.href = ONBOARDING_URL;
+        return;
+      }
+      profile = prof;
+
+      // Pre-fill the AI Agent Setup tab from what was chosen in onboarding
+      hydrateAgentSetup();
+
+      // Fetch live data
+      await Promise.all([loadCompetitors(), loadPosts()]);
+    })();
+
+    // ════════════════════════════════════════════════════════
+    // AUTH-AWARE FETCH HELPER
+    // Always carries the user JWT so RLS works inside Edge Functions.
+    // ════════════════════════════════════════════════════════
+    async function authFetch(url, init = {}) {
+      const headers = {
+        'Authorization': 'Bearer ' + session.access_token,
+        'apikey': SUPABASE_ANON,
+        ...(init.headers || {}),
+      };
+      if (init.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      const res = await fetch(url, { ...init, headers });
+      // 401 likely means token expired — refresh and retry once
+      if (res.status === 401) {
+        const { data, error } = await sb.auth.refreshSession();
+        if (error || !data.session) {
+          window.location.href = AUTH_URL + '?logout=1';
+          throw new Error('Session expired');
+        }
+        session = data.session;
+        headers['Authorization'] = 'Bearer ' + session.access_token;
+        return fetch(url, { ...init, headers });
+      }
+      return res;
+    }
+
+    // ════════════════════════════════════════════════════════
+    // TABS
+    // ════════════════════════════════════════════════════════
     function showTab(name, btn) {
       ['competitors','agent','preview'].forEach(t => {
-        document.getElementById('tab-'+t).style.display = t === name ? '' : 'none';
+        document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
       });
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       if (name === 'preview') loadPosts();
     }
 
-    // ─── MAKE PROXY: LOAD POSTS ───────────────────────────────
-    async function loadPosts() {
-      const loading = document.getElementById('posts-loading');
-      const list    = document.getElementById('posts-list');
-      loading.style.display = 'inline';
-      list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--t3);font-size:14px;">Loading posts…</div>';
+    // ════════════════════════════════════════════════════════
+    // STATS — counts derived from the lists we already load
+    // ════════════════════════════════════════════════════════
+    function renderStats(competitors, posts) {
+      document.getElementById('stat-competitors').textContent = competitors.length;
+
+      // "Posts scraped" — total, but show recent 24h as accent if any
+      const last24h = posts.filter(p => p.created_at && (Date.now() - new Date(p.created_at).getTime()) < 86_400_000);
+      document.getElementById('stat-posts').textContent = posts.length;
+      const subEl = document.querySelector('#stat-posts + .stat-sub');
+      if (subEl) subEl.textContent = last24h.length ? `+${last24h.length} last 24h` : 'All time';
+
+      // "Generated posts" — those with AI-written rewrite
+      const generated = posts.filter(p => p.new_post && p.new_post.trim().length > 0);
+      document.getElementById('stat-generated').textContent = generated.length;
+    }
+
+    // ════════════════════════════════════════════════════════
+    // AGENT SETUP — hydrate with values chosen during onboarding
+    // ════════════════════════════════════════════════════════
+    function hydrateAgentSetup() {
+      if (!profile) return;
+      if (profile.brand_voice) {
+        const sel = document.getElementById('brand-voice');
+        if (sel) sel.value = profile.brand_voice;
+      }
+      // Render niche tags into the second tag container (the one in Agent Setup)
+      const containers = document.querySelectorAll('.tag-container');
+      const setupContainer = containers[1]; // first is in "Add competitor", second is in "Agent Setup"
+      if (setupContainer && Array.isArray(profile.niche_tags)) {
+        const input = setupContainer.querySelector('input');
+        profile.niche_tags.forEach(t => {
+          const tag = document.createElement('span');
+          tag.className = 'tag';
+          tag.innerHTML = `${escapeHtml(t)} <span class="tag-remove" onclick="removeTag(this)">×</span>`;
+          setupContainer.insertBefore(tag, input);
+        });
+      }
+    }
+
+    // ════════════════════════════════════════════════════════
+    // COMPETITORS
+    // ════════════════════════════════════════════════════════
+    let competitorsCache = [];
+    let postsCache = [];
+
+    async function loadCompetitors() {
+      const list  = document.getElementById('competitor-list');
+      const empty = document.getElementById('competitor-empty');
 
       try {
-        const res = await fetch(MAKE_PROXY, { method: 'POST' });
-        if (!res.ok) throw new Error(`Make error: ${res.status}`);
-        const raw = await res.json();
-        console.log('POSTS RAW:', JSON.stringify(raw).substring(0, 300));
+        const res = await authFetch(FN_GET_COMPETITORS);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const { competitors = [] } = await res.json();
+        competitorsCache = competitors;
+        renderStats(competitorsCache, postsCache);
 
-        // Handle all possible Make response structures
-        let data = [];
-        if (Array.isArray(raw)) {
-          data = raw;
-        } else if (raw.items && Array.isArray(raw.items) && raw.items[0] && raw.items[0].array) {
-          // Triple nested: {items: [{array: [...]}]}
-          data = raw.items[0].array;
-        } else if (raw.items && raw.items.array && Array.isArray(raw.items.array)) {
-          data = raw.items.array;
-        } else if (raw.items && Array.isArray(raw.items)) {
-          data = raw.items;
-        } else if (raw.array && Array.isArray(raw.array)) {
-          data = raw.array;
-        } else if (raw.records) {
-          data = raw.records;
-        } else {
-          data = [raw];
-        }
-        console.log('POSTS parsed:', data.length, 'records');
-
-        // update stats
-        document.getElementById('stat-posts').textContent     = data.length;
-        document.getElementById('stat-generated').textContent = data.filter(r => r['New Post']).length;
-
-        if (!data.length) {
-          list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--t3);font-size:14px;">No posts yet. Run the agent to generate content.</div>';
+        if (!competitors.length) {
+          list.innerHTML = '<div style="padding:24px 0;color:var(--t3);font-size:13px;text-align:center;">No competitors yet. Add your first one above ↑</div>';
           return;
         }
 
-        list.innerHTML = data.map((f, i) => {
-          const name      = f['Name']      || '—';
-          const content   = f['content']   || '';
-          const newPost   = f['New Post']  || '';
-          const postedAt  = f['postedAt']  ? new Date(f['postedAt']).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—';
-          const sourceUrl = f['URL']        || '#';
+        list.innerHTML = competitors.map(c => {
+          const initials = (c.name || '?').split(/\s+/).map(w => w[0] || '').join('').substring(0,2).toUpperCase();
+          const url = (c.profile_url || '').replace(/^https?:\/\//, '');
+          const platform = (c.platform || 'linkedin').charAt(0).toUpperCase() + (c.platform || 'linkedin').slice(1);
+          return `
+            <div class="competitor-row" data-id="${c.id}">
+              <div class="comp-avatar">${escapeHtml(initials)}</div>
+              <div style="flex:1;min-width:0;">
+                <div class="comp-name">${escapeHtml(c.name || '—')}</div>
+                <div class="comp-url">${escapeHtml(url)}</div>
+              </div>
+              <span class="comp-platform">${platform}</span>
+              <div class="comp-status"></div>
+            </div>`;
+        }).join('');
+      } catch (err) {
+        console.error('loadCompetitors:', err);
+        list.innerHTML = `<div style="padding:24px 0;color:rgba(255,120,120,0.85);font-size:13px;text-align:center;">Could not load competitors. ${escapeHtml(err.message || '')}</div>`;
+      }
+    }
+
+    async function addCompetitor() {
+      const name = document.getElementById('comp-name').value.trim();
+      const url  = document.getElementById('comp-url').value.trim();
+      if (!name || !url) { showToast('Please fill in name and URL'); return; }
+      if (!/^https?:\/\//i.test(url)) { showToast('URL must start with http:// or https://'); return; }
+
+      const selected = document.querySelector('#platform-group .platform-pill.selected input');
+      const platform = selected ? selected.value : 'linkedin';
+
+      // Collect any niche tags entered for this competitor (first .tag-container)
+      const addContainer = document.querySelector('#tab-competitors .tag-container');
+      const niche_tags = addContainer
+        ? Array.from(addContainer.querySelectorAll('.tag')).map(t => t.textContent.replace(/×$/,'').trim())
+        : [];
+
+      showToast('⏳ Saving…');
+
+      try {
+        const res = await authFetch(FN_ADD_COMPETITOR, {
+          method: 'POST',
+          body: JSON.stringify({ name, profile_url: url, platform, niche_tags }),
+        });
+        const body = await res.json();
+        if (!res.ok) {
+          const msg = body.error || ('HTTP ' + res.status);
+          showToast('✗ ' + msg);
+          return;
+        }
+        resetCompetitorForm();
+        showToast('✓ Tracking ' + name);
+        await loadCompetitors();
+      } catch (err) {
+        console.error('addCompetitor:', err);
+        showToast('✗ Could not save. ' + (err.message || 'Check connection.'));
+      }
+    }
+
+    function resetCompetitorForm() {
+      document.getElementById('comp-name').value = '';
+      document.getElementById('comp-url').value  = '';
+      const addContainer = document.querySelector('#tab-competitors .tag-container');
+      if (addContainer) {
+        addContainer.querySelectorAll('.tag').forEach(t => t.remove());
+      }
+    }
+
+    // ════════════════════════════════════════════════════════
+    // POSTS
+    // ════════════════════════════════════════════════════════
+    async function loadPosts() {
+      const loading = document.getElementById('posts-loading');
+      const list    = document.getElementById('posts-list');
+      if (loading) loading.style.display = 'inline';
+      if (list) list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--t3);font-size:14px;">Loading posts…</div>';
+
+      try {
+        const res = await authFetch(FN_GET_POSTS);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const { posts = [] } = await res.json();
+        postsCache = posts;
+        renderStats(competitorsCache, postsCache);
+
+        if (!list) return;
+
+        if (!posts.length) {
+          list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--t3);font-size:14px;">No posts yet. Once your competitors get scraped, AI-rewritten posts will appear here.</div>';
+          return;
+        }
+
+        // Build a lookup so we can show the source creator's name
+        const compMap = Object.fromEntries(competitorsCache.map(c => [c.id, c]));
+
+        list.innerHTML = posts.map((p, i) => {
+          const comp = p.competitor_id ? compMap[p.competitor_id] : null;
+          const sourceName = comp ? comp.name : '—';
+          const platform = (p.platform || 'linkedin').charAt(0).toUpperCase() + (p.platform || 'linkedin').slice(1);
+          const postedAt = p.posted_at ? new Date(p.posted_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '—';
+          const safeNew = (p.new_post || '').replace(/`/g, "'").replace(/\\/g, '\\\\').replace(/\$/g, '\\$');
 
           return `
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:24px 0;border-top:${i===0?'none':'0.5px solid var(--border)'};">
-            <div>
-              <div class="post-preview-label">Source — ${name}</div>
-              <div class="post-preview">
-                <div class="post-preview-text" style="max-height:180px;overflow:hidden;mask-image:linear-gradient(to bottom,black 70%,transparent);">${content}</div>
-                <div class="post-preview-meta" style="margin-top:10px;">
-                  <span class="post-meta-item">📅 ${postedAt}</span>
-                  ${sourceUrl !== '#' ? `<a href="${sourceUrl}" target="_blank" style="font-size:11px;color:var(--t4);text-decoration:none;">🔗 Original</a>` : ''}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:24px 0;border-top:${i===0?'none':'0.5px solid var(--border)'};">
+              <div>
+                <div class="post-preview-label">Source — ${escapeHtml(sourceName)} · ${escapeHtml(platform)}</div>
+                <div class="post-preview">
+                  <div class="post-preview-text" style="max-height:180px;overflow:hidden;mask-image:linear-gradient(to bottom,black 70%,transparent);">${escapeHtml(p.content || '')}</div>
+                  <div class="post-preview-meta" style="margin-top:10px;">
+                    <span class="post-meta-item">📅 ${postedAt}</span>
+                    ${p.source_url ? `<a href="${escapeHtml(p.source_url)}" target="_blank" rel="noopener" style="font-size:11px;color:var(--t4);text-decoration:none;">🔗 Original</a>` : ''}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div>
-              <div class="post-preview-label">Generated post</div>
-              <div class="post-preview" style="border-color:rgba(255,255,255,0.22);">
-                <div class="post-preview-text">${newPost || '<span style="color:var(--t4);font-style:italic;">Not yet generated</span>'}</div>
+              <div>
+                <div class="post-preview-label">Generated post</div>
+                <div class="post-preview" style="border-color:rgba(255,255,255,0.22);">
+                  <div class="post-preview-text">${p.new_post ? escapeHtml(p.new_post) : '<span style="color:var(--t4);font-style:italic;">Not yet generated</span>'}</div>
+                </div>
+                ${p.new_post ? `
+                <div class="btn-row" style="margin-top:12px;">
+                  <button class="btn-ghost" onclick="copyText(\`${safeNew}\`)">Copy post</button>
+                </div>` : ''}
               </div>
-              ${newPost ? `
-              <div class="btn-row" style="margin-top:12px;">
-                <button class="btn-ghost" onclick="copyText(\`${newPost.replace(/`/g,"'").replace(/\n/g,'\\n')}\`)">Copy post</button>
-              </div>` : ''}
-            </div>
-          </div>`;
+            </div>`;
         }).join('');
 
       } catch (err) {
-        list.innerHTML = `<div style="text-align:center;padding:48px 0;color:rgba(255,120,120,0.8);font-size:13px;">
-          Could not load posts. Check your Make scenario is active.<br>
-          <span style="font-size:11px;color:var(--t4);margin-top:6px;display:block;">${err.message}</span>
-        </div>`;
+        console.error('loadPosts:', err);
+        if (list) {
+          list.innerHTML = `<div style="text-align:center;padding:48px 0;color:rgba(255,120,120,0.85);font-size:13px;">Could not load posts. ${escapeHtml(err.message || '')}</div>`;
+        }
       } finally {
-        loading.style.display = 'none';
+        if (loading) loading.style.display = 'none';
       }
     }
 
-    // ─── MAKE PROXY: LOAD STATS ───────────────────────────────
-    async function loadStats() {
-      try {
-        const res = await fetch(MAKE_PROXY, { method: 'POST' });
-        if (!res.ok) return;
-        const raw = await res.json();
-        let data = [];
-        if (Array.isArray(raw)) {
-          data = raw;
-        } else if (raw.items && Array.isArray(raw.items) && raw.items[0] && raw.items[0].array) {
-          data = raw.items[0].array;
-        } else if (raw.items && raw.items.array) {
-          data = raw.items.array;
-        } else if (raw.items && Array.isArray(raw.items)) {
-          data = raw.items;
-        } else if (raw.array) {
-          data = raw.array;
-        }
-        animateNum('stat-posts',     data.length, 400);
-        animateNum('stat-generated', data.filter(r => r['New Post']).length, 600);
-      } catch {}
-    }
-
-    // ─── MAKE WEBHOOK: RUN NOW ────────────────────────────────
+    // ════════════════════════════════════════════════════════
+    // RUN-NOW — still hits the existing Make webhook
+    // ════════════════════════════════════════════════════════
     async function runNow() {
-      showToast('⏳ Sending request to agent…');
+      showToast('⏳ Triggering daily scrape…');
       try {
-        await fetch(MAKE_WEBHOOK, {
+        await fetch(MAKE_RUN_NOW, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ trigger: 'manual', source: 'dashboard', timestamp: new Date().toISOString() })
+          body: JSON.stringify({
+            trigger: 'manual',
+            source: 'dashboard',
+            user_id: session?.user?.id,
+            timestamp: new Date().toISOString(),
+          }),
         });
-        showToast('✓ Agent triggered — check Post Preview in a few minutes');
+        showToast('✓ Agent triggered — new posts appear in Post Preview when ready');
       } catch (err) {
-        showToast('✗ Could not reach webhook. Check your connection.');
+        showToast('✗ Could not reach Make webhook.');
       }
     }
 
-    // ─── HELPERS ──────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════
+    // SIGN OUT
+    // ════════════════════════════════════════════════════════
+    async function signOut() {
+      try { await sb.auth.signOut(); } catch {}
+      window.location.href = AUTH_URL + '?logout=1';
+    }
+
+    // ════════════════════════════════════════════════════════
+    // SHARED HELPERS
+    // ════════════════════════════════════════════════════════
     function copyText(text) {
       navigator.clipboard.writeText(text).then(() => showToast('✓ Copied to clipboard'));
     }
 
     function togglePill(label) {
-      label.classList.toggle('selected');
+      // Single-select platform: deselect siblings inside the same group
+      const group = label.parentElement;
+      if (group && group.classList.contains('platform-group')) {
+        group.querySelectorAll('.platform-pill').forEach(p => {
+          p.classList.remove('selected');
+          const cb = p.querySelector('input[type="checkbox"]');
+          if (cb) cb.checked = false;
+        });
+      }
+      label.classList.add('selected');
+      const cb = label.querySelector('input[type="checkbox"]');
+      if (cb) cb.checked = true;
     }
 
     function removeTag(btn) {
@@ -1130,67 +1337,18 @@
     function handleTagKey(e) {
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
-        const val = e.target.value.trim().replace(',','');
+        const val = e.target.value.trim().replace(/,/g, '');
         if (!val) return;
         const tag = document.createElement('span');
         tag.className = 'tag';
-        tag.innerHTML = val + ' <span class="tag-remove" onclick="removeTag(this)">×</span>';
+        tag.innerHTML = `${escapeHtml(val)} <span class="tag-remove" onclick="removeTag(this)">×</span>`;
         e.target.parentElement.insertBefore(tag, e.target);
         e.target.value = '';
       }
     }
 
-    const MAKE_ADD_COMPETITOR = 'https://hook.eu1.make.com/q5pfogg3i522us803ury8mfq8j5zkndm';
-
-    async function addCompetitor() {
-      const name = document.getElementById('comp-name').value.trim();
-      const url  = document.getElementById('comp-url').value.trim();
-      if (!name || !url) { showToast('Please fill in name and URL'); return; }
-
-      // get selected platform
-      const selected = document.querySelector('#platform-group .platform-pill.selected input');
-      const platform = selected ? selected.value : 'linkedin';
-
-      showToast('⏳ Saving to Airtable…');
-
-      try {
-        await fetch(MAKE_ADD_COMPETITOR, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, url, platform })
-        });
-
-        // add to UI list
-        const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-        const list = document.getElementById('competitor-list');
-        const row  = document.createElement('div');
-        row.className = 'competitor-row';
-        row.innerHTML = `
-          <div class="comp-avatar">${initials}</div>
-          <div style="flex:1; min-width:0;">
-            <div class="comp-name">${name}</div>
-            <div class="comp-url">${url}</div>
-          </div>
-          <span class="comp-platform">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
-          <div class="comp-status"></div>`;
-        list.appendChild(row);
-        document.getElementById('stat-competitors').textContent = list.querySelectorAll('.competitor-row').length;
-        resetCompetitorForm();
-        showToast(`✓ ${name} saved to Airtable`);
-        loadCompetitors(); // refresh list from Airtable
-
-      } catch {
-        showToast('✗ Could not save. Check your connection.');
-      }
-    }
-
-    function resetCompetitorForm() {
-      document.getElementById('comp-name').value = '';
-      document.getElementById('comp-url').value  = '';
-    }
-
-    function saveAgent()    { showToast('✓ Agent configuration saved'); }
-    function saveSchedule() { showToast('✓ Schedule saved — agent active'); }
+    function saveAgent()    { showToast('✓ Agent configuration saved (UI only — wiring lands in next sprint)'); }
+    function saveSchedule() { showToast('✓ Schedule saved'); }
 
     function showToast(msg) {
       const t = document.getElementById('toast');
@@ -1199,107 +1357,22 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    // ─── INTERSECTION OBSERVER ────────────────────────────────
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Reveal-on-scroll
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
       });
     }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    // ─── LOAD COMPETITORS FROM AIRTABLE ───────────────────────
-    async function loadCompetitors() {
-      try {
-        const first = await fetch(MAKE_COMPETITORS, { method: 'POST' });
-        if (!first.ok) return;
-
-        const text = await first.text();
-        if (!text || text.trim() === 'Accepted') {
-          console.log('Competitors: enable Immediately as data arrives in Make scenario');
-          return;
-        }
-
-        let data;
-        try { data = JSON.parse(text); } catch { return; }
-
-        let records = [];
-        if (Array.isArray(data)) {
-          records = data;
-        } else if (data.items && Array.isArray(data.items)) {
-          records = data.items;
-        } else if (data.items && data.items.array) {
-          records = data.items.array;
-        } else if (data.array) {
-          records = data.array;
-        } else if (data.__IMTLENGTH__) {
-          const total = data.__IMTLENGTH__;
-          records.push(data);
-          const promises = [];
-          for (let i = 1; i < total; i++) {
-            promises.push(
-              fetch(MAKE_COMPETITORS, { method: 'POST' }).then(r => r.json())
-            );
-          }
-          const rest = await Promise.all(promises);
-          records.push(...rest);
-        } else {
-          records = [data];
-        }
-
-        // Deduplicate by Name
-        const seen = new Set();
-        records = records.filter(r => {
-          const name = r['Name'] || r.Name || '';
-          if (seen.has(name)) return false;
-          seen.add(name);
-          return true;
-        });
-
-        if (!records.length) return;
-
-        const list = document.getElementById('competitor-list');
-        list.innerHTML = '';
-
-        records.forEach(r => {
-          const name     = r['Name']        || r.Name        || '—';
-          const url      = r['Profile URL'] || r.profile_url || '';
-          const platform = r['Джерело']     || r.platform    || 'linkedin';
-          const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-
-          const row = document.createElement('div');
-          row.className = 'competitor-row';
-          row.innerHTML = `
-            <div class="comp-avatar">${initials}</div>
-            <div style="flex:1;min-width:0;">
-              <div class="comp-name">${name}</div>
-              <div class="comp-url">${url}</div>
-            </div>
-            <span class="comp-platform">${platform.charAt(0).toUpperCase() + platform.slice(1)}</span>
-            <div class="comp-status"></div>`;
-          list.appendChild(row);
-        });
-
-        document.getElementById('stat-competitors').textContent = records.length;
-
-      } catch(e) { console.log('Competitors error:', e); }
-    }
-
-    // ─── INIT ─────────────────────────────────────────────────
-    function animateNum(id, target, delay) {
-      setTimeout(() => {
-        let n = 0;
-        const el = document.getElementById(id);
-        const step = setInterval(() => {
-          n++;
-          el.textContent = n;
-          if (n >= target) clearInterval(step);
-        }, 60);
-      }, delay);
-    }
-
-    // Load real data on page load
-    loadStats();
-    loadCompetitors();
   </script>
 </body>
 </html>
