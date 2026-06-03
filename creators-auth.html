@@ -696,14 +696,26 @@
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // ── If already signed in → straight to dashboard ─────────
+    // ── If already signed in → route based on onboarding state ──
     // Also handles the OAuth callback: Supabase processes the URL hash
     // automatically on createClient(), and getSession() will return the
     // newly-established session.
+    async function routeAfterAuth(userId) {
+      // Look up onboarding flag. RLS allows the user to read their own row.
+      // If the profile row doesn't exist yet (e.g. race with the trigger),
+      // treat it as "needs onboarding".
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('onboarding_complete')
+        .eq('user_id', userId)
+        .maybeSingle();
+      window.location.href = profile?.onboarding_complete ? DASHBOARD_URL : ONBOARDING_URL;
+    }
+
     (async function checkExistingSession() {
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        window.location.href = DASHBOARD_URL;
+        await routeAfterAuth(session.user.id);
       }
     })();
 
@@ -764,9 +776,8 @@
         return;
       }
 
-      // Returning user → dashboard. Dashboard will redirect to onboarding
-      // later if it detects the account hasn't completed setup.
-      window.location.href = DASHBOARD_URL;
+      // Route based on whether onboarding has been completed
+      await routeAfterAuth(data.user.id);
     }
 
     // ── Create Account (email + password) ───────────────────

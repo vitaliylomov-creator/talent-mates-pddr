@@ -3,113 +3,865 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Setting up your workspace — Content Engine</title>
+  <title>Setup — Content Engine — Talent Mates Creators</title>
+  <meta name="description" content="3-step setup for your AI Content Engine: niche, brand voice, and first competitor." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:        #794DC6;
+      --purple-dk:     #6b42b5;
+      --white:         #ffffff;
+      --border:        rgba(255,255,255,0.10);
+      --border-mid:    rgba(255,255,255,0.22);
+      --border-strong: rgba(255,255,255,0.38);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.32);
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
     body {
-      font-family: 'DM Sans', system-ui, sans-serif;
-      background: #794DC6;
-      color: #ffffff;
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
       min-height: 100vh;
+      padding: 40px 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
-      -webkit-font-smoothing: antialiased;
     }
-    .wrap {
-      max-width: 420px;
-      text-align: center;
+
+    button { font-family: var(--font-b); cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── SHELL ── */
+    .shell { width: 100%; max-width: 560px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
     }
-    .badge {
+    .logo-mark {
+      font-family: var(--font-b);
+      font-size: 11px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+    }
+    .logo-mark strong { color: var(--white); font-weight: 500; }
+    .logo-mark span   { color: var(--t3); font-weight: 400; }
+
+    .step-pills {
+      display: flex;
+      gap: 8px;
+    }
+    .step-pill {
+      width: 26px;
+      height: 4px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.16);
+      transition: background 0.4s var(--ease);
+    }
+    .step-pill.active { background: var(--white); }
+    .step-pill.done   { background: rgba(255,255,255,0.55); }
+
+    /* ── CARD ── */
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 22px;
+      padding: 44px 44px 40px;
+    }
+
+    .step-count {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 14px;
+    }
+
+    .step-title {
+      font-family: var(--font-d);
+      font-size: clamp(28px, 4.5vw, 38px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+    .step-title em { font-style: italic; color: rgba(255,255,255,0.45); }
+
+    .step-sub {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--t3);
+      line-height: 1.62;
+      margin-bottom: 32px;
+    }
+
+    /* ── STEP CONTAINERS ── */
+    .step { display: none; }
+    .step.active { display: block; animation: fadeUp 0.5s var(--ease) both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── TAGS (Step 1) ── */
+    .tag-input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 64px;
+    }
+    .tag-input-row.focused {
+      border-color: var(--border-strong);
+      background: rgba(255,255,255,0.08);
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.12);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t1);
+    }
+    .tag-chip button {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.55);
+      font-size: 16px;
+      line-height: 1;
+      padding: 0 0 0 2px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .tag-chip button:hover { color: var(--white); }
+    .tag-input-row input {
+      flex: 1;
+      min-width: 120px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--t1);
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 300;
+      padding: 4px 0;
+    }
+    .tag-input-row input::placeholder { color: rgba(255,255,255,0.25); }
+
+    .hint {
+      font-size: 12px;
+      color: var(--t4);
+      margin-top: 10px;
+      letter-spacing: 0.01em;
+    }
+
+    .tag-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 18px;
+    }
+    .tag-suggestion {
+      padding: 6px 12px;
+      background: transparent;
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--t2);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .tag-suggestion:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--border-strong);
+    }
+
+    /* ── BRAND VOICE CARDS (Step 2) ── */
+    .voice-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .voice-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 12px;
+      text-align: left;
+      transition: background 0.2s, border-color 0.2s;
+      cursor: pointer;
+      width: 100%;
+    }
+    .voice-card:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: var(--border-strong);
+    }
+    .voice-card.selected {
+      background: rgba(255,255,255,0.10);
+      border-color: var(--white);
+    }
+    .voice-radio {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      flex-shrink: 0;
+      margin-top: 2px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .voice-card.selected .voice-radio {
+      border-color: var(--white);
+    }
+    .voice-card.selected .voice-radio::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: var(--white);
+      border-radius: 50%;
+    }
+    .voice-text { flex: 1; }
+    .voice-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--t1);
+      margin-bottom: 3px;
+      letter-spacing: 0.005em;
+    }
+    .voice-desc {
+      font-size: 12.5px;
+      font-weight: 300;
+      color: var(--t3);
+      line-height: 1.55;
+    }
+
+    /* ── COMPETITOR FORM (Step 3) ── */
+    .platform-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .platform-pill {
+      flex: 1;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .platform-pill:hover { background: rgba(255,255,255,0.07); }
+    .platform-pill.selected {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--white);
+      color: var(--t1);
+    }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--t1);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.20); }
+    .field input:focus {
+      border-color: var(--border-strong);
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── INLINE MESSAGE ── */
+    .msg {
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .msg.error {
+      display: block;
+      background: rgba(255, 80, 80, 0.12);
+      border: 0.5px solid rgba(255, 80, 80, 0.35);
+      color: rgba(255, 200, 200, 0.95);
+    }
+
+    /* ── FOOTER BUTTONS ── */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 0.5px solid var(--border);
+    }
+    .btn-back {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: var(--t3);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+      padding: 8px 4px;
+    }
+    .btn-back:hover { color: var(--t1); }
+    .btn-back:disabled { opacity: 0; pointer-events: none; }
+
+    .btn-next {
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 13px 28px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255,255,255,0.10);
-      border: 0.5px solid rgba(255,255,255,0.22);
-      border-radius: 100px;
-      padding: 7px 18px;
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.82);
-      margin-bottom: 24px;
+      transition: opacity 0.2s, transform 0.15s;
+      min-width: 140px;
+      justify-content: center;
     }
-    .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #fff;
-      animation: pulse 1.4s ease-in-out infinite;
+    .btn-next:hover  { opacity: 0.88; }
+    .btn-next:active { transform: scale(0.99); }
+    .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .skip-link {
+      font-size: 12px;
+      color: var(--t4);
+      letter-spacing: 0.01em;
+      display: inline-block;
+      margin-left: 16px;
+      transition: color 0.2s;
     }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(32px, 6vw, 48px);
-      font-weight: 400;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-    h1 em { font-style: italic; color: rgba(255,255,255,0.45); }
-    p {
-      font-size: 15px;
-      font-weight: 300;
-      color: rgba(255,255,255,0.65);
-      line-height: 1.6;
-      margin-bottom: 32px;
-    }
+    .skip-link:hover { color: var(--t2); }
+
+    /* ── SPINNER ── */
     .spinner {
-      width: 32px; height: 32px;
-      border: 2px solid rgba(255,255,255,0.18);
-      border-top-color: #fff;
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 1.5px solid rgba(121,77,198,0.25);
+      border-top-color: var(--purple);
       border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-      margin: 0 auto;
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .card { padding: 32px 24px 28px; border-radius: 18px; }
+      .topbar { margin-bottom: 24px; }
+      .footer { flex-wrap: wrap; }
+      .btn-next { width: 100%; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="badge"><div class="dot"></div>Creators Division</div>
-    <h1>Setting up your<br><em>workspace.</em></h1>
-    <p>Welcome to AI Content Engine. We're preparing your dashboard — this takes just a moment.</p>
-    <div class="spinner"></div>
+  <div class="shell">
+
+    <!-- ── Top bar: brand + progress pills ── -->
+    <div class="topbar">
+      <div class="logo-mark"><strong>TALENT</strong>&nbsp;<span>MATES</span></div>
+      <div class="step-pills">
+        <div class="step-pill active" data-pill="1"></div>
+        <div class="step-pill"        data-pill="2"></div>
+        <div class="step-pill"        data-pill="3"></div>
+      </div>
+    </div>
+
+    <div class="card">
+
+      <!-- ── STEP 1: NICHE TAGS ── -->
+      <div id="step-1" class="step active">
+        <div class="step-count">Step 1 of 3</div>
+        <h1 class="step-title">What's your <em>niche?</em></h1>
+        <p class="step-sub">Add 1–5 tags so AI Content Engine learns what topics matter to your audience. You can edit these later.</p>
+
+        <div class="tag-input-row" id="tag-row">
+          <input id="tag-input" type="text" placeholder="Type a tag and press Enter…" autocomplete="off" />
+        </div>
+        <p class="hint">Press Enter, comma, or Tab to add. Click × to remove.</p>
+
+        <div class="tag-suggestions">
+          <button type="button" class="tag-suggestion" onclick="addTag('AI tools')">AI tools</button>
+          <button type="button" class="tag-suggestion" onclick="addTag('Personal branding')">Personal branding</button>
+          <button type="button" class="tag-suggestion" onclick="addTag('Content strategy')">Content strategy</button>
+          <button type="button" class="tag-suggestion" onclick="addTag('Startups')">Startups</button>
+          <button type="button" class="tag-suggestion" onclick="addTag('Marketing')">Marketing</button>
+          <button type="button" class="tag-suggestion" onclick="addTag('Sports business')">Sports business</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: BRAND VOICE ── -->
+      <div id="step-2" class="step">
+        <div class="step-count">Step 2 of 3</div>
+        <h1 class="step-title">Pick your <em>voice.</em></h1>
+        <p class="step-sub">This shapes how AI writes for you. You can change it any time from the dashboard.</p>
+
+        <div class="voice-grid" id="voice-grid">
+          <button type="button" class="voice-card" data-voice="founder">
+            <div class="voice-radio"></div>
+            <div class="voice-text">
+              <div class="voice-name">Founder authority</div>
+              <div class="voice-desc">Premium, opinionated, niche-expert. For thought-leaders and operators.</div>
+            </div>
+          </button>
+          <button type="button" class="voice-card" data-voice="educator">
+            <div class="voice-radio"></div>
+            <div class="voice-text">
+              <div class="voice-name">Educator</div>
+              <div class="voice-desc">Clear, accessible, trust-building. Breaks down complex ideas.</div>
+            </div>
+          </button>
+          <button type="button" class="voice-card" data-voice="entertainer">
+            <div class="voice-radio"></div>
+            <div class="voice-text">
+              <div class="voice-name">Entertainer</div>
+              <div class="voice-desc">Engaging, relatable, high-energy. Built for reach and shares.</div>
+            </div>
+          </button>
+          <button type="button" class="voice-card" data-voice="analyst">
+            <div class="voice-radio"></div>
+            <div class="voice-text">
+              <div class="voice-name">Analyst</div>
+              <div class="voice-desc">Data-driven, precise, insight-led. For numbers people.</div>
+            </div>
+          </button>
+          <button type="button" class="voice-card" data-voice="visionary">
+            <div class="voice-radio"></div>
+            <div class="voice-text">
+              <div class="voice-name">Visionary</div>
+              <div class="voice-desc">Forward-looking, bold, contrarian. Calls the future before it arrives.</div>
+            </div>
+          </button>
+          <button type="button" class="voice-card" data-voice="storyteller">
+            <div class="voice-radio"></div>
+            <div class="voice-text">
+              <div class="voice-name">Storyteller</div>
+              <div class="voice-desc">Narrative-first, emotional, personal. Behind-the-scenes and lessons.</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: FIRST COMPETITOR ── -->
+      <div id="step-3" class="step">
+        <div class="step-count">Step 3 of 3</div>
+        <h1 class="step-title">Add your first <em>competitor.</em></h1>
+        <p class="step-sub">Pick any creator in your niche — blogger, brand, thought-leader. We'll scrape their posts daily and turn them into content ideas for you.</p>
+
+        <div class="platform-row" id="platform-row">
+          <button type="button" class="platform-pill selected" data-platform="linkedin">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            LinkedIn
+          </button>
+          <button type="button" class="platform-pill" data-platform="instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            Instagram
+          </button>
+        </div>
+
+        <div class="field">
+          <label for="comp-name">Creator name</label>
+          <input id="comp-name" type="text" placeholder="e.g. Alex Hormozi" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="comp-url">Profile URL</label>
+          <input id="comp-url" type="url" placeholder="https://linkedin.com/in/…" autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- ── Error / status message ── -->
+      <div id="msg" class="msg"></div>
+
+      <!-- ── Footer: Back / Next ── -->
+      <div class="footer">
+        <button class="btn-back" id="btn-back" onclick="prevStep()" disabled>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back
+        </button>
+        <div>
+          <a href="#" class="skip-link" id="skip-link" onclick="skipStep(); return false;" style="display:none;">Skip for now</a>
+          <button class="btn-next" id="btn-next" onclick="nextStep()">
+            <span id="btn-next-label">Continue</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <script>
-    // ──────────────────────────────────────────────────────────
-    // TEMPORARY PLACEHOLDER for the full 3-step onboarding flow
-    // (niche tags → brand voice → first competitor). The real
-    // multi-step UI is Sprint 1 Task #6 and will replace this file.
-    //
-    // Behaviour right now:
-    //   1. Verify the user has a live Supabase session (signUp just
-    //      created one, or OAuth callback handed one back).
-    //   2. After a short delay for visual continuity, send them on
-    //      to the dashboard so they can poke around the app shell.
-    // ──────────────────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════
+    // SUPABASE
+    // ════════════════════════════════════════════════════════
     const SUPABASE_URL  = 'https://cwoedvxltgtwmjazekal.supabase.co';
     const SUPABASE_ANON = 'sb_publishable_bSaKsm6r7ehIvkdDZlA5TQ_gBE54prH';
-    const DASHBOARD_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-dashboard.html';
+
     const AUTH_URL      = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html';
+    const DASHBOARD_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-dashboard.html';
+    const ADD_COMPETITOR_FN = SUPABASE_URL + '/functions/v1/creators-add-competitor';
 
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    (async function go() {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        // Reached this page without auth — bounce back to sign in
+    let session = null;
+    let currentStep = 1;
+
+    // State accumulated across steps
+    const state = {
+      niche_tags: [],
+      brand_voice: null,
+      competitor: { platform: 'linkedin', name: '', profile_url: '' }
+    };
+
+    // ── Auth gate: bounce to login if no session ──────────────
+    (async function init() {
+      const { data } = await sb.auth.getSession();
+      if (!data.session) {
         window.location.href = AUTH_URL;
         return;
       }
-      setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1400);
+      session = data.session;
+
+      // If onboarding already complete, skip straight to dashboard
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('onboarding_complete')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      if (profile?.onboarding_complete) {
+        window.location.href = DASHBOARD_URL;
+        return;
+      }
+
+      // Wire up tag input handlers now that we know we'll render the UI
+      wireTagInput();
+      wireVoiceCards();
+      wirePlatformPills();
+      updateFooter();
     })();
+
+    // ════════════════════════════════════════════════════════
+    // STEP NAVIGATION
+    // ════════════════════════════════════════════════════════
+    function showStep(n) {
+      currentStep = n;
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + n).classList.add('active');
+      document.querySelectorAll('.step-pill').forEach(p => {
+        const idx = Number(p.dataset.pill);
+        p.classList.toggle('active', idx === n);
+        p.classList.toggle('done',   idx <  n);
+      });
+      clearMsg();
+      updateFooter();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateFooter() {
+      document.getElementById('btn-back').disabled = currentStep === 1;
+
+      const skip = document.getElementById('skip-link');
+      const label = document.getElementById('btn-next-label');
+
+      if (currentStep === 3) {
+        label.textContent = 'Finish & open dashboard';
+        skip.style.display = 'inline-block';
+        skip.textContent = 'Skip — I\'ll add competitors later';
+      } else {
+        label.textContent = 'Continue';
+        skip.style.display = currentStep === 2 ? 'inline-block' : 'none';
+        skip.textContent = 'Skip';
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) showStep(currentStep - 1);
+    }
+
+    async function nextStep() {
+      if (currentStep === 1) {
+        // Require at least 1 tag
+        if (state.niche_tags.length === 0) {
+          showMsg('Add at least one niche tag (or pick a suggestion).');
+          return;
+        }
+        showStep(2);
+      } else if (currentStep === 2) {
+        if (!state.brand_voice) {
+          showMsg('Pick a brand voice to continue.');
+          return;
+        }
+        showStep(3);
+      } else if (currentStep === 3) {
+        await finish(/*skipCompetitor*/ false);
+      }
+    }
+
+    async function skipStep() {
+      if (currentStep === 2) {
+        // Allow skipping voice — defaults to "founder" later in dashboard
+        showStep(3);
+      } else if (currentStep === 3) {
+        await finish(/*skipCompetitor*/ true);
+      }
+    }
+
+    // ════════════════════════════════════════════════════════
+    // STEP 1 — TAGS
+    // ════════════════════════════════════════════════════════
+    function wireTagInput() {
+      const row = document.getElementById('tag-row');
+      const input = document.getElementById('tag-input');
+
+      input.addEventListener('focus', () => row.classList.add('focused'));
+      input.addEventListener('blur',  () => row.classList.remove('focused'));
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',' || e.key === 'Tab') {
+          e.preventDefault();
+          const v = input.value.trim().replace(/,$/, '');
+          if (v) addTag(v);
+          input.value = '';
+        } else if (e.key === 'Backspace' && input.value === '' && state.niche_tags.length > 0) {
+          removeTag(state.niche_tags.length - 1);
+        }
+      });
+
+      row.addEventListener('click', () => input.focus());
+    }
+
+    function addTag(text) {
+      const tag = String(text).trim();
+      if (!tag) return;
+      // Dedupe (case-insensitive)
+      if (state.niche_tags.some(t => t.toLowerCase() === tag.toLowerCase())) return;
+      if (state.niche_tags.length >= 8) {
+        showMsg('Max 8 tags. Remove one to add another.');
+        return;
+      }
+      state.niche_tags.push(tag);
+      renderTags();
+      clearMsg();
+    }
+
+    function removeTag(idx) {
+      state.niche_tags.splice(idx, 1);
+      renderTags();
+    }
+
+    function renderTags() {
+      const row = document.getElementById('tag-row');
+      const input = document.getElementById('tag-input');
+      // Wipe everything before the input
+      Array.from(row.querySelectorAll('.tag-chip')).forEach(el => el.remove());
+      state.niche_tags.forEach((t, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = '<span></span><button type="button" aria-label="Remove">×</button>';
+        chip.querySelector('span').textContent = t;
+        chip.querySelector('button').addEventListener('click', e => {
+          e.stopPropagation();
+          removeTag(i);
+        });
+        row.insertBefore(chip, input);
+      });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // STEP 2 — VOICE
+    // ════════════════════════════════════════════════════════
+    function wireVoiceCards() {
+      document.querySelectorAll('.voice-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state.brand_voice = card.dataset.voice;
+          clearMsg();
+        });
+      });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // STEP 3 — COMPETITOR PLATFORM PILLS
+    // ════════════════════════════════════════════════════════
+    function wirePlatformPills() {
+      document.querySelectorAll('.platform-pill').forEach(p => {
+        p.addEventListener('click', () => {
+          document.querySelectorAll('.platform-pill').forEach(x => x.classList.remove('selected'));
+          p.classList.add('selected');
+          state.competitor.platform = p.dataset.platform;
+          // Update placeholder hint
+          const url = document.getElementById('comp-url');
+          url.placeholder = p.dataset.platform === 'instagram'
+            ? 'https://instagram.com/username'
+            : 'https://linkedin.com/in/username';
+        });
+      });
+    }
+
+    // ════════════════════════════════════════════════════════
+    // FINISH — save profile, optionally add competitor, redirect
+    // ════════════════════════════════════════════════════════
+    async function finish(skipCompetitor) {
+      const btn = document.getElementById('btn-next');
+      const label = document.getElementById('btn-next-label');
+
+      // If user did NOT skip competitor, validate the form
+      let competitorPayload = null;
+      if (!skipCompetitor) {
+        const name = document.getElementById('comp-name').value.trim();
+        const url  = document.getElementById('comp-url').value.trim();
+        if (!name) { showMsg('Enter the creator\'s name.'); return; }
+        if (!url || !/^https?:\/\//i.test(url)) {
+          showMsg('Enter a full profile URL starting with http(s)://');
+          return;
+        }
+        competitorPayload = {
+          name,
+          profile_url: url,
+          platform: state.competitor.platform,
+          niche_tags: state.niche_tags,
+        };
+      }
+
+      btn.disabled = true;
+      label.innerHTML = '<span class="spinner"></span> Saving…';
+
+      // 1. Upsert profile
+      const { error: profileError } = await sb
+        .from('profiles')
+        .update({
+          niche_tags: state.niche_tags,
+          brand_voice: state.brand_voice,
+          onboarding_complete: true,
+        })
+        .eq('user_id', session.user.id);
+
+      if (profileError) {
+        showMsg('Could not save profile: ' + profileError.message);
+        btn.disabled = false;
+        label.textContent = skipCompetitor ? 'Finish' : 'Finish & open dashboard';
+        return;
+      }
+
+      // 2. If a competitor was provided, call the Edge Function
+      if (competitorPayload) {
+        try {
+          const res = await fetch(ADD_COMPETITOR_FN, {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + session.access_token,
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON,
+            },
+            body: JSON.stringify(competitorPayload),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            // 409 = duplicate URL → not fatal, profile is saved
+            if (res.status !== 409) {
+              console.warn('add-competitor failed:', body);
+              showMsg('Profile saved, but competitor add failed: ' + (body.error || res.status) + '. You can add them from the dashboard.');
+              // Still proceed to dashboard
+              setTimeout(() => { window.location.href = DASHBOARD_URL; }, 2200);
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn('add-competitor network error:', err);
+          // Non-fatal — still go to dashboard
+        }
+      }
+
+      // 3. Done — go to dashboard
+      window.location.href = DASHBOARD_URL;
+    }
+
+    // ════════════════════════════════════════════════════════
+    // MSG HELPERS
+    // ════════════════════════════════════════════════════════
+    function showMsg(text) {
+      const el = document.getElementById('msg');
+      el.textContent = text;
+      el.className = 'msg error';
+    }
+    function clearMsg() {
+      const el = document.getElementById('msg');
+      el.textContent = '';
+      el.className = 'msg';
+    }
+
+    // ── Enter on the visible form triggers Next ──────────────
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      // Step 1's tag input handles Enter itself
+      if (currentStep === 1 && document.activeElement?.id === 'tag-input') return;
+      // Step 3 inputs — let the user type freely; Enter advances
+      nextStep();
+    });
   </script>
 </body>
 </html>
