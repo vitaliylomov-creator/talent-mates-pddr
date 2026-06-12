@@ -399,10 +399,11 @@
       background: rgba(255,255,255,0.12);
     }
 
-    /* OAuth row */
+    /* OAuth row (single column — Apple temporarily disabled until Apple
+       Developer Program is active and the provider is enabled in Supabase) */
     .auth-oauth {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
     }
     .oauth-btn {
@@ -717,12 +718,6 @@
             </svg>
             Google
           </button>
-          <button type="button" class="oauth-btn" id="appleSignin">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M11.182 8.55c-.022-2.018 1.65-2.99 1.725-3.037-.94-1.375-2.4-1.563-2.92-1.585-1.24-.126-2.422.733-3.052.733-.638 0-1.608-.715-2.65-.694-1.354.02-2.617.795-3.318 2.015C-.456 8.4.585 12.21 1.974 14.31c.696 1.025 1.51 2.17 2.583 2.13 1.04-.043 1.432-.674 2.69-.674 1.247 0 1.61.674 2.703.65 1.118-.018 1.823-1.031 2.5-2.063.797-1.18 1.124-2.337 1.143-2.398-.026-.011-2.196-.844-2.218-3.346zm-2.013-6.15C9.74 1.7 10.123.728 10.018 0c-.683.028-1.512.456-2.105 1.158-.528.62-.99 1.61-.866 2.302.762.06 1.541-.388 2.122-1.06z"/>
-            </svg>
-            Apple
-          </button>
         </div>
 
         <!-- Inline status message (errors, signup confirmation, etc.) -->
@@ -760,7 +755,6 @@
     const submitBtn     = document.getElementById('submitBtn');
     const submitLabel   = document.getElementById('submitLabel');
     const googleBtn     = document.getElementById('googleSignin');
-    const appleBtn      = document.getElementById('appleSignin');
     const status        = document.getElementById('authStatus');
 
     // ── ALREADY LOGGED IN? GO TO DASHBOARD ──
@@ -890,7 +884,10 @@
       };
     }
     googleBtn.addEventListener('click', oauthHandler('google'));
-    appleBtn.addEventListener('click', oauthHandler('apple'));
+    // Apple OAuth button removed until Apple Developer Program + Supabase
+    // Apple provider are active. oauthHandler() above is provider-agnostic
+    // — re-add the button in the markup and call oauthHandler('apple')
+    // once Apple is configured.
   </script>
 
 </body>
