@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Fibonacci Path — MATE AI</title>
+<!-- Supabase JS SDK — used here only for signOut() in the nav -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -1123,6 +1125,11 @@ nav {
       <div class="nav-avatar" id="nav-avatar">YL</div>
       <span class="nav-player-name" id="nav-player-name">Yehor Lomov</span>
     </div>
+    <button type="button" onclick="signOut()" aria-label="Sign out"
+      style="font-family:inherit;font-size:13px;color:rgba(255,255,255,0.55);background:transparent;border:none;cursor:pointer;padding:6px 4px;transition:color 0.15s;"
+      onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">
+      Sign out
+    </button>
   </div>
 </nav>
 
@@ -1226,6 +1233,22 @@ nav {
 </div>
 
 <script>
+// ── SIGN OUT — clears Supabase session, returns to Fibonacci sign-in. ──
+const SB_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+const SB_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+const _sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SB_URL, SB_ANON)
+  : null;
+async function signOut() {
+  try { if (_sb) await _sb.auth.signOut(); } catch (_) {}
+  try {
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('sb-') || k === 'tm_session_id') localStorage.removeItem(k);
+    });
+  } catch (_) {}
+  window.location.href = 'https://app.talent-mates.com/fibonacci.html';
+}
+
 // ── PLAYER DATA ──
 // In production this comes from Make/Airtable via URL params or API
 const PLAYER = {

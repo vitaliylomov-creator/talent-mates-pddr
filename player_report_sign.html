@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Player Development Diagnostic Report — Talent Mates</title>
+<!-- Supabase JS SDK — used here only for signOut() in the nav -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -1070,6 +1072,11 @@ nav {
       Dashboard ↗
     </a>
     <button class="nav-back" id="nav-back" style="display:none" onclick="goBack()">← Back to registration</button>
+    <button type="button" onclick="signOut()" aria-label="Sign out"
+      style="font-family:inherit;font-size:12px;color:rgba(255,255,255,0.55);background:transparent;border:none;cursor:pointer;padding:5px 4px;letter-spacing:0.04em;transition:color 0.15s;"
+      onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">
+      Sign out
+    </button>
   </div>
 </nav>
 
@@ -1267,6 +1274,22 @@ nav {
 </div>
 
 <script>
+// ── SIGN OUT — clears Supabase session, returns to Fibonacci sign-in. ──
+const SB_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+const SB_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+const _sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SB_URL, SB_ANON)
+  : null;
+async function signOut() {
+  try { if (_sb) await _sb.auth.signOut(); } catch (_) {}
+  try {
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('sb-') || k === 'tm_session_id') localStorage.removeItem(k);
+    });
+  } catch (_) {}
+  window.location.href = 'https://app.talent-mates.com/fibonacci.html';
+}
+
 // ── STATE ──
 let currentUser = null;
 let selectedRole = 'coach';
@@ -1539,9 +1562,13 @@ async function submitToTally() {
     // Show success message
     const note = document.querySelector('.submit-note');
     if (note) {
-      note.innerHTML = '✓ Assessment sent to MATE AI · Report will be generated shortly · Check your dashboard';
+      note.innerHTML = '✓ Assessment sent to MATE AI · Report will be generated shortly';
       note.style.color = 'var(--green)';
     }
+
+    // Show next-step buttons so the coach can assess another player or
+    // return to the dashboard instead of being stranded on the filled form.
+    showPostSubmitActions();
 
   } catch (err) {
     btn.innerHTML = originalText;
@@ -1549,6 +1576,91 @@ async function submitToTally() {
     alert('Connection error. Please try again.');
     console.error('Make webhook error:', err);
   }
+}
+
+// ── POST-SUBMIT ACTIONS ──
+// After a successful assessment, give the coach two clear next steps:
+//   1. Assess another player → reset the form, scroll to the top
+//   2. Back to dashboard     → coach_dashboard.html with the full roster
+// Buttons are injected just after the .submit-note so they appear inline
+// with the success confirmation. Idempotent: re-calling does not stack.
+function showPostSubmitActions() {
+  if (document.getElementById('post-submit-actions')) return;
+
+  const host = document.querySelector('.submit-note')?.parentNode;
+  if (!host) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'post-submit-actions';
+  wrap.style.cssText = 'display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px;';
+
+  wrap.innerHTML = `
+    <button type="button" id="btn-another"
+      style="background:var(--white);color:var(--purple);border:none;border-radius:100px;padding:13px 26px;font-family:inherit;font-size:13px;font-weight:500;letter-spacing:0.02em;cursor:pointer;transition:opacity 0.2s,transform 0.15s;"
+      onmouseover="this.style.opacity=0.88;this.style.transform='scale(1.02)'"
+      onmouseout="this.style.opacity=1;this.style.transform='scale(1)'">
+      + Assess another player
+    </button>
+    <a href="coach_dashboard.html"
+      style="background:transparent;color:var(--t1);border:0.5px solid var(--border-strong);border-radius:100px;padding:13px 26px;font-family:inherit;font-size:13px;font-weight:500;letter-spacing:0.02em;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:background 0.2s,border-color 0.2s;"
+      onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='var(--t1)'"
+      onmouseout="this.style.background='transparent';this.style.borderColor='var(--border-strong)'">
+      Back to dashboard →
+    </a>
+  `;
+
+  host.appendChild(wrap);
+
+  document.getElementById('btn-another').addEventListener('click', () => {
+    resetAssessmentForm();
+    wrap.remove();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// Reset the assessment form to a clean state for the next player.
+function resetAssessmentForm() {
+  const form = document.getElementById('pddr-form') || document.querySelector('form');
+  if (form) {
+    // Reset every input/select/textarea inside the assessment form.
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type === 'date') {
+        el.value = new Date().toISOString().split('T')[0];
+      } else if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
+      } else if (el.tagName === 'SELECT') {
+        el.selectedIndex = 0;
+      } else {
+        el.value = '';
+      }
+    });
+  }
+
+  // Restore the submit button + helper note to their default state.
+  const btn = document.querySelector('.btn-submit');
+  if (btn) {
+    btn.innerHTML = 'Submit assessment to MATE AI';
+    btn.disabled = false;
+    btn.style.background = '';
+    btn.style.color = '';
+  }
+  const note = document.querySelector('.submit-note');
+  if (note) {
+    note.innerHTML = 'Redirects to assessment confirmation · Powered by Talent Mates AI Lab';
+    note.style.color = '';
+  }
+
+  // Keep the assessor pre-filled from the coach session (same approach as gotoPDDR).
+  if (currentUser) {
+    const assessor = document.getElementById('f-assessor');
+    const clubF    = document.getElementById('f-club');
+    if (assessor) assessor.value = currentUser.email || '';
+    if (clubF)    clubF.value    = currentUser.team  || '';
+  }
+
+  // Rebuild dynamic widgets if present.
+  if (typeof buildStrip  === 'function') try { buildStrip();  } catch (_) {}
+  if (typeof buildLevels === 'function') try { buildLevels(); } catch (_) {}
 }
 
 // ── INIT ──

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coach Dashboard — Talent Mates</title>
+<!-- Supabase JS SDK — used here only for signOut() in the nav -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -1025,6 +1027,9 @@ nav {
     <a href="player_report_sign.html" class="nav-btn-back" target="_self">
       + New Assessment
     </a>
+    <button type="button" class="nav-btn-back" onclick="signOut()" aria-label="Sign out">
+      Sign out
+    </button>
   </div>
 </nav>
 
@@ -1096,6 +1101,23 @@ nav {
 </div>
 
 <script>
+// ── SIGN OUT — clears Supabase session, returns to Fibonacci sign-in. ──
+const SB_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+const SB_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+const _sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SB_URL, SB_ANON)
+  : null;
+async function signOut() {
+  try { if (_sb) await _sb.auth.signOut(); } catch (_) {}
+  // Best-effort: also clear any local-only state used by player_report_sign.
+  try {
+    Object.keys(localStorage).forEach(k => {
+      if (k.startsWith('sb-') || k === 'tm_session_id') localStorage.removeItem(k);
+    });
+  } catch (_) {}
+  window.location.href = 'https://app.talent-mates.com/fibonacci.html';
+}
+
 // ── MAKE PROXY CONFIG ──
 const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/xtfd88c6x9yolcuctm6ybu9mmeuqeg8c';
 
