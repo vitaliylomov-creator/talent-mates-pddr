@@ -588,7 +588,7 @@
 
     const FIBONACCI_URL      = 'https://app.talent-mates.com/fibonacci.html';
     const REGISTRATION_URL   = 'https://app.talent-mates.com/player_report_sign.html';
-    const DASHBOARD_COACH    = 'https://app.talent-mates.com/coach_dashboard.html';
+    const PDDR_URL           = 'https://app.talent-mates.com/player_report_sign.html';
     const DASHBOARD_PLAYER   = 'https://app.talent-mates.com/player_dashboard.html';
 
     const { createClient } = supabase;
@@ -610,8 +610,13 @@
 
     let selectedRole = 'coach';
 
-    function targetFor(role) {
-      return role === 'player' ? DASHBOARD_PLAYER : DASHBOARD_COACH;
+    function targetFor(role, email) {
+      if (role === 'player') return DASHBOARD_PLAYER;
+      const url = new URL(PDDR_URL);
+      url.searchParams.set('role', 'coach');
+      url.searchParams.set('authed', '1');
+      if (email) url.searchParams.set('email', email);
+      return url.toString();
     }
 
     function showStatus(text, type) {
@@ -627,7 +632,7 @@
     (async function checkSession() {
       try {
         const { data: { session } } = await sb.auth.getSession();
-        if (session) window.location.href = targetFor(selectedRole);
+        if (session) window.location.href = targetFor(selectedRole, session.user?.email);
       } catch (_) { /* no session, stay on page */ }
     })();
 
@@ -737,7 +742,7 @@
       try {
         const { error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.href = targetFor(selectedRole);
+        window.location.href = targetFor(selectedRole, email);
       } catch (err) {
         showStatus(err.message || 'Sign in failed. Check your credentials.', 'error');
       } finally {

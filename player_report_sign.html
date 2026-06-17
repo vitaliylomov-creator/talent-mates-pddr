@@ -1294,6 +1294,28 @@ async function signOut() {
 let currentUser = null;
 let selectedRole = 'coach';
 
+// ── AUTO-SKIP TO PDDR if coming from fibonacci.html after successful sign-in ──
+(async function checkAutoSkip() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('authed') !== '1') return;
+  const role = params.get('role') || 'coach';
+  selectedRole = role;
+  let email = params.get('email') || '';
+  if (!email && _sb) {
+    try {
+      const { data: { session } } = await _sb.auth.getSession();
+      if (session) email = session.user.email || '';
+    } catch (_) {}
+  }
+  if (!email) return; // no session data — fall back to showing register form
+  currentUser = { email, club: 'My Club', team: 'My Team', role };
+  if (role === 'player') {
+    window.location.href = 'player_dashboard.html?email=' + encodeURIComponent(email);
+  } else {
+    gotoPDDR();
+  }
+})();
+
 // ── REGISTER ──
 function selectRole(r) {
   selectedRole = r;
