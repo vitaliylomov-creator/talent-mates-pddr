@@ -264,26 +264,147 @@ nav {
 .modal-body::-webkit-scrollbar { width: 4px; }
 .modal-body::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
 .report-text {
-  font-size: 13px; line-height: 1.8;
+  font-size: 13px; line-height: 1.7;
   color: var(--t2);
   font-family: var(--font-b); font-weight: 300;
 }
-.md-h1 {
-  font-family: var(--font-d); font-size: 18px; font-weight: 400;
-  color: var(--accent); margin: 20px 0 8px; display: block;
+
+/* Gold-Standard Brief — structured rendering */
+.report-strip {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
 }
-.md-h2 {
-  font-family: var(--font-d); font-size: 15px; font-weight: 400;
-  color: var(--t1); margin: 16px 0 6px; display: block;
+.report-meta-line {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--t4); margin-bottom: 12px;
 }
-.md-h3 {
-  font-size: 13px; font-weight: 600;
-  color: var(--t2); margin: 12px 0 4px; display: block;
+.report-pills-row {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center;
 }
-.md-bold { color: var(--t1); font-weight: 600; }
-.md-hr {
-  border: none; border-top: 1px solid rgba(255,255,255,0.1);
-  margin: 14px 0; display: block;
+.verdict-pill, .risk-pill, .grade-pill {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-b); font-weight: 600;
+  font-size: 11px; letter-spacing: 0.5px;
+  padding: 6px 12px; border-radius: 100px;
+  text-transform: uppercase; white-space: nowrap;
+}
+.verdict-pill { font-size: 13px; padding: 7px 16px; }
+.tone-green { background: rgba(34,201,122,0.18); color: #22c97a; border: 1px solid rgba(34,201,122,0.40); }
+.tone-amber { background: rgba(245,166,35,0.18); color: #f5a623; border: 1px solid rgba(245,166,35,0.40); }
+.tone-red   { background: rgba(255,77,106,0.18); color: #ff4d6a; border: 1px solid rgba(255,77,106,0.40); }
+.tone-mute  { background: rgba(255,255,255,0.06); color: var(--t3); border: 1px solid var(--border); }
+.evidence-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; letter-spacing: 0.5px;
+  padding: 5px 10px; border-radius: 100px;
+  background: rgba(255,255,255,0.06);
+  color: var(--t3);
+  border: 1px solid var(--border);
+  cursor: help;
+  text-transform: uppercase;
+}
+.evidence-badge::after { content: 'ⓘ'; opacity: 0.6; margin-left: 2px; }
+.why-block {
+  font-size: 12.5px; color: var(--t2);
+  line-height: 1.65;
+  display: grid; gap: 6px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.why-block strong { color: var(--t1); font-weight: 600; }
+
+.report-nav {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.report-nav-btn {
+  font-family: var(--font-b); font-size: 11px; font-weight: 500;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--t3); padding: 5px 11px;
+  border-radius: 100px; cursor: pointer;
+  transition: all 0.15s;
+}
+.report-nav-btn:hover { color: var(--t1); border-color: var(--border-strong); background: rgba(255,255,255,0.04); }
+
+.report-section { margin-bottom: 26px; scroll-margin-top: 12px; }
+.section-h2 {
+  font-family: var(--font-d); font-size: 17px; font-weight: 400;
+  color: var(--accent); margin: 0 0 12px;
+}
+.pillar-block {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.pillar-h-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 6px; flex-wrap: wrap;
+}
+.section-h3 {
+  font-family: var(--font-d); font-size: 13.5px; font-weight: 400;
+  color: var(--t1); margin: 0;
+}
+.section-h3 em { font-style: italic; color: var(--t3); font-size: 12px; font-weight: 300; }
+.pillar-score {
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+.pillar-score strong { color: var(--t2); }
+.report-section p {
+  font-size: 13px; line-height: 1.75;
+  color: var(--t2); margin: 0 0 10px;
+}
+.report-section p strong { color: var(--t1); font-weight: 600; }
+.report-section ul, .report-section ol {
+  margin: 8px 0 12px; padding-left: 20px;
+  font-size: 13px; line-height: 1.7; color: var(--t2);
+}
+.report-section li { margin-bottom: 6px; }
+.report-section li strong { color: var(--t1); font-weight: 600; }
+.report-section hr {
+  border: none; border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 16px 0;
+}
+.verdict-inline-note {
+  font-size: 11px; font-style: italic; color: var(--t4);
+  padding: 6px 10px; background: rgba(255,255,255,0.03);
+  border-left: 2px solid var(--border-mid);
+  border-radius: 0 4px 4px 0;
+}
+.agent-note-badge {
+  display: inline-block; font-size: 10px;
+  background: rgba(121,77,198,0.22); color: var(--accent);
+  border: 1px solid rgba(121,77,198,0.4);
+  padding: 3px 9px; border-radius: 100px;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-left: 8px; vertical-align: middle;
+}
+
+/* Print mode — clean white pages */
+@media print {
+  body * { visibility: hidden; }
+  .modal-overlay, .modal-overlay * { visibility: visible; }
+  .modal-overlay { position: absolute; inset: 0; background: #fff !important; padding: 0; backdrop-filter: none; display: block !important; }
+  .modal { max-width: none; max-height: none; background: #fff !important; color: #1a1a1a; border: none; border-radius: 0; }
+  .modal-header { padding: 20px 28px; border-bottom: 1px solid #ccc; }
+  .modal-title { color: #1a1a1a; }
+  .modal-sub, .report-meta-line, .pillar-score { color: #555 !important; }
+  .modal-body { padding: 20px 28px; overflow: visible; }
+  .modal-footer, .modal-close, .report-nav { display: none !important; }
+  .report-strip { background: #f6f4ff !important; border: 1px solid #ccc; }
+  .pillar-block { background: #fafafa !important; border: 1px solid #ddd; }
+  .section-h2 { color: #794DC6 !important; }
+  .section-h3, .modal-title { color: #1a1a1a !important; }
+  .report-section p, .report-section li, .why-block { color: #222 !important; }
+  .report-section p strong, .why-block strong { color: #1a1a1a !important; }
+  .verdict-pill, .risk-pill, .grade-pill { border-width: 1.5px; }
 }
 .modal-footer {
   padding: 16px 28px;
@@ -1225,22 +1346,166 @@ function openReport(id) {
   document.getElementById('modal-title').textContent = player.name + ' — AI Report';
   document.getElementById('modal-sub').textContent = player.position + ' · ' + player.team + ' · ' + player.assessment_date;
   currentReport = player.report || 'Report not available yet.';
-  document.getElementById('modal-report').innerHTML = renderMarkdown(currentReport);
+  document.getElementById('modal-report').innerHTML = renderReport(currentReport, { hideAgentNote: false });
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function renderMarkdown(text) {
-  let html = text;
-  html = html.replace(/^# (.+)$/gm, '<div class="md-h1">$1</div>');
-  html = html.replace(/^## (.+)$/gm, '<div class="md-h2">$1</div>');
-  html = html.replace(/^### (.+)$/gm, '<div class="md-h3">$1</div>');
-  html = html.split('**').map(function(part, i) {
-    return i % 2 === 1 ? '<strong class="md-bold">' + part + '</strong>' : part;
-  }).join('');
-  html = html.replace(/^---$/gm, '<div class="md-hr"></div>');
-  html = html.split('\n').join('<br>');
+// ── GOLD-STANDARD BRIEF RENDERER ──
+// Smart parser for the MATE Gold-Standard Brief markdown.
+// Detects Verdict / Risk grade / Pillar grades and renders as colored pills.
+// Builds a section navigation strip. Hides Section 6 (Agent Note) when
+// opts.hideAgentNote === true (Player Dashboard).
+function renderReport(text, opts) {
+  if (!text) return '';
+  opts = opts || {};
+  const hideAgent = !!opts.hideAgentNote;
+
+  const verdictMatch  = text.match(/\*\*Verdict:\*\*\s*([A-Z][A-Z ]*)/);
+  const riskMatch     = text.match(/\*\*Risk grade:\*\*\s*([A-Z]+)/);
+  const whyMatch      = text.match(/\*\*Why:\*\*\s*([^\n]+)/);
+  const ifMatch       = text.match(/\*\*If we do nothing:\*\*\s*([^\n]+)/);
+  const briefMeta     = text.match(/^\*MATE Gold-Standard Brief[^*\n]*\*/m);
+  const hasEvidence   = /Evidence class:\s*D-dominant/i.test(text);
+
+  let html = '<div class="report-strip">';
+  if (briefMeta) {
+    html += '<div class="report-meta-line">' + escapeHtml(briefMeta[0].replace(/\*/g, '').trim()) + '</div>';
+  }
+  if (verdictMatch || riskMatch || hasEvidence) {
+    html += '<div class="report-pills-row">';
+    if (verdictMatch) html += renderPill('verdict', verdictMatch[1]);
+    if (riskMatch)    html += renderPill('risk', riskMatch[1]);
+    if (hasEvidence)  html += '<span class="evidence-badge" title="Coach slider self-report. Upgrade path: video evidence + environment block + coach reference.">Class D-dominant evidence</span>';
+    html += '</div>';
+  }
+  if (whyMatch || ifMatch) {
+    html += '<div class="why-block">';
+    if (whyMatch) html += '<div><strong>Why:</strong> ' + escapeHtml(whyMatch[1].trim()) + '</div>';
+    if (ifMatch)  html += '<div><strong>If we do nothing:</strong> ' + escapeHtml(ifMatch[1].trim()) + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  const sections = splitSections(text).filter(s => !(hideAgent && /Agent Note/i.test(s.title)));
+
+  if (sections.length > 1) {
+    html += '<div class="report-nav">';
+    sections.forEach(s => {
+      const short = s.title.replace(/^\d+\.\s*/, '').replace(/—.*$/, '').trim() || s.title;
+      html += '<button type="button" class="report-nav-btn" onclick="scrollToReportSection(\'' + s.id + '\')">' + escapeHtml(short) + '</button>';
+    });
+    html += '</div>';
+  }
+
+  sections.forEach(s => { html += renderSection(s); });
   return html;
+}
+
+function renderPill(kind, value) {
+  const v = (value || '').trim().toUpperCase();
+  if (!v) return '';
+  const tone = toneFor(v);
+  if (kind === 'verdict') return '<span class="verdict-pill ' + tone + '">' + v + '</span>';
+  if (kind === 'risk')    return '<span class="risk-pill '    + tone + '">Risk: ' + v + '</span>';
+  return '<span class="grade-pill ' + tone + '">' + v + '</span>';
+}
+
+function toneFor(token) {
+  const t = (token || '').toUpperCase().trim();
+  const greens = ['RECRUIT','DEVELOP','SOLID','HIGH-INTENSITY READY','DIAMOND','DIAMOND CANDIDATE','AMPLIFYING','PLAN READY','LOW'];
+  const reds   = ['HOLD','REJECT','FRAGILE','NOT YET','NO EDGE FOUND','SUPPRESSING','NO PLAN','HIGH'];
+  if (greens.indexOf(t) !== -1) return 'tone-green';
+  if (reds.indexOf(t) !== -1)   return 'tone-red';
+  return 'tone-amber';
+}
+
+function splitSections(text) {
+  const lines = text.split('\n');
+  let i = 0;
+  while (i < lines.length && !/^##\s+/.test(lines[i])) i++;
+  const body = lines.slice(i).join('\n');
+  const parts = body.split(/^##\s+/m).filter(b => b.trim());
+  return parts.map(b => {
+    const nl = b.indexOf('\n');
+    const title = (nl === -1 ? b : b.slice(0, nl)).trim();
+    const content = nl === -1 ? '' : b.slice(nl + 1);
+    const id = 'sec-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return { title, content, id };
+  });
+}
+
+function renderSection(s) {
+  const isAgentNote = /Agent Note/i.test(s.title);
+  let html = '<div class="report-section" id="' + s.id + '">';
+  html += '<h2 class="section-h2">' + escapeHtml(s.title);
+  if (isAgentNote) html += '<span class="agent-note-badge">Internal only</span>';
+  html += '</h2>';
+
+  const hasPillars = /^###\s+/m.test(s.content);
+  if (hasPillars) {
+    const subs = s.content.split(/^###\s+/m);
+    const preamble = subs.shift();
+    if (preamble && preamble.trim()) html += inlineMd(preamble);
+    subs.forEach(sub => {
+      const nl = sub.indexOf('\n');
+      const subTitle = (nl === -1 ? sub : sub.slice(0, nl)).trim();
+      const subContent = nl === -1 ? '' : sub.slice(nl + 1);
+      const gradeMatch = subContent.match(/\*\*Grade:\*\*\s*([A-Z][A-Z /-]*?)(?:\n|$)/);
+      const scoreMatch = subContent.match(/\*\*Score:\*\*\s*([^\n]+?)(?:\s*·\s*\*\*Grade:|$)/m);
+      const cleaned = subContent
+        .replace(/^\s*\*\*Score:\*\*[^\n]*\n?/m, '')
+        .replace(/^\s*\*\*Grade:\*\*[^\n]*\n?/m, '');
+      const titleHtml = inlineMd(subTitle).replace(/<p>|<\/p>/g, '');
+      html += '<div class="pillar-block">';
+      html += '<div class="pillar-h-row"><h3 class="section-h3">' + titleHtml + '</h3>';
+      if (gradeMatch) html += renderPill('grade', gradeMatch[1]);
+      html += '</div>';
+      if (scoreMatch) html += '<div class="pillar-score"><strong>Score:</strong> ' + escapeHtml(scoreMatch[1].trim()) + '</div>';
+      html += inlineMd(cleaned);
+      html += '</div>';
+    });
+  } else if (/Executive Verdict/i.test(s.title)) {
+    html += '<div class="verdict-inline-note">Verdict and risk grade shown in the header above.</div>';
+  } else {
+    html += inlineMd(s.content);
+  }
+
+  html += '</div>';
+  return html;
+}
+
+// Lightweight inline markdown — escapes HTML, then re-applies bold/italic/lists/hr.
+function inlineMd(text) {
+  if (!text) return '';
+  let s = escapeHtml(text.trim());
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+  s = s.replace(/^\s*---\s*$/gm, 'HR');
+  const blocks = s.split(/\n{2,}/).map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (block === 'HR') return '<hr>';
+    if (/^- /m.test(block)) {
+      const items = block.split('\n').filter(l => l.trim()).map(l => '<li>' + l.replace(/^- /, '').trim() + '</li>').join('');
+      return '<ul>' + items + '</ul>';
+    }
+    if (/^\d+\.\s+/m.test(block)) {
+      const items = block.split('\n').filter(l => l.trim()).map(l => '<li>' + l.replace(/^\d+\.\s+/, '').trim() + '</li>').join('');
+      return '<ol>' + items + '</ol>';
+    }
+    return '<p>' + block.replace(/\n/g, '<br>') + '</p>';
+  });
+  return blocks.join('\n');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function scrollToReportSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function closeModal(e) {
