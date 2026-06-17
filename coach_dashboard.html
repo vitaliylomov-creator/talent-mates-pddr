@@ -1024,9 +1024,9 @@ nav {
   </a>
   <div class="nav-right">
     <span class="nav-badge">Coach Dashboard</span>
-    <a href="player_report_sign.html" class="nav-btn-back" target="_self">
+    <button type="button" class="nav-btn-back" onclick="goToNewAssessment()">
       + New Assessment
-    </a>
+    </button>
     <button type="button" class="nav-btn-back" onclick="signOut()" aria-label="Sign out">
       Sign out
     </button>
@@ -1063,9 +1063,9 @@ nav {
   <!-- Section label + add button -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
     <div class="sec-label" style="flex:1;margin:0;margin-right:20px;">Player assessments</div>
-    <a href="player_report_sign.html" class="btn-add-player" target="_self">
+    <button type="button" class="btn-add-player" onclick="goToNewAssessment()">
       + New Assessment
-    </a>
+    </button>
   </div>
 
   <!-- Cards grid -->
@@ -1107,6 +1107,20 @@ const SB_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
 const _sb = (window.supabase && window.supabase.createClient)
   ? window.supabase.createClient(SB_URL, SB_ANON)
   : null;
+async function goToNewAssessment() {
+  let email = '';
+  try {
+    if (_sb) {
+      const { data: { session } } = await _sb.auth.getSession();
+      if (session) email = session.user.email || '';
+    }
+  } catch (_) {}
+  const url = new URL('https://app.talent-mates.com/player_report_sign.html');
+  url.searchParams.set('role', 'coach');
+  url.searchParams.set('authed', '1');
+  if (email) url.searchParams.set('email', email);
+  window.location.href = url.toString();
+}
 async function signOut() {
   try { if (_sb) await _sb.auth.signOut(); } catch (_) {}
   // Best-effort: also clear any local-only state used by player_report_sign.
