@@ -1307,10 +1307,9 @@ let selectedRole = 'coach';
       if (session) email = session.user.email || '';
     } catch (_) {}
   }
-  if (!email) return; // no session data — fall back to showing register form
-  currentUser = { email, club: 'My Club', team: 'My Team', role };
+  if (email) currentUser = { email, club: 'My Club', team: 'My Team', role };
   if (role === 'player') {
-    window.location.href = 'player_dashboard.html?email=' + encodeURIComponent(email);
+    window.location.href = 'player_dashboard.html' + (email ? '?email=' + encodeURIComponent(email) : '');
   } else {
     gotoPDDR();
   }
