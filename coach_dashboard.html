@@ -1315,12 +1315,6 @@ async function fetchPlayers() {
   }
 }
 
-// ── NEW ASSESSMENT ──
-function goToNewAssessment() {
-  const base = 'https://vitaliylomov-creator.github.io/talent-mates-pddr';
-  const params = new URLSearchParams({ mode: 'new', role: 'coach' });
-  window.location.href = base + '?' + params.toString();
-}
 
 // ── INIT ──
 fetchPlayers();
