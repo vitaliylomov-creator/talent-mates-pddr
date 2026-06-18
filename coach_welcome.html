@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#794DC6" />
+<title>Welcome — Talent Mates</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --purple:        #794DC6;
+  --purple-dk:     #6b42b5;
+  --white:         #ffffff;
+  --t1: #ffffff;
+  --t2: rgba(255,255,255,0.82);
+  --t3: rgba(255,255,255,0.55);
+  --t4: rgba(255,255,255,0.35);
+  --border:        rgba(255,255,255,0.10);
+  --border-mid:    rgba(255,255,255,0.20);
+  --border-strong: rgba(255,255,255,0.35);
+  --green:         #22c97a;
+  --red:           #ff4d6a;
+  --font-d: 'DM Serif Display', Georgia, serif;
+  --font-b: 'DM Sans', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--purple); color: var(--t1);
+  font-family: var(--font-b); font-weight: 300;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px; -webkit-font-smoothing: antialiased;
+}
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 0.5px solid var(--border);
+  border-radius: 24px; padding: 44px 40px;
+  max-width: 440px; width: 100%; backdrop-filter: blur(20px);
+}
+.eyebrow {
+  font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 16px;
+}
+h1 {
+  font-family: var(--font-d); font-weight: 400;
+  font-size: 34px; line-height: 1.15; letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+h1 em { color: rgba(255,255,255,0.55); font-style: italic; }
+.lede {
+  font-size: 13px; color: var(--t2); line-height: 1.6; margin-bottom: 32px;
+}
+.field { margin-bottom: 16px; }
+.field-label {
+  display: block; font-size: 11px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--t3); margin-bottom: 8px;
+}
+input {
+  width: 100%; padding: 12px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 12px; color: var(--t1);
+  font-family: var(--font-b); font-size: 14px;
+  transition: border-color 0.15s;
+}
+input:focus { outline: none; border-color: var(--border-strong); }
+.row-context {
+  font-size: 12px; color: var(--t3); line-height: 1.6;
+  padding: 12px 14px; background: rgba(255,255,255,0.04);
+  border-radius: 10px; margin-bottom: 24px;
+}
+.row-context strong { color: var(--t1); font-weight: 500; }
+button {
+  width: 100%; padding: 12px 20px; margin-top: 8px;
+  background: var(--white); color: var(--purple);
+  border: none; border-radius: 100px;
+  font-family: var(--font-b); font-weight: 600; font-size: 14px;
+  cursor: pointer; transition: opacity 0.15s;
+}
+button:hover { opacity: 0.9; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+.status {
+  font-size: 12.5px; color: var(--t2);
+  margin-top: 14px; line-height: 1.55; min-height: 18px;
+}
+.status[data-type="error"] { color: var(--red); }
+.status[data-type="success"] { color: var(--green); }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="eyebrow">Talent Mates · Fibonacci</div>
+
+  <div id="loading-view">
+    <h1>Verifying<br><em>your invite…</em></h1>
+    <div class="status" id="loading-status">Connecting to Talent Mates.</div>
+  </div>
+
+  <div id="password-view" class="hidden">
+    <h1>Welcome,<br><em id="welcome-name">coach</em></h1>
+    <p class="lede">You've been invited to Talent Mates Fibonacci. Set a password to finish creating your account.</p>
+
+    <div class="row-context" id="context-line"></div>
+
+    <div class="field">
+      <label class="field-label" for="password">New password</label>
+      <input id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label class="field-label" for="password2">Confirm password</label>
+      <input id="password2" type="password" placeholder="Type it again" autocomplete="new-password" />
+    </div>
+
+    <button id="submit-btn" type="button">Activate my account →</button>
+    <div class="status" id="submit-status"></div>
+  </div>
+
+  <div id="error-view" class="hidden">
+    <h1>This invite<br><em>can't be opened.</em></h1>
+    <p class="lede" id="error-detail">The link may have expired, already been used, or have been opened in a different browser than the one that received the email.</p>
+    <p class="lede">Ask your Sporting Director to send a fresh invite to your email address.</p>
+  </div>
+
+  <div id="success-view" class="hidden">
+    <h1>You're in,<br><em id="success-name">coach</em>.</h1>
+    <p class="lede">Account activated. Opening your dashboard.</p>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+const DASHBOARD_URL = 'https://app.talent-mates.com/coach_dashboard.html';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+});
+
+const loadingView   = document.getElementById('loading-view');
+const passwordView  = document.getElementById('password-view');
+const errorView     = document.getElementById('error-view');
+const successView   = document.getElementById('success-view');
+const loadingStatus = document.getElementById('loading-status');
+const welcomeName   = document.getElementById('welcome-name');
+const contextLine   = document.getElementById('context-line');
+const successName   = document.getElementById('success-name');
+const errorDetail   = document.getElementById('error-detail');
+const passwordInput = document.getElementById('password');
+const password2Input= document.getElementById('password2');
+const submitBtn     = document.getElementById('submit-btn');
+const submitStatus  = document.getElementById('submit-status');
+
+function show(view) {
+  [loadingView, passwordView, errorView, successView].forEach(v => v.classList.add('hidden'));
+  view.classList.remove('hidden');
+}
+
+function setStatus(el, text, type) {
+  el.textContent = text;
+  if (type) el.setAttribute('data-type', type); else el.removeAttribute('data-type');
+}
+
+// ── Step 1: detectSessionInUrl reads the access_token from the URL hash.
+//    Give it a tick, then check for a live session.
+(async function bootstrap() {
+  // Small delay to let the Supabase client process the URL fragment.
+  await new Promise(r => setTimeout(r, 150));
+
+  const { data: { session }, error } = await sb.auth.getSession();
+  if (error || !session) {
+    setStatus(loadingStatus, '', null);
+    errorDetail.textContent = error?.message
+      ? 'Supabase returned: ' + error.message
+      : errorDetail.textContent;
+    show(errorView);
+    return;
+  }
+
+  const user = session.user;
+  const meta = user.user_metadata || {};
+  const fullName = meta.full_name || user.email?.split('@')[0] || 'coach';
+  welcomeName.textContent = fullName.split(' ')[0] || 'coach';
+  successName.textContent = fullName.split(' ')[0] || 'coach';
+
+  const roleLabel = ({
+    head_coach:      'Head Coach',
+    assistant_coach: 'Assistant Coach',
+    analyst:         'Analyst',
+    sporting_director: 'Sporting Director'
+  })[meta.role] || 'Coach';
+
+  contextLine.innerHTML =
+    '<strong>' + roleLabel + '</strong> · ' + (user.email || '') +
+    '<br>Invited to your academy in Fibonacci.';
+
+  show(passwordView);
+  passwordInput.focus();
+})();
+
+// ── Step 2: set the password, hand off to the dashboard ──
+submitBtn.addEventListener('click', async () => {
+  const pw  = passwordInput.value;
+  const pw2 = password2Input.value;
+  setStatus(submitStatus, '', null);
+
+  if (pw.length < 8) {
+    setStatus(submitStatus, 'Password must be at least 8 characters.', 'error');
+    passwordInput.focus();
+    return;
+  }
+  if (pw !== pw2) {
+    setStatus(submitStatus, 'Passwords do not match.', 'error');
+    password2Input.focus();
+    return;
+  }
+
+  submitBtn.disabled = true;
+  setStatus(submitStatus, 'Activating your account…', null);
+
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if (error) {
+    submitBtn.disabled = false;
+    setStatus(submitStatus, 'Could not set password: ' + error.message, 'error');
+    return;
+  }
+
+  show(successView);
+  setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1500);
+});
+
+passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') password2Input.focus(); });
+password2Input.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+</script>
+</body>
+</html>

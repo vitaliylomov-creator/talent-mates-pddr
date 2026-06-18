@@ -78,10 +78,100 @@ impersonates you as Sporting Director and prints counts that must
 match expectations — paste it into the SQL Editor after applying
 the migration to confirm policies behave as designed.
 
+## What's in scope for migration 0003
+
+- One trigger on `auth.users` that auto-links a `pddr_coaches` row
+  with `status='pending'` and matching email to the new auth user
+  once they confirm the invite (i.e. set a password). After link:
+  `auth_user_id = NEW.id`, `status = 'active'`.
+- Companion edge function `supabase/functions/invite-coach/index.ts`
+  that the Sporting Director's dashboard POSTs to. It validates SD
+  role via the caller's JWT, inserts the pending `pddr_coaches`
+  row, optionally adds `pddr_coach_team_assignments`, then calls
+  `supabase.auth.admin.inviteUserByEmail()`. Rolls back inserts on
+  any invite failure.
+- Companion HTML at `coach_welcome.html` (repo root) that consumes
+  the invite link, asks the user for a password, and forwards to
+  `coach_dashboard.html` once activated.
+
+### Apply order
+
+1. `db/pddr/0003_invite_trigger.sql` → Supabase Dashboard SQL Editor.
+2. Deploy the edge function:
+   ```bash
+   cd /path/to/talent-mates-pddr
+   supabase functions deploy invite-coach \
+     --project-ref zlkzjeaojpxzccpovygk
+   ```
+   The CLI may warn that this folder is linked to the creators
+   project — the `--project-ref` flag overrides the link for this
+   single deploy. It will not affect the creators functions.
+3. Set required environment variables (already populated for any
+   Supabase project, but verify):
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+4. Push `coach_welcome.html` to `main` so GitHub Pages serves it
+   at `https://app.talent-mates.com/coach_welcome.html`.
+
+### Test plan
+
+Once 0003 + edge function + welcome page are live, exercise the
+flow end-to-end:
+
+1. Get the Supabase access token for Vitalii (already SD of Talent
+   Mates Demo). The easiest path: open `fibonacci.html` in DevTools
+   console after signing in and run
+   ```js
+   (await supabase.auth.getSession()).data.session.access_token
+   ```
+2. Get a U19 team UUID from the SQL Editor:
+   ```sql
+   SELECT id FROM pddr_teams WHERE name = 'U19';
+   ```
+3. POST to the edge function with curl (replace placeholders):
+   ```bash
+   curl -X POST \
+     "https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/invite-coach" \
+     -H "Authorization: Bearer <vitalii_access_token>" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "test-coach+u19@example.com",
+       "full_name": "Test U19 Coach",
+       "role": "head_coach",
+       "team_ids": ["<u19_team_uuid>"]
+     }'
+   ```
+   Expected: `200 { ok: true, coach_id: "..." }`.
+4. Verify the row in SQL Editor:
+   ```sql
+   SELECT id, email, role, status, auth_user_id
+   FROM pddr_coaches
+   WHERE email = 'test-coach+u19@example.com';
+   ```
+   Expected: one row, `status='pending'`, `auth_user_id IS NULL`.
+5. Use a real email you control for the actual invite-accept test.
+   The invited user clicks the email link → lands on
+   `coach_welcome.html` → sets password → redirects to
+   `coach_dashboard.html`.
+6. Re-check the same SQL — `status` should now be `'active'` and
+   `auth_user_id` should be the new user's `auth.users.id`.
+
+### Cleanup of test rows
+
+```sql
+-- Removes the test coach AND auth.users row.
+WITH del AS (
+  DELETE FROM pddr_coaches
+   WHERE email = 'test-coach+u19@example.com'
+   RETURNING auth_user_id
+)
+DELETE FROM auth.users WHERE id IN (SELECT auth_user_id FROM del WHERE auth_user_id IS NOT NULL);
+```
+
 ## What's NOT in scope yet
 
-- **Coach invite flow** → edge function + migration `0003_invites.sql`
-  (Session 3)
+- **Coach Dashboard UI modal** for inviting (Session 3.5 — small)
 - **Player invite + MATE AI auto-provision** → Session 4
 - **Make.com dual-write** → Session 5
 - **Frontend cut over** → Session 6
