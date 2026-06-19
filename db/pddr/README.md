@@ -169,10 +169,127 @@ WITH del AS (
 DELETE FROM auth.users WHERE id IN (SELECT auth_user_id FROM del WHERE auth_user_id IS NOT NULL);
 ```
 
+## What's in scope for migration 0004
+
+- `UNIQUE INDEX uniq_pddr_players_academy_email` so a coach cannot
+  invite the same player email twice into the same academy.
+- `pddr_link_invited_player()` trigger on `auth.users` that mirrors
+  the coach-link trigger: when an invited player confirms their
+  email (sets a password), the function finds the matching pending
+  `pddr_players` row, links `auth_user_id`, flips `status` to
+  `'active'`, and **auto-grants** the academy MATE AI bonus by
+  upserting a row into `pddr_mate_ai_entitlements`.
+- Companion edge function `supabase/functions/invite-player/`. A
+  coach POSTs `{ email, full_name, team_id, position?,
+  date_of_birth?, nationality?, redirect_to? }`. Function validates
+  the caller is an active coach, verifies the team is in their
+  academy, and (for non-SD roles) that they're assigned to that
+  team. Then inserts the pending player and sends the invite email
+  via `auth.admin.inviteUserByEmail`. Rolls back on failure.
+- Companion HTML at `player_welcome.html` (repo root). Same
+  set-password UX as `coach_welcome.html`, plus a lime-accented
+  "MATE AI is on the house" bonus banner shown after activation —
+  but only when the entitlement row actually landed (defensive
+  read).
+
+### Apply order
+
+1. `db/pddr/0004_player_invite_triggers.sql` → Dashboard SQL Editor.
+2. Deploy the edge function:
+   ```bash
+   cd /path/to/talent-mates-pddr
+   supabase functions deploy invite-player \
+     --project-ref zlkzjeaojpxzccpovygk
+   ```
+3. Push `player_welcome.html` to `main` so GitHub Pages serves it
+   at `https://app.talent-mates.com/player_welcome.html`.
+
+### Test plan
+
+Same shape as Session 3 — easiest path is the console snippet. Sign
+in via `fibonacci.html` as Vitalii (SD), then in the DevTools
+Console:
+
+```js
+(async () => {
+  const { data: { session } } = await _sb.auth.getSession();
+  const token = session.access_token;
+
+  const { data: teams } = await _sb
+    .from('pddr_teams').select('id, name').eq('name', 'U19').limit(1);
+  const u19_id = teams[0].id;
+
+  const res = await fetch(
+    'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/invite-player',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({
+        email:         'vitaliylomov+playertest@gmail.com',
+        full_name:     'Test U19 Player',
+        team_id:       u19_id,
+        position:      'CM',
+        date_of_birth: '2007-04-12',
+        nationality:   'Ukraine'
+      })
+    }
+  );
+  const body = await res.json();
+  console.log('HTTP', res.status, body);
+})();
+```
+
+Expected: `HTTP 200 { ok: true, player_id: "..." }`.
+
+Verify in SQL Editor:
+```sql
+SELECT p.full_name, p.email, p.status, p.auth_user_id, p.position,
+       (SELECT name FROM pddr_teams WHERE id = p.team_id) AS team,
+       e.active AS mate_ai_active, e.activated_at
+FROM pddr_players p
+LEFT JOIN pddr_mate_ai_entitlements e ON e.player_id = p.id
+WHERE p.email = 'vitaliylomov+playertest@gmail.com';
+```
+
+Before the invite is accepted: `status='invited'`, `auth_user_id`
+NULL, `mate_ai_active` NULL.
+
+Accept the invite (open the email, click → land on
+`player_welcome.html` → set a password → see the bonus banner →
+"Open my dashboard"). Re-run the query: `status='active'`,
+`auth_user_id` filled, `mate_ai_active=true`, `activated_at` set.
+
+### Cleanup of all Session 3 + 4 test rows
+
+```sql
+-- Removes test coaches AND test players AND any orphaned auth.users
+-- rows. Safe to run repeatedly.
+WITH del_coaches AS (
+  DELETE FROM pddr_coaches
+   WHERE email LIKE 'vitaliylomov+%test%'
+     OR email = 'vitaliylomov+u19test@gmail.com'
+   RETURNING auth_user_id
+),
+del_players AS (
+  DELETE FROM pddr_players
+   WHERE email LIKE 'vitaliylomov+%test%'
+     OR email = 'vitaliylomov+playertest@gmail.com'
+   RETURNING auth_user_id
+)
+DELETE FROM auth.users
+ WHERE id IN (
+   SELECT auth_user_id FROM del_coaches WHERE auth_user_id IS NOT NULL
+   UNION
+   SELECT auth_user_id FROM del_players WHERE auth_user_id IS NOT NULL
+ );
+```
+
 ## What's NOT in scope yet
 
-- **Coach Dashboard UI modal** for inviting (Session 3.5 — small)
-- **Player invite + MATE AI auto-provision** → Session 4
+- **Coach Dashboard UI modal** for inviting (Session 3.5/4.5 — small)
 - **Make.com dual-write** → Session 5
 - **Frontend cut over** → Session 6
 - **Airtable retirement** → end of Session 6
