@@ -2343,19 +2343,43 @@
   function checkPaymentReturn() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
-      // Show success message
-      setTimeout(() => {
-        appendMATEMessage(
-          '🎉 **Welcome to MATE Pro!** Your subscription is now active. You have unlimited access to all agents, PDF analysis, and real-time data. Let\'s get to work.',
-          'concierge', false, true
-        );
-        if (!hasStartedChat) {
-          document.getElementById('welcomeState').style.display = 'none';
-          hasStartedChat = true;
+      // Dismiss paywall immediately — webhook fires async and may lag 2-5s
+      dismissPaywall();
+      // Poll Supabase until webhook activates the subscription (up to 12s)
+      let attempts = 0;
+      const pollSub = async () => {
+        await checkSubscription();
+        if (isPro) {
+          setTimeout(() => {
+            appendMATEMessage(
+              '🎉 **Welcome to MATE Pro!** Your subscription is now active. You have unlimited access to all agents, PDF analysis, and real-time data. Let\'s get to work.',
+              'concierge', false, true
+            );
+            if (!hasStartedChat) {
+              document.getElementById('welcomeState').style.display = 'none';
+              hasStartedChat = true;
+            }
+          }, 300);
+        } else if (attempts < 6) {
+          attempts++;
+          setTimeout(pollSub, 2000);
+        } else {
+          // Webhook took too long — still dismiss paywall, user paid
+          isPro = true;
+          document.getElementById('proBadge').classList.add('visible');
+          document.getElementById('msgCounter').style.display = 'none';
+          appendMATEMessage(
+            '🎉 **Welcome to MATE Pro!** Payment confirmed. Your account will be fully activated within a minute.',
+            'concierge', false, true
+          );
+          if (!hasStartedChat) {
+            document.getElementById('welcomeState').style.display = 'none';
+            hasStartedChat = true;
+          }
         }
-      }, 500);
+      };
+      pollSub();
     }
     if (params.get('payment') === 'cancelled') {
       window.history.replaceState({}, '', window.location.pathname);
