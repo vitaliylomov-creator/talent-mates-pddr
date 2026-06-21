@@ -937,6 +937,90 @@
       min-height: 18px;
     }
 
+    /* GDPR / Account section */
+    .account-danger-section {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .account-danger-section .profile-section-label {
+      color: rgba(255,255,255,0.55);
+      margin-top: 0;
+    }
+    .account-action-btn {
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, background 0.2s;
+      margin-top: 10px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: transparent;
+      color: rgba(255,255,255,0.85);
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .account-action-btn:hover { background: rgba(255,255,255,0.05); }
+    .account-action-btn.danger { color: #ff9b9b; border-color: rgba(255,155,155,0.3); }
+    .account-action-btn.danger:hover { background: rgba(255,80,80,0.08); }
+    .account-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .account-action-btn .ico { font-size: 16px; opacity: 0.6; }
+
+    .confirm-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1100;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .confirm-modal-overlay.visible { display: flex; }
+    .confirm-modal {
+      background: #5c3a9e;
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 440px; width: 100%;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .confirm-title {
+      font-size: 18px; font-weight: 500; margin-bottom: 10px;
+      color: var(--t1);
+    }
+    .confirm-body {
+      font-size: 14px; line-height: 1.55;
+      color: var(--t2);
+      margin-bottom: 18px;
+    }
+    .confirm-body strong { color: var(--t1); }
+    .confirm-actions { display: flex; gap: 10px; }
+    .confirm-actions button {
+      flex: 1; padding: 11px; border-radius: 10px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: transparent; color: var(--t1);
+      transition: opacity 0.2s;
+    }
+    .confirm-actions button:hover { opacity: 0.85; }
+    .confirm-actions button.danger {
+      background: #d93939; border-color: #d93939; color: #fff;
+    }
+    .confirm-input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: var(--t1);
+      font-size: 13px;
+      margin-bottom: 14px;
+      box-sizing: border-box;
+    }
+    .confirm-input:focus { outline: none; border-color: rgba(255,255,255,0.35); }
+
     /* ── TRAINING LOG MODAL ── */
     .training-modal-overlay {
       display: none;
@@ -1566,6 +1650,53 @@
 
     <button class="profile-save-btn" id="profileSaveBtn" onclick="saveProfile()">Save Changes</button>
     <div class="profile-save-msg" id="profileSaveMsg"></div>
+
+    <!-- GDPR / Account management -->
+    <div class="account-danger-section">
+      <div class="profile-section-label">Account</div>
+
+      <button class="account-action-btn" id="cancelSubBtn" onclick="openCancelConfirm()" style="display:none;">
+        <span>Cancel Pro subscription</span>
+        <span class="ico">→</span>
+      </button>
+
+      <button class="account-action-btn danger" onclick="openDeleteConfirm()">
+        <span>Delete my account & all data</span>
+        <span class="ico">→</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel subscription confirm -->
+<div class="confirm-modal-overlay" id="cancelConfirmOverlay" onclick="closeCancelConfirm(event)">
+  <div class="confirm-modal" onclick="event.stopPropagation()">
+    <div class="confirm-title">Cancel Pro subscription?</div>
+    <div class="confirm-body">
+      You'll keep <strong>Pro access until the end of your current billing period</strong>, then your account
+      reverts to the free tier (10 messages/month). No further charges will be made.
+    </div>
+    <div class="confirm-actions">
+      <button onclick="closeCancelConfirm()">Keep Pro</button>
+      <button class="danger" id="confirmCancelBtn" onclick="confirmCancelSubscription()">Cancel subscription</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete account confirm -->
+<div class="confirm-modal-overlay" id="deleteConfirmOverlay" onclick="closeDeleteConfirm(event)">
+  <div class="confirm-modal" onclick="event.stopPropagation()">
+    <div class="confirm-title">Delete account & all data?</div>
+    <div class="confirm-body">
+      This is <strong>permanent and cannot be undone</strong>. We will immediately cancel any active subscription,
+      delete every conversation, training log, profile and authentication record we hold about you. To confirm,
+      type <strong>DELETE</strong> below.
+    </div>
+    <input type="text" class="confirm-input" id="deleteConfirmInput" placeholder="Type DELETE to confirm" autocomplete="off" />
+    <div class="confirm-actions">
+      <button onclick="closeDeleteConfirm()">Keep my account</button>
+      <button class="danger" id="confirmDeleteBtn" onclick="confirmDeleteAccount()">Delete forever</button>
+    </div>
   </div>
 </div>
 
@@ -1595,6 +1726,8 @@
   // ── CONFIG ──
   const EDGE_URL      = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat';
   const CHECKOUT_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/create-checkout';
+  const CANCEL_URL    = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/cancel-subscription';
+  const DELETE_URL    = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/delete-account';
   // Note: no Stripe publishable key needed in the frontend — we use hosted
   // Checkout (server creates a session, frontend redirects to session.url).
   const FREE_MSG_LIMIT = 10;
@@ -2403,6 +2536,8 @@
     document.getElementById('edit_bio').value      = player.bio ?? '';
 
     document.getElementById('profileSaveMsg').textContent = '';
+    // Show "Cancel Pro subscription" only if user is currently Pro
+    document.getElementById('cancelSubBtn').style.display = isPro ? 'flex' : 'none';
     document.getElementById('profileModalOverlay').classList.add('visible');
   }
 
@@ -2458,6 +2593,87 @@
     setTimeout(() => {
       document.getElementById('profileModalOverlay').classList.remove('visible');
     }, 1500);
+  }
+
+  // ── GDPR: Cancel subscription ──
+  function openCancelConfirm() {
+    document.getElementById('cancelConfirmOverlay').classList.add('visible');
+  }
+  function closeCancelConfirm(e) {
+    if (e && e.target !== document.getElementById('cancelConfirmOverlay')) return;
+    document.getElementById('cancelConfirmOverlay').classList.remove('visible');
+  }
+  async function confirmCancelSubscription() {
+    const btn = document.getElementById('confirmCancelBtn');
+    btn.disabled = true;
+    btn.textContent = 'Cancelling…';
+    try {
+      const { data: { session: s } } = await sb.auth.getSession();
+      const res = await fetch(CANCEL_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${s?.access_token ?? ''}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Cancel failed');
+
+      closeCancelConfirm();
+      document.getElementById('profileModalOverlay').classList.remove('visible');
+      const endDate = data.cancel_at ? new Date(data.cancel_at).toLocaleDateString() : 'end of period';
+      appendMATEMessage(
+        `Your subscription has been cancelled. You'll keep Pro access until **${endDate}**, then revert to the free tier. No further charges will be made.`,
+        'concierge', false, true
+      );
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Cancel subscription';
+      alert('Could not cancel subscription: ' + err.message);
+    }
+  }
+
+  // ── GDPR: Delete account ──
+  function openDeleteConfirm() {
+    document.getElementById('deleteConfirmInput').value = '';
+    document.getElementById('deleteConfirmOverlay').classList.add('visible');
+    setTimeout(() => document.getElementById('deleteConfirmInput').focus(), 100);
+  }
+  function closeDeleteConfirm(e) {
+    if (e && e.target !== document.getElementById('deleteConfirmOverlay')) return;
+    document.getElementById('deleteConfirmOverlay').classList.remove('visible');
+  }
+  async function confirmDeleteAccount() {
+    const input = document.getElementById('deleteConfirmInput').value.trim();
+    if (input !== 'DELETE') {
+      alert('Please type DELETE (in capital letters) to confirm.');
+      return;
+    }
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+    try {
+      const { data: { session: s } } = await sb.auth.getSession();
+      const res = await fetch(DELETE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${s?.access_token ?? ''}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+
+      // Sign out & wipe everything client-side
+      await sb.auth.signOut();
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = 'mate-auth.html?deleted=1';
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Delete forever';
+      alert('Could not delete account: ' + err.message);
+    }
   }
 
   // ── TRAINING LOG ──
