@@ -1595,7 +1595,8 @@
   // ── CONFIG ──
   const EDGE_URL      = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/mate-chat';
   const CHECKOUT_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co/functions/v1/create-checkout';
-  const STRIPE_PK     = 'pk_test_51Tb4oJ0iX3hBaut7U2XFBr1Zns2aeqDvooJaRvsnl5HIHaNdIuMwGFGmu0Dy9hIGHzMRE8Q9YAqRCCT1kLSHOfvk00dB4iUfkx';
+  // Note: no Stripe publishable key needed in the frontend — we use hosted
+  // Checkout (server creates a session, frontend redirects to session.url).
   const FREE_MSG_LIMIT = 10;
 
   const { createClient } = supabase;
