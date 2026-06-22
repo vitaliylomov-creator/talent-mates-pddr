@@ -695,80 +695,172 @@
     }
     .paywall-overlay.visible { display: flex; }
 
+    /* Paywall — 3-tier shell */
+    .paywall-shell {
+      max-width: 1080px;
+      width: 100%;
+      animation: fadeUp 0.4s var(--ease) both;
+    }
+    .paywall-head { text-align: center; margin-bottom: 22px; }
+    .paywall-head-icon { font-size: 40px; margin-bottom: 12px; }
+    .paywall-head-title {
+      font-family: var(--font-d);
+      font-size: 30px;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .paywall-head-sub {
+      font-size: 14px; font-weight: 300;
+      color: var(--t3); line-height: 1.55;
+      max-width: 540px; margin: 0 auto;
+    }
+
+    .billing-toggle {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(0,0,0,0.22);
+      border-radius: 100px;
+      margin: 18px auto 26px;
+    }
+    .billing-toggle button {
+      padding: 8px 18px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 100px;
+      border: none;
+      background: transparent;
+      color: var(--t3);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .billing-toggle button.active {
+      background: #ffffff;
+      color: var(--purple);
+    }
+    .billing-toggle .save-pill {
+      display: inline-block;
+      margin-left: 6px;
+      background: #6dffb3;
+      color: var(--purple);
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+    .billing-toggle button:not(.active) .save-pill {
+      background: rgba(109,255,179,0.18);
+      color: #6dffb3;
+    }
+
+    .paywall-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
     .paywall-card {
+      position: relative;
       background: #5c3a9e;
       border: 0.5px solid var(--border-mid);
       border-radius: 20px;
-      padding: 36px 32px;
-      max-width: 380px;
-      width: 100%;
-      text-align: center;
-      animation: fadeUp 0.4s var(--ease) both;
+      padding: 26px 22px;
+      display: flex; flex-direction: column;
+      min-height: 460px;
+      transition: transform 0.2s, border-color 0.2s;
     }
-    .paywall-icon { font-size: 40px; margin-bottom: 16px; }
-    .paywall-title {
+    .paywall-card.featured {
+      border: 1px solid #6dffb3;
+      transform: translateY(-4px);
+    }
+    .paywall-card.featured::before {
+      content: 'Most popular';
+      position: absolute; top: -11px; left: 50%;
+      transform: translateX(-50%);
+      background: #6dffb3; color: var(--purple);
+      font-size: 11px; font-weight: 500;
+      padding: 3px 10px; border-radius: 100px;
+      font-family: var(--font-b);
+    }
+    .pc-name {
       font-family: var(--font-d);
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-    .paywall-sub {
-      font-size: 14px;
-      font-weight: 300;
-      color: var(--t3);
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
-    .paywall-price {
-      font-size: 36px;
-      font-weight: 500;
-      color: var(--t1);
+      font-size: 22px;
       margin-bottom: 4px;
     }
-    .paywall-price span {
-      font-size: 16px;
-      font-weight: 300;
+    .pc-tagline {
+      font-size: 12px; font-weight: 300;
+      color: var(--t3);
+      margin-bottom: 14px;
+      min-height: 32px;
+      line-height: 1.4;
+    }
+    .pc-price-row {
+      display: flex; align-items: baseline; gap: 6px;
+      margin-bottom: 4px;
+    }
+    .pc-price {
+      font-size: 30px; font-weight: 500;
+      color: var(--t1);
+    }
+    .pc-per {
+      font-size: 13px; font-weight: 300;
       color: var(--t3);
     }
-    .paywall-features {
-      list-style: none;
-      margin: 16px 0 24px;
-      text-align: left;
+    .pc-yearly-note {
+      font-size: 11px; font-weight: 300;
+      color: var(--t4);
+      min-height: 16px;
+      margin-bottom: 16px;
     }
-    .paywall-features li {
+    .pc-features {
+      list-style: none;
+      margin: 0 0 18px;
+      padding: 0;
+      flex: 1;
+    }
+    .pc-features li {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
       font-weight: 300;
       color: var(--t2);
       padding: 6px 0;
-      border-bottom: 0.5px solid var(--border);
+      line-height: 1.5;
     }
-    .paywall-features li:last-child { border-bottom: none; }
-    .paywall-features li::before {
+    .pc-features li::before {
       content: '✓';
       color: #6dffb3;
-      font-size: 12px;
+      font-size: 11px;
       flex-shrink: 0;
+      margin-top: 2px;
     }
-    .paywall-btn {
+    .pc-btn {
       width: 100%;
-      padding: 14px;
-      background: #ffffff;
-      color: var(--purple);
+      padding: 12px;
       border: none;
       border-radius: 100px;
       font-family: var(--font-b);
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       transition: opacity 0.2s, transform 0.15s;
-      margin-bottom: 12px;
+      background: rgba(255,255,255,0.08);
+      color: var(--t1);
+      border: 1px solid rgba(255,255,255,0.18);
     }
-    .paywall-btn:hover { opacity: 0.88; transform: scale(1.02); }
-    .paywall-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .paywall-btn-loading::after { content: '…'; }
+    .pc-btn.featured {
+      background: #ffffff;
+      color: var(--purple);
+      border: none;
+    }
+    .pc-btn:hover { opacity: 0.88; transform: scale(1.01); }
+    .pc-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
     .paywall-dismiss {
+      display: block;
+      margin: 22px auto 0;
       font-size: 12px;
       color: var(--t4);
       background: none;
@@ -777,6 +869,12 @@
       font-family: var(--font-b);
     }
     .paywall-dismiss:hover { color: var(--t2); }
+
+    @media (max-width: 860px) {
+      .paywall-grid { grid-template-columns: 1fr; }
+      .paywall-card.featured { transform: none; }
+      .paywall-card { min-height: 0; }
+    }
 
     /* Pro badge in topbar */
     .pro-badge {
@@ -1656,7 +1754,7 @@
       <div class="profile-section-label">Account</div>
 
       <button class="account-action-btn" id="cancelSubBtn" onclick="openCancelConfirm()" style="display:none;">
-        <span>Cancel Pro subscription</span>
+        <span id="cancelSubLabel">Cancel subscription</span>
         <span class="ico">→</span>
       </button>
 
@@ -1700,23 +1798,79 @@
   </div>
 </div>
 
-<!-- PAYWALL OVERLAY -->
+<!-- PAYWALL OVERLAY — 3-tier -->
 <div class="paywall-overlay" id="paywallOverlay">
-  <div class="paywall-card">
-    <div class="paywall-icon">⚽</div>
-    <div class="paywall-title">Upgrade to Pro</div>
-    <div class="paywall-sub">You've used your 10 free messages. Unlock unlimited access to MATE AI.</div>
-    <div class="paywall-price">€10 <span>/ month</span></div>
-    <ul class="paywall-features">
-      <li>Unlimited messages</li>
-      <li>All 4 AI agents (Legal, Coach, Analyst, Concierge)</li>
-      <li>PDF contract analysis</li>
-      <li>Real-time data (weather, trains, fixtures)</li>
-      <li>Full conversation history</li>
-    </ul>
-    <button class="paywall-btn" id="upgradeBtn" onclick="startCheckout()">
-      Upgrade Now — €10/month
-    </button>
+  <div class="paywall-shell">
+    <div class="paywall-head">
+      <div class="paywall-head-icon">⚽</div>
+      <div class="paywall-head-title" id="paywallTitle">Pick the plan that fits your career</div>
+      <div class="paywall-head-sub" id="paywallSub">You've used your 10 free messages. Choose how serious you are about your next step.</div>
+
+      <div class="billing-toggle">
+        <button id="billMonthly" class="active" onclick="setBillingPeriod('monthly')">Monthly</button>
+        <button id="billYearly" onclick="setBillingPeriod('yearly')">Yearly <span class="save-pill">−30%</span></button>
+      </div>
+    </div>
+
+    <div class="paywall-grid">
+      <!-- START -->
+      <div class="paywall-card">
+        <div class="pc-name">MATE Start</div>
+        <div class="pc-tagline">For players exploring AI for the first time.</div>
+        <div class="pc-price-row">
+          <span class="pc-price" id="priceStart">€19</span>
+          <span class="pc-per" id="perStart">/ month</span>
+        </div>
+        <div class="pc-yearly-note" id="noteStart">&nbsp;</div>
+        <ul class="pc-features">
+          <li>100 messages per month</li>
+          <li>All 4 AI agents</li>
+          <li>PDF contract analysis</li>
+          <li>Real-time data (weather, trains, fixtures)</li>
+          <li>Full conversation history</li>
+        </ul>
+        <button class="pc-btn" onclick="startCheckout('start')" data-plan="start">Choose Start</button>
+      </div>
+
+      <!-- PRO (featured) -->
+      <div class="paywall-card featured">
+        <div class="pc-name">MATE Pro</div>
+        <div class="pc-tagline">Daily training companion. No message limits.</div>
+        <div class="pc-price-row">
+          <span class="pc-price" id="pricePro">€49</span>
+          <span class="pc-per" id="perPro">/ month</span>
+        </div>
+        <div class="pc-yearly-note" id="notePro">&nbsp;</div>
+        <ul class="pc-features">
+          <li><strong>Unlimited messages</strong></li>
+          <li>All 4 AI agents</li>
+          <li>PDF contract analysis</li>
+          <li>Real-time data (weather, trains, fixtures)</li>
+          <li>Priority response speed</li>
+        </ul>
+        <button class="pc-btn featured" onclick="startCheckout('pro')" data-plan="pro">Choose Pro</button>
+      </div>
+
+      <!-- CAREER -->
+      <div class="paywall-card">
+        <div class="pc-name">MATE Career</div>
+        <div class="pc-tagline">Pro features + real human agent in the loop.</div>
+        <div class="pc-price-row">
+          <span class="pc-price" id="priceCareer">€149</span>
+          <span class="pc-per" id="perCareer">/ month</span>
+        </div>
+        <div class="pc-yearly-note" id="noteCareer">&nbsp;</div>
+        <ul class="pc-features">
+          <li>Everything in Pro</li>
+          <li><strong>1-on-1 Zoom sessions</strong> with a real football agent</li>
+          <li>Personal contract & transfer strategy reviews</li>
+          <li>Career-pathway planning</li>
+          <li>Direct WhatsApp line for urgent questions</li>
+        </ul>
+        <button class="pc-btn" onclick="startCheckout('career')" data-plan="career">Choose Career</button>
+      </div>
+    </div>
+
     <button class="paywall-dismiss" onclick="dismissPaywall()">Maybe later</button>
   </div>
 </div>
@@ -2385,21 +2539,50 @@
     }
   }
 
+  // ── PLAN CONFIG ──
+  const PLAN_LIMITS = {
+    free:   10,
+    start:  100,
+    pro:    Infinity,
+    career: Infinity,
+  };
+  const PLAN_LABELS = {
+    start:  '✦ Start',
+    pro:    '✦ Pro',
+    career: '✦ Career',
+  };
+  const PLAN_PRICES = {
+    start:  { monthly: 19,  yearly: 159  },
+    pro:    { monthly: 49,  yearly: 411  },
+    career: { monthly: 149, yearly: 1251 },
+  };
+  let currentPlan   = 'free';     // 'free' | 'start' | 'pro' | 'career'
+  let billingPeriod = 'monthly';  // 'monthly' | 'yearly'
+
   // ── SUBSCRIPTION CHECK ──
   async function checkSubscription() {
     if (!player) return;
     const { data } = await sb
       .from('subscriptions')
-      .select('plan, status, current_period_end')
+      .select('plan, status, current_period_end, billing_period')
       .eq('player_id', player.id)
       .eq('status', 'active')
       .single();
 
-    if (data) {
-      isPro = true;
-      document.getElementById('proBadge').classList.add('visible');
-      document.getElementById('msgCounter').style.display = 'none';
+    if (data && data.plan && PLAN_LABELS[data.plan]) {
+      currentPlan = data.plan;
+      isPro = true; // anything paid counts as "no paywall"
+      const badge = document.getElementById('proBadge');
+      badge.textContent = PLAN_LABELS[data.plan];
+      badge.classList.add('visible');
+      // Pro/Career hide counter; Start shows quota
+      if (currentPlan === 'start') {
+        await loadMessageCount();
+      } else {
+        document.getElementById('msgCounter').style.display = 'none';
+      }
     } else {
+      currentPlan = 'free';
       isPro = false;
       await loadMessageCount();
     }
@@ -2407,7 +2590,6 @@
 
   async function loadMessageCount() {
     if (!player) return;
-    // Count messages this month
     const monthStart = new Date();
     monthStart.setDate(1); monthStart.setHours(0,0,0,0);
 
@@ -2423,15 +2605,32 @@
   }
 
   function updateMsgCounter() {
-    if (isPro) return;
+    const limit = PLAN_LIMITS[currentPlan] ?? FREE_MSG_LIMIT;
+    if (limit === Infinity) {
+      document.getElementById('msgCounter').style.display = 'none';
+      return;
+    }
     const el = document.getElementById('msgCounter');
-    const remaining = Math.max(0, FREE_MSG_LIMIT - msgCount);
-    el.textContent = `${remaining} free msg left`;
-    el.className = 'msg-counter' + (remaining <= 3 ? ' critical' : remaining <= 5 ? ' warning' : '');
+    el.style.display = '';
+    const remaining = Math.max(0, limit - msgCount);
+    const label = currentPlan === 'start' ? `${remaining}/${limit} msg left` : `${remaining} free msg left`;
+    el.textContent = label;
+    const ratio = remaining / limit;
+    el.className = 'msg-counter' + (ratio <= 0.1 ? ' critical' : ratio <= 0.3 ? ' warning' : '');
     if (remaining === 0) showPaywall();
   }
 
   function showPaywall() {
+    // Adjust copy depending on whether user is Free or Start hitting cap
+    const title = document.getElementById('paywallTitle');
+    const sub   = document.getElementById('paywallSub');
+    if (currentPlan === 'start') {
+      title.textContent = 'You\'ve hit your monthly Start limit';
+      sub.textContent   = 'Upgrade to Pro for unlimited messages, or Career for a real agent in your corner.';
+    } else {
+      title.textContent = 'Pick the plan that fits your career';
+      sub.textContent   = 'You\'ve used your 10 free messages. Choose how serious you are about your next step.';
+    }
     document.getElementById('paywallOverlay').classList.add('visible');
   }
 
@@ -2439,8 +2638,28 @@
     document.getElementById('paywallOverlay').classList.remove('visible');
   }
 
-  async function startCheckout() {
-    const btn = document.getElementById('upgradeBtn');
+  // ── Billing period toggle ──
+  function setBillingPeriod(period) {
+    billingPeriod = period;
+    document.getElementById('billMonthly').classList.toggle('active', period === 'monthly');
+    document.getElementById('billYearly').classList.toggle('active', period === 'yearly');
+    ['start','pro','career'].forEach(plan => {
+      const p = PLAN_PRICES[plan];
+      document.getElementById('price' + cap(plan)).textContent = '€' + (period === 'yearly' ? p.yearly : p.monthly);
+      document.getElementById('per'   + cap(plan)).textContent = period === 'yearly' ? '/ year' : '/ month';
+      const monthlyEq = period === 'yearly' ? (p.yearly / 12).toFixed(0) : null;
+      document.getElementById('note'  + cap(plan)).innerHTML = monthlyEq
+        ? `≈ €${monthlyEq}/month · billed annually · save 30%`
+        : '&nbsp;';
+    });
+  }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  async function startCheckout(plan) {
+    plan = plan || 'pro';
+    const btn = document.querySelector(`.pc-btn[data-plan="${plan}"]`);
+    if (!btn) return;
+    const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Redirecting to Stripe…';
 
@@ -2455,7 +2674,7 @@
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ origin }),
+        body: JSON.stringify({ origin, plan, period: billingPeriod }),
       });
 
       const data = await res.json();
@@ -2467,7 +2686,7 @@
     } catch (err) {
       console.error('Checkout error:', err);
       btn.disabled = false;
-      btn.textContent = 'Upgrade Now — €10/month';
+      btn.textContent = originalText;
       alert('Something went wrong. Please try again.');
     }
   }
@@ -2485,8 +2704,9 @@
         await checkSubscription();
         if (isPro) {
           setTimeout(() => {
+            const planName = (PLAN_LABELS[currentPlan] ?? '✦ Pro').replace('✦ ', '');
             appendMATEMessage(
-              '🎉 **Welcome to MATE Pro!** Your subscription is now active. You have unlimited access to all agents, PDF analysis, and real-time data. Let\'s get to work.',
+              `🎉 **Welcome to MATE ${planName}!** Your subscription is now active. Let's get to work.`,
               'concierge', false, true
             );
             if (!hasStartedChat) {
@@ -2503,7 +2723,7 @@
           document.getElementById('proBadge').classList.add('visible');
           document.getElementById('msgCounter').style.display = 'none';
           appendMATEMessage(
-            '🎉 **Welcome to MATE Pro!** Payment confirmed. Your account will be fully activated within a minute.',
+            '🎉 **Welcome to MATE!** Payment confirmed. Your account will be fully activated within a minute.',
             'concierge', false, true
           );
           if (!hasStartedChat) {
@@ -2536,8 +2756,15 @@
     document.getElementById('edit_bio').value      = player.bio ?? '';
 
     document.getElementById('profileSaveMsg').textContent = '';
-    // Show "Cancel Pro subscription" only if user is currently Pro
-    document.getElementById('cancelSubBtn').style.display = isPro ? 'flex' : 'none';
+    // Show Cancel button only for paid plans, with plan-aware label
+    const cancelBtn = document.getElementById('cancelSubBtn');
+    if (isPro && currentPlan !== 'free') {
+      const planName = (PLAN_LABELS[currentPlan] ?? '✦ Pro').replace('✦ ', '');
+      document.getElementById('cancelSubLabel').textContent = `Cancel ${planName} subscription`;
+      cancelBtn.style.display = 'flex';
+    } else {
+      cancelBtn.style.display = 'none';
+    }
     document.getElementById('profileModalOverlay').classList.add('visible');
   }
 
