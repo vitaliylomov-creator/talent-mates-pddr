@@ -114,16 +114,33 @@ CREATE POLICY mate_pro_frames_insert_service
   ON storage.objects FOR INSERT TO service_role
   WITH CHECK (bucket_id = 'mate-pro-frames');
 
--- Uncomment when Step 6 commits to browser-side frame extraction:
--- DROP POLICY IF EXISTS mate_pro_frames_insert_own ON storage.objects;
--- CREATE POLICY mate_pro_frames_insert_own
---   ON storage.objects FOR INSERT TO authenticated
---   WITH CHECK (
---     bucket_id = 'mate-pro-frames'
---     AND (storage.foldername(name))[1] = (
---       SELECT id::text FROM public.mate_pro_agents WHERE user_id = auth.uid()
---     )
---   );
+-- Browser-side frame extraction (Step 6 decision): the dashboard's
+-- runVideoAnalysis() draws frames from <video> to canvas, JPEG-encodes,
+-- and uploads each to mate-pro-frames/{agent_id}/{video_analysis_id}/.
+-- The mate-pro-video-analyse edge function then reads them as service_role.
+
+DROP POLICY IF EXISTS mate_pro_frames_insert_own ON storage.objects;
+CREATE POLICY mate_pro_frames_insert_own
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'mate-pro-frames'
+    AND (storage.foldername(name))[1] = (
+      SELECT id::text FROM public.mate_pro_agents WHERE user_id = auth.uid()
+    )
+  );
+
+-- Delete-own is also needed so the dashboard can clean up extracted
+-- frames after a successful analysis (or when retrying a failed one).
+-- Service-role bypasses RLS — this only governs browser-initiated deletes.
+DROP POLICY IF EXISTS mate_pro_frames_delete_own ON storage.objects;
+CREATE POLICY mate_pro_frames_delete_own
+  ON storage.objects FOR DELETE TO authenticated
+  USING (
+    bucket_id = 'mate-pro-frames'
+    AND (storage.foldername(name))[1] = (
+      SELECT id::text FROM public.mate_pro_agents WHERE user_id = auth.uid()
+    )
+  );
 
 -- ════════════════════════════════════════════════════════════════════════════
 -- End of migration 0006_mate_pro_storage.sql
