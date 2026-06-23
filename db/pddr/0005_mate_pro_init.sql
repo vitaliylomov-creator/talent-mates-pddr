@@ -492,12 +492,15 @@ CREATE POLICY mate_pro_va_insert_own
 
 
 -- ── mate_pro_founding_counter ──
--- Authenticated users may read the counter (so a public-ish
--- "X of 100 admitted" stat can be shown on the dashboard). Writes
--- only via mate_pro_assign_founding_number() under service_role.
+-- Both authenticated users AND anonymous visitors may read the counter.
+-- The auth page (mate-pro-auth.html) shows the live "X of 100 admitted"
+-- number before sign-in to create real urgency for the Founding 100
+-- promotion. The counter exposes no PII — just two integers and a
+-- timestamp — so anon SELECT is intentional, not a leak. Writes only
+-- via mate_pro_assign_founding_number() under service_role.
 DROP POLICY IF EXISTS mate_pro_founding_counter_read_all ON public.mate_pro_founding_counter;
 CREATE POLICY mate_pro_founding_counter_read_all
-  ON public.mate_pro_founding_counter FOR SELECT TO authenticated
+  ON public.mate_pro_founding_counter FOR SELECT TO authenticated, anon
   USING (true);
 
 

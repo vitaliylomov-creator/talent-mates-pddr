@@ -1519,7 +1519,7 @@
 
     <div class="modal-section-label">Founding 100</div>
     <div class="analysis-note" style="border-left-color: var(--accent-green); color: var(--t2);">
-      <strong style="color: var(--accent-green);">Founding Agent — lifetime price lock at €299/month.</strong> Direct founder access. Permanent place in the platform's history. Your founding number is shown in the top bar.
+      <strong style="color: var(--accent-green);">Founding Agent — lifetime lock at €149/month.</strong> Fifty percent below the standard Pro tier. Direct founder access. Early roadmap input. A permanent place in the platform's history. Your founding number is shown in the top bar.
     </div>
 
     <button class="primary-btn" onclick="saveAgentProfile()">Save Changes</button>
@@ -2306,7 +2306,7 @@
       'border-bottom: 1px solid rgba(109,255,179,0.4); color: var(--t1); font-size: 14px; text-align:center;' +
       'backdrop-filter: blur(10px);';
     bar.innerHTML = !isNaN(n) && n <= 100
-      ? '<strong style="color:#6dffb3">Welcome, Founding Agent #' + n + '.</strong> Lifetime price lock at €299/month. Direct founder access.'
+      ? '<strong style="color:#6dffb3">Welcome, Founding Agent #' + n + '.</strong> Lifetime lock at €149/month — fifty percent below the standard Pro tier. Direct founder access.'
       : 'Welcome to MATE Pro. The Founding 100 cohort is complete — your account is on the standard tier.';
     document.body.appendChild(bar);
     setTimeout(() => bar.style.transition = 'opacity 400ms', 50);

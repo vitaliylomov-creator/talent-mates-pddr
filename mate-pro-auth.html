@@ -622,6 +622,144 @@
       transform: none;
     }
 
+
+    /* ── COMPLIANCE CHIP (under Agent hero) ───────── */
+    .compliance-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px 8px 12px;
+      background: rgba(0,0,0,0.18);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t2);
+      margin-bottom: 28px;
+    }
+    .compliance-chip::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px rgba(109,255,179,0.50);
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+
+    /* ── GAIN CARDS (Speed / Reach / Memory) ──────── */
+    .gain-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 40px 0 56px;
+      max-width: 620px;
+    }
+    .gain-card {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 20px 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .gain-card-title {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+      color: var(--white);
+    }
+    .gain-card-body {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--t2);
+      font-weight: 300;
+    }
+    @media (max-width: 960px) {
+      .gain-cards { grid-template-columns: 1fr; gap: 10px; }
+    }
+
+    /* ── FOUNDING 100 BLOCK ───────────────────────── */
+    .founding-block {
+      max-width: 620px;
+      padding: 32px 28px 30px;
+      background: rgba(0,0,0,0.18);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 22px;
+    }
+    .founding-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--t3);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .founding-eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 0.5px;
+      background: var(--border-strong);
+    }
+    .founding-title {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 36px;
+      line-height: 1.05;
+      letter-spacing: -0.018em;
+      margin-bottom: 18px;
+      color: var(--white);
+    }
+    .founding-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--t2);
+      font-weight: 300;
+      margin-bottom: 14px;
+      max-width: 540px;
+    }
+    .founding-body strong { color: var(--white); font-weight: 500; }
+    .founding-dates {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--t4);
+      margin-top: 20px;
+      margin-bottom: 24px;
+    }
+    .founding-counter {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      padding-top: 20px;
+      border-top: 0.5px solid var(--border);
+    }
+    .founding-counter-num {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 64px;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      color: var(--white);
+    }
+    .founding-counter-of {
+      font-size: 13px;
+      color: var(--t3);
+      letter-spacing: 0.04em;
+    }
+    .founding-remain {
+      margin-left: auto;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-green);
+      font-weight: 500;
+    }
+
   </style>
 </head>
 <body>
@@ -666,32 +804,52 @@
       </div>
     </section>
 
-    <!-- AGENT LEFT (DRAFT — awaiting final content from founder) -->
+    <!-- AGENT LEFT — landing + scarcity (live Founding counter) -->
     <section class="left-pane hidden" id="leftAgent">
       <div class="landing-eyebrow">MATE PRO · FOR LICENSED AGENTS</div>
 
       <h1 class="product-mark">MATE PRO</h1>
 
-      <p class="landing-lede">
+      <p class="landing-lede" style="margin-bottom: 18px;">
         The race engineer for <em>your roster.</em>
       </p>
 
-      <div class="quote-block">
-        <p class="quote-text">
-          Every contract is a moment. <span class="accent">MATE Pro is the room you walk into before it.</span>
-        </p>
-        <span class="quote-attribution">FOR THE AGENT WHO PREPARES</span>
-      </div>
+      <div class="compliance-chip">FIFA-Licensed Agents Only · Verification at Registration</div>
 
-      <p class="body-paragraph">
-        <strong>Built for FFAR-licensed football agents.</strong> One thread per client. Legal, coach, analyst, concierge — calibrated for representation, not for the player you negotiate against. Read videos, draft commission clauses, brief the next trial. Race engineer voice, peer to peer.
+      <p class="body-paragraph" style="margin-bottom: 16px;">
+        Legal, Coach, Analyst and Concierge sub-agents — one chat for every client conversation.
       </p>
 
-      <div class="agents">
-        <span class="agent-badge"><span class="agent-emoji">⚖️</span> Legal</span>
-        <span class="agent-badge"><span class="agent-emoji">🏋️</span> Coach</span>
-        <span class="agent-badge"><span class="agent-emoji">📊</span> Analyst</span>
-        <span class="agent-badge"><span class="agent-emoji">🏠</span> Concierge</span>
+      <div class="gain-cards">
+        <div class="gain-card">
+          <div class="gain-card-title">Speed</div>
+          <div class="gain-card-body">A clause draft in ninety seconds. A five-club shortlist in three minutes. A scout\'s read on a clip in under five. The work you\'d do in a Tuesday afternoon, before lunch.</div>
+        </div>
+        <div class="gain-card">
+          <div class="gain-card-title">Reach</div>
+          <div class="gain-card-body">The legal precision of a sports lawyer. The tactical eye of a Cat 1 scout. The market read of a senior analyst. The logistics of a relocation manager. Wherever you are. Whatever your client just sent you.</div>
+        </div>
+        <div class="gain-card">
+          <div class="gain-card-title">Memory</div>
+          <div class="gain-card-body">Every conversation lives beside the client it\'s about. Open a client. Pick up where you left off. Six months later. Two countries away. The thread does not break.</div>
+        </div>
+      </div>
+
+      <div class="founding-block">
+        <div class="founding-eyebrow">Access</div>
+        <h2 class="founding-title">The Founding <em>100.</em></h2>
+        <p class="founding-body">
+          The first hundred FFAR-licensed agents we admit lock in a <strong>lifetime price of €149 per month</strong> — fifty percent below the standard Pro tier.
+        </p>
+        <p class="founding-body">
+          Direct founder access. Early roadmap input. A permanent place in the platform\'s history.
+        </p>
+        <div class="founding-dates">Open until 31 December 2026, or until the cohort is full.</div>
+        <div class="founding-counter">
+          <span class="founding-counter-num" id="foundingNum">—</span>
+          <span class="founding-counter-of">of 100 admitted</span>
+          <span class="founding-remain" id="foundingRemain"></span>
+        </div>
       </div>
     </section>
 
@@ -1175,6 +1333,26 @@
     }
     wireConsent('pr_consent', 'playerRegisterBtn');
     wireConsent('ar_consent', 'agentStep1Btn');
+
+    // ── Live Founding 100 counter (anon-readable per RLS) ──────────────
+    (async function loadFoundingCounter() {
+      try {
+        const { data, error } = await sb
+          .from('mate_pro_founding_counter')
+          .select('next_number, cap')
+          .eq('id', 1)
+          .single();
+        if (error || !data) return;
+        const admitted = Math.max(0, data.next_number - 1);
+        const remain = Math.max(0, data.cap - admitted);
+        const numEl = document.getElementById('foundingNum');
+        const remEl = document.getElementById('foundingRemain');
+        if (numEl) numEl.textContent = String(admitted);
+        if (remEl) remEl.textContent = remain > 0
+          ? remain + ' places remain'
+          : 'cohort full';
+      } catch (_) { /* silent — placeholder em-dash stays */ }
+    })();
   </script>
 </body>
 </html>
