@@ -448,15 +448,16 @@
       50%      { opacity: 0.25; }
     }
 
-    /* MATE / MATE PRO display mark */
+    /* MATE / MATE PRO display mark — one line, never wraps */
     .product-mark {
       font-family: var(--font-d);
       font-weight: 400;
-      font-size: clamp(72px, 11vw, 156px);
+      font-size: clamp(56px, 8.5vw, 124px);
       line-height: 0.92;
       letter-spacing: -0.025em;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
       color: var(--white);
+      white-space: nowrap;
     }
 
     /* Lede paragraph under mark */
@@ -552,7 +553,7 @@
 
     /* Mobile tightens landing typography */
     @media (max-width: 960px) {
-      .product-mark { font-size: clamp(64px, 16vw, 96px); margin-bottom: 28px; }
+      .product-mark { font-size: clamp(48px, 13vw, 84px); margin-bottom: 22px; }
       .landing-lede { margin-bottom: 48px; font-size: 17px; }
       .quote-text { font-size: clamp(28px, 7vw, 40px); }
     }
@@ -651,30 +652,30 @@
     .gain-cards {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 40px 0 56px;
-      max-width: 620px;
+      gap: 10px;
+      margin: 28px 0 36px;
+      max-width: 720px;
     }
     .gain-card {
       background: rgba(255,255,255,0.05);
       border: 0.5px solid var(--border);
-      border-radius: 18px;
-      padding: 22px 20px 24px;
+      border-radius: 16px;
+      padding: 16px 16px 18px;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
     }
     .gain-card-title {
       font-family: var(--font-d);
       font-weight: 400;
-      font-size: 20px;
-      line-height: 1.1;
+      font-size: 18px;
+      line-height: 1.05;
       letter-spacing: -0.01em;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       color: var(--white);
     }
     .gain-card-body {
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: 12.5px;
+      line-height: 1.42;
       color: var(--t2);
       font-weight: 300;
     }
@@ -682,82 +683,82 @@
       .gain-cards { grid-template-columns: 1fr; gap: 10px; }
     }
 
-    /* ── FOUNDING 100 BLOCK ───────────────────────── */
+    /* ── FOUNDING 100 BLOCK (compact) ─────────────── */
     .founding-block {
-      max-width: 620px;
-      padding: 32px 28px 30px;
+      max-width: 720px;
+      padding: 22px 22px 20px;
       background: rgba(0,0,0,0.18);
       border: 0.5px solid var(--border-mid);
-      border-radius: 22px;
+      border-radius: 18px;
     }
     .founding-eyebrow {
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.28em;
       text-transform: uppercase;
       color: var(--t3);
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
     .founding-eyebrow::before {
       content: '';
-      width: 28px;
+      width: 22px;
       height: 0.5px;
       background: var(--border-strong);
     }
     .founding-title {
       font-family: var(--font-d);
       font-weight: 400;
-      font-size: 36px;
+      font-size: 26px;
       line-height: 1.05;
       letter-spacing: -0.018em;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
       color: var(--white);
     }
     .founding-body {
-      font-size: 14px;
-      line-height: 1.65;
+      font-size: 13px;
+      line-height: 1.5;
       color: var(--t2);
       font-weight: 300;
       margin-bottom: 14px;
-      max-width: 540px;
+      max-width: 620px;
     }
     .founding-body strong { color: var(--white); font-weight: 500; }
-    .founding-dates {
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      color: var(--t4);
-      margin-top: 20px;
-      margin-bottom: 24px;
-    }
     .founding-counter {
       display: flex;
       align-items: baseline;
-      gap: 14px;
-      padding-top: 20px;
+      gap: 12px;
+      padding-top: 14px;
       border-top: 0.5px solid var(--border);
     }
     .founding-counter-num {
       font-family: var(--font-d);
       font-weight: 400;
-      font-size: 64px;
+      font-size: 42px;
       line-height: 1;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.022em;
       color: var(--white);
     }
     .founding-counter-of {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--t3);
       letter-spacing: 0.04em;
     }
     .founding-remain {
       margin-left: auto;
-      font-size: 12px;
+      font-size: 11px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--accent-green);
       font-weight: 500;
+    }
+    .founding-dates {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--t4);
+      margin-top: 8px;
+      text-align: right;
     }
 
   </style>
@@ -839,17 +840,14 @@
         <div class="founding-eyebrow">Access</div>
         <h2 class="founding-title">The Founding <em>100.</em></h2>
         <p class="founding-body">
-          The first hundred FFAR-licensed agents we admit lock in a <strong>lifetime price of €149 per month</strong> — fifty percent below the standard Pro tier.
+          First 100 FFAR-licensed agents lock <strong>€149/month for life</strong> — 50% below standard. Founder access, early roadmap input, a permanent place in the platform\'s history.
         </p>
-        <p class="founding-body">
-          Direct founder access. Early roadmap input. A permanent place in the platform\'s history.
-        </p>
-        <div class="founding-dates">Open until 31 December 2026, or until the cohort is full.</div>
         <div class="founding-counter">
           <span class="founding-counter-num" id="foundingNum">—</span>
           <span class="founding-counter-of">of 100 admitted</span>
           <span class="founding-remain" id="foundingRemain"></span>
         </div>
+        <div class="founding-dates">Open until 31 December 2026, or until the cohort is full.</div>
       </div>
     </section>
 
