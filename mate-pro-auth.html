@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Sign in or request access to MATE — Player or Agent." />
+  <meta name="theme-color" content="#794DC6" />
+  <title>Sign in — MATE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --purple:        #794DC6;
+      --purple-dk:     #6b42b5;
+      --purple-lt:     #7a50cc;
+      --ink:           #1a0f2e;
+      --white:         #ffffff;
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.35);
+      --glass-1: rgba(255,255,255,0.05);
+      --glass-2: rgba(255,255,255,0.08);
+      --glass-3: rgba(255,255,255,0.12);
+      --border:        rgba(255,255,255,0.10);
+      --border-mid:    rgba(255,255,255,0.20);
+      --border-strong: rgba(255,255,255,0.35);
+      --accent-red:    #ff9898;
+      --accent-green:  #6dffb3;
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease:   cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { min-height: 100vh; }
+
+    body {
+      background: var(--purple);
+      color: var(--t1);
+      font-family: var(--font-b);
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    em { font-style: italic; color: rgba(255,255,255,0.45); font-family: var(--font-d); font-weight: 400; }
+
+    a { color: var(--t1); text-decoration: none; }
+    a:hover { opacity: 0.8; }
+
+    /* ── TOP NAV (Inside Shell) ───────────────────── */
+    .topnav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 40px;
+      background: rgba(121,77,198,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .nav-brand {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t1);
+    }
+    .nav-brand strong { font-weight: 500; }
+    .nav-brand span { color: var(--t3); font-weight: 400; }
+    .nav-back {
+      font-size: 12px;
+      color: var(--t3);
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--t1); }
+
+    /* ── PAGE LAYOUT ──────────────────────────────── */
+    .page {
+      min-height: calc(100vh - 65px);
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      gap: 80px;
+      padding: 80px 56px 64px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .narrative {
+      max-width: 540px;
+      padding-top: 24px;
+    }
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--t3);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 0.5px;
+      background: var(--border-strong);
+    }
+    .narrative h1 {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: clamp(40px, 5vw, 64px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+    .narrative .lede {
+      font-size: 17px;
+      color: var(--t2);
+      max-width: 460px;
+    }
+    .narrative .lede em { color: var(--t1); opacity: 0.5; }
+
+    .narrative-foot {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 0.5px solid var(--border);
+      font-size: 12px;
+      color: var(--t4);
+      letter-spacing: 0.06em;
+    }
+    .narrative-foot strong { color: var(--t3); font-weight: 400; }
+
+    /* ── CARD (action panel) ──────────────────────── */
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 24px;
+      padding: 36px 32px 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: sticky;
+      top: 105px;
+      align-self: start;
+    }
+
+    /* Role toggle — top-level Player|Agent */
+    .role-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(0,0,0,0.18);
+      border-radius: 100px;
+      padding: 4px;
+      position: relative;
+      margin-bottom: 22px;
+    }
+    .role-btn {
+      background: transparent;
+      border: none;
+      padding: 12px 16px;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--t3);
+      cursor: pointer;
+      transition: color 0.25s var(--ease);
+      position: relative;
+      z-index: 2;
+    }
+    .role-btn.active { color: var(--purple); }
+    .role-indicator {
+      position: absolute;
+      top: 4px; bottom: 4px; left: 4px;
+      width: calc(50% - 4px);
+      background: var(--white);
+      border-radius: 100px;
+      transition: transform 0.35s var(--ease);
+      z-index: 1;
+    }
+    .role-indicator.agent { transform: translateX(100%); }
+
+    /* Mode toggle — Sign in | Request access */
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px;
+      padding: 4px;
+      position: relative;
+      margin-bottom: 28px;
+    }
+    .mode-btn {
+      background: transparent;
+      border: none;
+      padding: 10px 14px;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--t2);
+      cursor: pointer;
+      transition: color 0.25s var(--ease);
+      position: relative;
+      z-index: 2;
+    }
+    .mode-btn.active { color: var(--purple); }
+    .mode-indicator {
+      position: absolute;
+      top: 4px; bottom: 4px; left: 4px;
+      width: calc(50% - 4px);
+      background: var(--white);
+      border-radius: 100px;
+      transition: transform 0.35s var(--ease);
+      z-index: 1;
+    }
+    .mode-indicator.register { transform: translateX(100%); }
+
+    /* Subhead inside card (changes per mode) */
+    .form-subhead {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 26px;
+      letter-spacing: -0.012em;
+      margin-bottom: 6px;
+    }
+    .form-sub {
+      font-size: 13px;
+      color: var(--t3);
+      margin-bottom: 22px;
+    }
+
+    /* Inputs */
+    .field { margin-bottom: 14px; }
+    .field-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 6px;
+      font-weight: 400;
+    }
+    input, select {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: var(--font-b);
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder { color: rgba(255,255,255,0.30); }
+    input:focus, select:focus {
+      border-color: var(--border-strong);
+      background: rgba(255,255,255,0.10);
+    }
+    select {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23ffffff88' d='M1 1l5 5 5-5'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+    .helper {
+      font-size: 11px;
+      color: var(--t4);
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* Primary CTA */
+    .btn-primary {
+      width: 100%;
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 16px 24px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { opacity: 0.92; transform: scale(1.005); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      width: 100%;
+      background: transparent;
+      color: var(--t2);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 13px 24px;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 10px;
+    }
+    .btn-ghost:hover { border-color: var(--border-strong); color: var(--t1); }
+
+    .link-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--t3);
+    }
+    .link-row a { color: var(--t2); }
+
+    .form-msg {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      display: none;
+    }
+    .form-msg.error {
+      display: block;
+      background: rgba(255,152,152,0.08);
+      border: 0.5px solid rgba(255,152,152,0.30);
+      color: var(--accent-red);
+    }
+    .form-msg.success {
+      display: block;
+      background: rgba(109,255,179,0.06);
+      border: 0.5px solid rgba(109,255,179,0.28);
+      color: var(--accent-green);
+    }
+    .form-msg.busy {
+      display: block;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      color: var(--t2);
+    }
+
+    /* Fine print under CTA */
+    .fineprint {
+      margin-top: 18px;
+      font-size: 11px;
+      color: var(--t4);
+      text-align: center;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+    }
+    .fineprint a { color: var(--t3); border-bottom: 0.5px dotted var(--border-mid); }
+
+    /* Step indicator (Agent register two-step) */
+    .step-dots {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .step-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.20);
+      transition: background 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+    .step-dot.active { background: var(--white); transform: scale(1.3); }
+    .step-dot.done { background: var(--accent-green); }
+
+    /* Form transitions */
+    .form-pane { animation: fadeUp 0.45s var(--ease) both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MOBILE ───────────────────────────────────── */
+    @media (max-width: 960px) {
+      .topnav { padding: 16px 20px; }
+      .page {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        padding: 36px 20px 48px;
+      }
+      .narrative { padding-top: 0; max-width: 100%; }
+      .narrative h1 { font-size: 36px; }
+      .narrative .lede { font-size: 15px; }
+      .card { position: static; padding: 28px 22px 24px; }
+      .narrative-foot { margin-top: 32px; }
+    }
+    @media (max-width: 600px) {
+      .narrative h1 { font-size: 30px; }
+      .narrative .lede { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav">
+    <a href="https://talent-mates.com" class="nav-brand">
+      <strong>Talent</strong> <span>Mates</span>
+    </a>
+    <a href="https://talent-mates.com" class="nav-back">← talent-mates.com</a>
+  </nav>
+
+  <main class="page">
+
+    <!-- ── NARRATIVE (left) ────────────────────────── -->
+    <section class="narrative">
+      <div class="eyebrow" id="eyebrow">The room</div>
+      <h1 id="narrativeTitle">A quiet edge, <em>built for the work.</em></h1>
+      <p class="lede" id="narrativeLede">
+        MATE is the race engineer behind professional football careers. Sign in to continue, or request access to join.
+      </p>
+      <div class="narrative-foot">
+        <strong>Two roles, one platform.</strong><br/>
+        Players use MATE for personal AI agents. Licensed football agents use MATE Pro to manage clients. Pick your role on the right.
+      </div>
+    </section>
+
+    <!-- ── CARD (right) ───────────────────────────── -->
+    <section class="card">
+
+      <!-- Top-level role toggle -->
+      <div class="role-toggle" role="tablist" aria-label="Role">
+        <div class="role-indicator" id="roleIndicator"></div>
+        <button class="role-btn active" id="rolePlayerBtn" type="button" onclick="setRole('player')">Player</button>
+        <button class="role-btn"        id="roleAgentBtn"  type="button" onclick="setRole('agent')">Agent</button>
+      </div>
+
+      <!-- Mode toggle (Sign in | Request access) -->
+      <div class="mode-toggle" role="tablist" aria-label="Mode">
+        <div class="mode-indicator" id="modeIndicator"></div>
+        <button class="mode-btn active" id="modeSignInBtn"   type="button" onclick="setMode('signin')">Sign in</button>
+        <button class="mode-btn"        id="modeRegisterBtn" type="button" onclick="setMode('register')">Request access</button>
+      </div>
+
+      <!-- ── PANE: Sign in (any role) ─────────────── -->
+      <div id="paneSignIn" class="form-pane">
+        <div class="form-subhead" id="signinTitle">Welcome back.</div>
+        <div class="form-sub" id="signinSub">Sign in to your MATE account.</div>
+
+        <div class="field">
+          <label class="field-label" for="si_email">Email</label>
+          <input type="email" id="si_email" autocomplete="email" placeholder="you@club.com" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="si_password">Password</label>
+          <input type="password" id="si_password" autocomplete="current-password" placeholder="••••••••" />
+        </div>
+
+        <button class="btn-primary" type="button" id="signinBtn" onclick="doSignIn()">Sign in</button>
+        <button class="btn-ghost"   type="button" onclick="sendMagicLink()">Send me a magic link instead</button>
+
+        <div class="link-row">
+          <a href="#" onclick="forgotPassword(event)">Forgot password?</a>
+          <a href="#" onclick="setMode('register')">Need access?</a>
+        </div>
+
+        <div id="signinMsg" class="form-msg"></div>
+      </div>
+
+      <!-- ── PANE: Player register (single step) ──── -->
+      <div id="panePlayerRegister" class="form-pane" style="display:none">
+        <div class="form-subhead">Create your <em>Player account</em>.</div>
+        <div class="form-sub">Two fields. You'll be in the dashboard in seconds.</div>
+
+        <div class="field">
+          <label class="field-label" for="pr_email">Email</label>
+          <input type="email" id="pr_email" autocomplete="email" placeholder="you@club.com" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="pr_password">Password</label>
+          <input type="password" id="pr_password" autocomplete="new-password" placeholder="At least 8 characters" />
+          <div class="helper">Minimum 8 characters.</div>
+        </div>
+
+        <button class="btn-primary" type="button" id="playerRegisterBtn" onclick="doPlayerRegister()">Create account</button>
+
+        <div class="fineprint">By creating an account you agree to our <a href="https://talent-mates.com/legal/terms">Terms</a> and <a href="https://talent-mates.com/legal/privacy">Privacy Policy</a>.</div>
+
+        <div id="playerRegisterMsg" class="form-msg"></div>
+      </div>
+
+      <!-- ── PANE: Agent register step 1 (email + pw) ─ -->
+      <div id="paneAgentStep1" class="form-pane" style="display:none">
+        <div class="step-dots">
+          <div class="step-dot active" id="stepDot1"></div>
+          <div class="step-dot"        id="stepDot2"></div>
+        </div>
+        <div class="form-subhead">Request <em>Agent access</em>.</div>
+        <div class="form-sub">Step 1 of 2 — set your sign-in credentials.</div>
+
+        <div class="field">
+          <label class="field-label" for="ar_email">Email</label>
+          <input type="email" id="ar_email" autocomplete="email" placeholder="you@agency.com" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="ar_password">Password</label>
+          <input type="password" id="ar_password" autocomplete="new-password" placeholder="At least 8 characters" />
+          <div class="helper">Minimum 8 characters.</div>
+        </div>
+
+        <button class="btn-primary" type="button" id="agentStep1Btn" onclick="doAgentStep1()">Continue</button>
+
+        <div class="fineprint">By requesting access you agree to our <a href="https://talent-mates.com/legal/terms">Terms</a> and <a href="https://talent-mates.com/legal/privacy">Privacy Policy</a>.</div>
+
+        <div id="agentStep1Msg" class="form-msg"></div>
+      </div>
+
+      <!-- ── PANE: Agent register step 2 (profile) ──── -->
+      <div id="paneAgentStep2" class="form-pane" style="display:none">
+        <div class="step-dots">
+          <div class="step-dot done"   id="stepDot1b"></div>
+          <div class="step-dot active" id="stepDot2b"></div>
+        </div>
+        <div class="form-subhead">Complete your <em>agent profile</em>.</div>
+        <div class="form-sub">FFAR licence is required — manual verification follows.</div>
+
+        <div class="row-2">
+          <div class="field">
+            <label class="field-label" for="ar_first">First name</label>
+            <input type="text" id="ar_first" autocomplete="given-name" placeholder="e.g. Vitalii" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="ar_last">Last name</label>
+            <input type="text" id="ar_last" autocomplete="family-name" placeholder="e.g. Lomov" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label class="field-label" for="ar_licence">FFAR licence number</label>
+            <input type="text" id="ar_licence" placeholder="e.g. FFAR-2024-UA-0847" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="ar_country">Country of licence</label>
+            <select id="ar_country">
+              <option value="">— Select country —</option>
+              <!-- populated from FIFA list at init -->
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-primary" type="button" id="agentStep2Btn" onclick="doAgentStep2()">Open my dashboard</button>
+
+        <div class="fineprint">Your FFAR licence is verified server-side after registration. You'll see ● Pending verification on the dashboard until then.</div>
+
+        <div id="agentStep2Msg" class="form-msg"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════════════
+    // MATE auth — Inside Shell, two-role two-mode entry
+    // ════════════════════════════════════════════════════════════════════════
+
+    const SUPABASE_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+    const PLAYER_DASH   = 'mate-dashboard-v6.html';
+    const AGENT_DASH    = 'mate-pro-dashboard.html';
+    const COMPLETE_URL  = SUPABASE_URL + '/functions/v1/mate-pro-complete-profile';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // UI state
+    let role = 'player';
+    let mode = 'signin';
+
+    // ── INIT ────────────────────────────────────────────────────────────
+    (async function init() {
+      // Populate FIFA country dropdown (subset from server-side list)
+      await populateCountries();
+
+      // If already signed in, route based on whether they have an Agent row
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const { data: agent } = await sb
+          .from('mate_pro_agents')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        if (agent) { window.location.href = AGENT_DASH; return; }
+        // Logged-in user without agent row — could be Player OR mid-flow agent.
+        // Default to Player dashboard; agent can sign out + request access if needed.
+        // If URL has ?role=agent intent, jump to step 2 instead.
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('role') === 'agent' && params.get('step') === '2') {
+          setRole('agent'); setMode('register'); showAgentStep2();
+          return;
+        }
+        window.location.href = PLAYER_DASH;
+        return;
+      }
+
+      // Read intent from URL: ?role=agent or ?mode=register
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('role') === 'agent') setRole('agent');
+      if (params.get('mode') === 'register') setMode('register');
+    })();
+
+    async function populateCountries() {
+      // Inline a copy of the 211-list to avoid an extra fetch + dependency
+      // on a public endpoint. Must stay in sync with
+      // supabase/functions/_shared/fifa-countries.ts.
+      const FIFA = ["Afghanistan","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antigua and Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei Darussalam","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central African Republic","Chad","Chile","China PR","Chinese Taipei","Colombia","Comoros","Congo","Cook Islands","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Curaçao","Cyprus","Czech Republic","Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","England","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Faroe Islands","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Grenada","Guam","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kosovo","Kuwait","Kyrgyz Republic","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Northern Ireland","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Republic of Ireland","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","São Tomé and Príncipe","Saudi Arabia","Scotland","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Sint Maarten","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Tahiti","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Turks and Caicos Islands","Uganda","Ukraine","United Arab Emirates","United States","Uruguay","US Virgin Islands","Uzbekistan","Vanuatu","Venezuela","Vietnam","Wales","Yemen","Zambia","Zimbabwe"];
+      const sel = document.getElementById('ar_country');
+      FIFA.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name; opt.textContent = name;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ── ROLE / MODE TOGGLES ─────────────────────────────────────────────
+    function setRole(r) {
+      role = r;
+      document.getElementById('rolePlayerBtn').classList.toggle('active', r === 'player');
+      document.getElementById('roleAgentBtn').classList.toggle('active', r === 'agent');
+      document.getElementById('roleIndicator').classList.toggle('agent', r === 'agent');
+      refreshPanes();
+      refreshNarrative();
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('modeSignInBtn').classList.toggle('active', m === 'signin');
+      document.getElementById('modeRegisterBtn').classList.toggle('active', m === 'register');
+      document.getElementById('modeIndicator').classList.toggle('register', m === 'register');
+      refreshPanes();
+      refreshNarrative();
+      clearMsg();
+    }
+
+    function refreshPanes() {
+      const show = id => document.getElementById(id).style.display = '';
+      const hide = id => document.getElementById(id).style.display = 'none';
+      hide('paneSignIn'); hide('panePlayerRegister'); hide('paneAgentStep1'); hide('paneAgentStep2');
+
+      if (mode === 'signin') {
+        show('paneSignIn');
+        document.getElementById('signinTitle').innerHTML =
+          role === 'agent' ? 'Welcome back, <em>agent</em>.' : 'Welcome back.';
+        document.getElementById('signinSub').textContent =
+          role === 'agent'
+            ? 'Sign in to MATE Pro to continue with your clients.'
+            : 'Sign in to MATE to continue.';
+      } else {
+        if (role === 'player') show('panePlayerRegister');
+        else show('paneAgentStep1');
+      }
+    }
+
+    function refreshNarrative() {
+      const e = document.getElementById('eyebrow');
+      const t = document.getElementById('narrativeTitle');
+      const l = document.getElementById('narrativeLede');
+      if (role === 'agent') {
+        e.textContent = 'MATE Pro';
+        t.innerHTML = 'The race engineer for <em>your roster.</em>';
+        l.textContent = 'FFAR-licensed agents only. Legal, Coach, Analyst and Concierge sub-agents — one chat for every client conversation.';
+      } else {
+        e.textContent = 'MATE';
+        t.innerHTML = 'A quiet edge, <em>built for the work.</em>';
+        l.textContent = 'The personal AI race engineer for footballers. Sign in to continue, or request access to join.';
+      }
+    }
+
+    function clearMsg() {
+      ['signinMsg','playerRegisterMsg','agentStep1Msg','agentStep2Msg'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.className = 'form-msg'; el.textContent = ''; }
+      });
+    }
+
+    // ── SIGN IN (Player or Agent) ───────────────────────────────────────
+    async function doSignIn() {
+      const msg = document.getElementById('signinMsg');
+      const btn = document.getElementById('signinBtn');
+      const email = document.getElementById('si_email').value.trim().toLowerCase();
+      const password = document.getElementById('si_password').value;
+      if (!email || !password) {
+        msg.className = 'form-msg error'; msg.textContent = 'Email and password required.';
+        return;
+      }
+      busy(msg, btn, 'Signing in…');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) { fail(msg, btn, error.message); return; }
+
+      // Branch by role choice
+      if (role === 'agent') {
+        // Verify agent has a mate_pro_agents row
+        const { data: agent } = await sb
+          .from('mate_pro_agents')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+        if (!agent) {
+          // Signed in but no agent profile — push to step 2
+          msg.className = 'form-msg busy';
+          msg.textContent = 'Account found but agent profile missing. Completing setup…';
+          setMode('register'); showAgentStep2();
+          btn.disabled = false;
+          return;
+        }
+        window.location.href = AGENT_DASH;
+      } else {
+        window.location.href = PLAYER_DASH;
+      }
+    }
+
+    async function sendMagicLink() {
+      const msg = document.getElementById('signinMsg');
+      const email = document.getElementById('si_email').value.trim().toLowerCase();
+      if (!email) {
+        msg.className = 'form-msg error'; msg.textContent = 'Enter your email above first.';
+        return;
+      }
+      msg.className = 'form-msg busy'; msg.textContent = 'Sending…';
+      const { error } = await sb.auth.signInWithOtp({ email });
+      if (error) { msg.className = 'form-msg error'; msg.textContent = error.message; return; }
+      msg.className = 'form-msg success';
+      msg.textContent = 'Check your inbox — link expires in 1 hour.';
+    }
+
+    async function forgotPassword(e) {
+      e.preventDefault();
+      const msg = document.getElementById('signinMsg');
+      const email = document.getElementById('si_email').value.trim().toLowerCase();
+      if (!email) {
+        msg.className = 'form-msg error'; msg.textContent = 'Enter your email above first.';
+        return;
+      }
+      msg.className = 'form-msg busy'; msg.textContent = 'Sending reset link…';
+      const { error } = await sb.auth.resetPasswordForEmail(email);
+      if (error) { msg.className = 'form-msg error'; msg.textContent = error.message; return; }
+      msg.className = 'form-msg success';
+      msg.textContent = 'Reset link sent. Check your inbox.';
+    }
+
+    // ── PLAYER REGISTER (one-step) ──────────────────────────────────────
+    async function doPlayerRegister() {
+      const msg = document.getElementById('playerRegisterMsg');
+      const btn = document.getElementById('playerRegisterBtn');
+      const email = document.getElementById('pr_email').value.trim().toLowerCase();
+      const password = document.getElementById('pr_password').value;
+      if (!validateEmail(email)) { fail(msg, btn, 'Valid email required.'); return; }
+      if (password.length < 8) { fail(msg, btn, 'Password must be at least 8 characters.'); return; }
+
+      busy(msg, btn, 'Creating account…');
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) { fail(msg, btn, error.message); return; }
+      if (!data.session) {
+        // Email confirmation required (project setting)
+        msg.className = 'form-msg success';
+        msg.textContent = 'Check your inbox to confirm your email, then sign in.';
+        btn.disabled = false;
+        return;
+      }
+      window.location.href = PLAYER_DASH;
+    }
+
+    // ── AGENT REGISTER — Step 1: email + password ───────────────────────
+    async function doAgentStep1() {
+      const msg = document.getElementById('agentStep1Msg');
+      const btn = document.getElementById('agentStep1Btn');
+      const email = document.getElementById('ar_email').value.trim().toLowerCase();
+      const password = document.getElementById('ar_password').value;
+      if (!validateEmail(email)) { fail(msg, btn, 'Valid email required.'); return; }
+      if (password.length < 8) { fail(msg, btn, 'Password must be at least 8 characters.'); return; }
+
+      busy(msg, btn, 'Creating account…');
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) {
+        if (/already registered|already.*been.*registered|email_exists/i.test(error.message)) {
+          // Account exists — try silent sign-in with the same credentials.
+          // If their password matches, we can recover and just proceed to step 2.
+          const { data: si, error: siErr } = await sb.auth.signInWithPassword({ email, password });
+          if (siErr) {
+            fail(msg, btn, 'This email is already registered. Sign in instead or use a different email.');
+            return;
+          }
+          // Check if they already have an agent row
+          const { data: existing } = await sb
+            .from('mate_pro_agents')
+            .select('id')
+            .eq('user_id', si.user.id)
+            .maybeSingle();
+          if (existing) { window.location.href = AGENT_DASH; return; }
+          showAgentStep2();
+          return;
+        }
+        fail(msg, btn, error.message); return;
+      }
+      if (!data.session) {
+        // Email confirmation required — pause flow
+        msg.className = 'form-msg success';
+        msg.textContent = 'Account created. Check your inbox to confirm, then sign in to finish.';
+        btn.disabled = false;
+        return;
+      }
+      // Session granted immediately — smooth transition to step 2
+      showAgentStep2();
+    }
+
+    function showAgentStep2() {
+      document.getElementById('paneAgentStep1').style.display = 'none';
+      document.getElementById('paneAgentStep2').style.display = '';
+      // Re-trigger animation
+      const pane = document.getElementById('paneAgentStep2');
+      pane.style.animation = 'none';
+      void pane.offsetHeight;
+      pane.style.animation = '';
+      setTimeout(() => document.getElementById('ar_first').focus(), 80);
+    }
+
+    // ── AGENT REGISTER — Step 2: profile (FFAR + name) ──────────────────
+    async function doAgentStep2() {
+      const msg = document.getElementById('agentStep2Msg');
+      const btn = document.getElementById('agentStep2Btn');
+      const first = document.getElementById('ar_first').value.trim();
+      const last  = document.getElementById('ar_last').value.trim();
+      const lic   = document.getElementById('ar_licence').value.trim();
+      const ctry  = document.getElementById('ar_country').value;
+
+      if (!first) { fail(msg, btn, 'First name required.'); return; }
+      if (!last)  { fail(msg, btn, 'Last name required.'); return; }
+      if (!lic)   { fail(msg, btn, 'FFAR licence number is required.'); return; }
+      if (!ctry)  { fail(msg, btn, 'Country of licence required.'); return; }
+
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        fail(msg, btn, 'Session expired. Please sign in again.');
+        setTimeout(() => { setMode('signin'); }, 1500);
+        return;
+      }
+
+      busy(msg, btn, 'Setting up your dashboard…');
+      const res = await fetch(COMPLETE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.access_token,
+          'apikey': SUPABASE_ANON,
+        },
+        body: JSON.stringify({
+          first_name: first, last_name: last,
+          ffar_licence: lic, ffar_country: ctry,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { fail(msg, btn, data.error || ('HTTP ' + res.status)); return; }
+
+      msg.className = 'form-msg success';
+      msg.textContent = data.is_founding
+        ? 'Welcome, Founding Agent #' + data.founding_number + '.'
+        : 'Welcome to MATE Pro.';
+
+      const qs = data.is_founding ? ('?founding=' + data.founding_number) : '';
+      setTimeout(() => { window.location.href = AGENT_DASH + qs; }, 800);
+    }
+
+    // ── helpers ─────────────────────────────────────────────────────────
+    function busy(msg, btn, label) {
+      btn.disabled = true;
+      msg.className = 'form-msg busy';
+      msg.textContent = label;
+    }
+    function fail(msg, btn, text) {
+      btn.disabled = false;
+      msg.className = 'form-msg error';
+      msg.textContent = text;
+    }
+    function validateEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
+  </script>
+</body>
+</html>
