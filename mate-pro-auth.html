@@ -417,6 +417,211 @@
       .narrative h1 { font-size: 30px; }
       .narrative .lede { font-size: 14px; }
     }
+
+    /* ── LEFT LANDING CONTENT (Player full from mate-auth.html, Agent placeholder) ── */
+    .left-pane { max-width: 640px; padding-top: 0; }
+    .left-pane.hidden { display: none; }
+
+    /* Pulse dot for the eyebrow (matches mate-auth.html landing rhythm) */
+    .landing-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--t3);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+    .landing-eyebrow::after {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--white);
+      opacity: 0.9;
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.9; }
+      50%      { opacity: 0.25; }
+    }
+
+    /* MATE / MATE PRO display mark */
+    .product-mark {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: clamp(72px, 11vw, 156px);
+      line-height: 0.92;
+      letter-spacing: -0.025em;
+      margin-bottom: 36px;
+      color: var(--white);
+    }
+
+    /* Lede paragraph under mark */
+    .landing-lede {
+      font-size: clamp(17px, 1.5vw, 21px);
+      line-height: 1.55;
+      color: var(--t2);
+      font-weight: 300;
+      max-width: 540px;
+      margin-bottom: 80px;
+    }
+    .landing-lede em { color: rgba(255,255,255,0.45); }
+
+    /* Pull quote */
+    .quote-block {
+      position: relative;
+      padding-left: 28px;
+      margin-bottom: 56px;
+      max-width: 600px;
+    }
+    .quote-block::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 32px;
+      width: 2px;
+      background: rgba(255,255,255,0.30);
+    }
+    .quote-text {
+      font-family: var(--font-d);
+      font-style: italic;
+      font-size: clamp(34px, 4.5vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -0.015em;
+      color: var(--white);
+      margin-bottom: 28px;
+    }
+    .quote-text .accent { color: rgba(255,255,255,0.45); }
+    .quote-attribution {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--t3);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .quote-attribution::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 0.5px;
+      background: rgba(255,255,255,0.30);
+    }
+
+    /* Body paragraph under quote */
+    .body-paragraph {
+      font-size: 16px;
+      line-height: 1.72;
+      color: var(--t2);
+      font-weight: 300;
+      max-width: 580px;
+      margin-bottom: 48px;
+    }
+    .body-paragraph strong { color: var(--white); font-weight: 500; }
+
+    /* Agent badges row */
+    .agents {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 600px;
+    }
+    .agent-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 10px 18px 10px 14px;
+      font-size: 13px;
+      color: var(--t2);
+      font-weight: 400;
+      transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
+    }
+    .agent-badge:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: var(--border-strong);
+    }
+    .agent-emoji { font-size: 15px; line-height: 1; }
+
+    /* Mobile tightens landing typography */
+    @media (max-width: 960px) {
+      .product-mark { font-size: clamp(64px, 16vw, 96px); margin-bottom: 28px; }
+      .landing-lede { margin-bottom: 48px; font-size: 17px; }
+      .quote-text { font-size: clamp(28px, 7vw, 40px); }
+    }
+
+    /* ── CONSENT CHECKBOX (Terms + Privacy) ─────── */
+    .consent {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 4px;
+      margin-bottom: 14px;
+      padding: 0 2px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .consent-input {
+      position: absolute;
+      opacity: 0;
+      width: 0; height: 0;
+      pointer-events: none;
+    }
+    .consent-box {
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      border-radius: 5px;
+      border: 0.5px solid var(--border-strong);
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+      margin-top: 2px;
+    }
+    .consent-box svg {
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+    }
+    .consent:hover .consent-box {
+      border-color: var(--white);
+      background: rgba(255,255,255,0.10);
+    }
+    .consent-input:checked + .consent-box {
+      background: var(--white);
+      border-color: var(--white);
+    }
+    .consent-input:checked + .consent-box svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .consent-text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--t2);
+      font-weight: 300;
+    }
+    .consent-text a {
+      color: var(--white);
+      text-decoration: underline;
+      text-decoration-color: rgba(255,255,255,0.30);
+      text-underline-offset: 3px;
+    }
+    .btn-primary.is-disabled,
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
   </style>
 </head>
 <body>
@@ -430,16 +635,63 @@
 
   <main class="page">
 
-    <!-- ── NARRATIVE (left) ────────────────────────── -->
-    <section class="narrative">
-      <div class="eyebrow" id="eyebrow">The room</div>
-      <h1 id="narrativeTitle">A quiet edge, <em>built for the work.</em></h1>
-      <p class="lede" id="narrativeLede">
-        MATE is the race engineer behind professional football careers. Sign in to continue, or request access to join.
+    <!-- ── LEFT — landing content (Player full, Agent placeholder) ─────── -->
+
+    <!-- PLAYER LEFT (1:1 with mate-auth.html landing) -->
+    <section class="left-pane" id="leftPlayer">
+      <div class="landing-eyebrow">TALENT MATES AI LAB · IN PRE-SEASON</div>
+
+      <h1 class="product-mark">MATE AI</h1>
+
+      <p class="landing-lede">
+        The Race Engineer for the pathway. <em>Your edge.</em>
       </p>
-      <div class="narrative-foot">
-        <strong>Two roles, one platform.</strong><br/>
-        Players use MATE for personal AI agents. Licensed football agents use MATE Pro to manage clients. Pick your role on the right.
+
+      <div class="quote-block">
+        <p class="quote-text">
+          I belong to the warrior in whom the ancient ways are <span class="accent">united with the new.</span>
+        </p>
+        <span class="quote-attribution">A NOTE TO THE WARRIOR</span>
+      </div>
+
+      <p class="body-paragraph">
+        <strong>Four agents. One race engineer.</strong> Legal, coach, analyst, concierge — always on, fluent in football, calm under pressure. The voice in the ear before every contract, every trial, every decision that defines a season. MATE doesn\'t play. MATE prepares the ones who do.
+      </p>
+
+      <div class="agents">
+        <span class="agent-badge"><span class="agent-emoji">⚖️</span> Legal</span>
+        <span class="agent-badge"><span class="agent-emoji">🏋️</span> Coach</span>
+        <span class="agent-badge"><span class="agent-emoji">📊</span> Analyst</span>
+        <span class="agent-badge"><span class="agent-emoji">🏠</span> Concierge</span>
+      </div>
+    </section>
+
+    <!-- AGENT LEFT (DRAFT — awaiting final content from founder) -->
+    <section class="left-pane hidden" id="leftAgent">
+      <div class="landing-eyebrow">MATE PRO · FOR LICENSED AGENTS</div>
+
+      <h1 class="product-mark">MATE PRO</h1>
+
+      <p class="landing-lede">
+        The race engineer for <em>your roster.</em>
+      </p>
+
+      <div class="quote-block">
+        <p class="quote-text">
+          Every contract is a moment. <span class="accent">MATE Pro is the room you walk into before it.</span>
+        </p>
+        <span class="quote-attribution">FOR THE AGENT WHO PREPARES</span>
+      </div>
+
+      <p class="body-paragraph">
+        <strong>Built for FFAR-licensed football agents.</strong> One thread per client. Legal, coach, analyst, concierge — calibrated for representation, not for the player you negotiate against. Read videos, draft commission clauses, brief the next trial. Race engineer voice, peer to peer.
+      </p>
+
+      <div class="agents">
+        <span class="agent-badge"><span class="agent-emoji">⚖️</span> Legal</span>
+        <span class="agent-badge"><span class="agent-emoji">🏋️</span> Coach</span>
+        <span class="agent-badge"><span class="agent-emoji">📊</span> Analyst</span>
+        <span class="agent-badge"><span class="agent-emoji">🏠</span> Concierge</span>
       </div>
     </section>
 
@@ -500,9 +752,20 @@
           <div class="helper">Minimum 8 characters.</div>
         </div>
 
-        <button class="btn-primary" type="button" id="playerRegisterBtn" onclick="doPlayerRegister()">Create account</button>
+        <label class="consent" for="pr_consent">
+          <input type="checkbox" id="pr_consent" class="consent-input" />
+          <span class="consent-box" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7.5l3.2 3L12 4" stroke="#794DC6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="consent-text">
+            I accept the Talent Mates <a href="https://talent-mates.com/legal/terms" target="_blank" rel="noopener">Terms</a> and <a href="https://talent-mates.com/legal/privacy" target="_blank" rel="noopener">Privacy</a>.
+          </span>
+        </label>
 
-        <div class="fineprint">By creating an account you agree to our <a href="https://talent-mates.com/legal/terms">Terms</a> and <a href="https://talent-mates.com/legal/privacy">Privacy Policy</a>.</div>
+        <button class="btn-primary is-disabled" type="button" id="playerRegisterBtn" onclick="doPlayerRegister()" disabled>Create account</button>
+
 
         <div id="playerRegisterMsg" class="form-msg"></div>
       </div>
@@ -526,9 +789,20 @@
           <div class="helper">Minimum 8 characters.</div>
         </div>
 
-        <button class="btn-primary" type="button" id="agentStep1Btn" onclick="doAgentStep1()">Continue</button>
+        <label class="consent" for="ar_consent">
+          <input type="checkbox" id="ar_consent" class="consent-input" />
+          <span class="consent-box" aria-hidden="true">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7.5l3.2 3L12 4" stroke="#794DC6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="consent-text">
+            I accept the Talent Mates <a href="https://talent-mates.com/legal/terms" target="_blank" rel="noopener">Terms</a> and <a href="https://talent-mates.com/legal/privacy" target="_blank" rel="noopener">Privacy</a>.
+          </span>
+        </label>
 
-        <div class="fineprint">By requesting access you agree to our <a href="https://talent-mates.com/legal/terms">Terms</a> and <a href="https://talent-mates.com/legal/privacy">Privacy Policy</a>.</div>
+        <button class="btn-primary is-disabled" type="button" id="agentStep1Btn" onclick="doAgentStep1()" disabled>Continue</button>
+
 
         <div id="agentStep1Msg" class="form-msg"></div>
       </div>
@@ -646,8 +920,10 @@
       document.getElementById('rolePlayerBtn').classList.toggle('active', r === 'player');
       document.getElementById('roleAgentBtn').classList.toggle('active', r === 'agent');
       document.getElementById('roleIndicator').classList.toggle('agent', r === 'agent');
+      // Toggle left landing panes
+      document.getElementById('leftPlayer').classList.toggle('hidden', r !== 'player');
+      document.getElementById('leftAgent').classList.toggle('hidden',  r !== 'agent');
       refreshPanes();
-      refreshNarrative();
     }
 
     function setMode(m) {
@@ -656,7 +932,6 @@
       document.getElementById('modeRegisterBtn').classList.toggle('active', m === 'register');
       document.getElementById('modeIndicator').classList.toggle('register', m === 'register');
       refreshPanes();
-      refreshNarrative();
       clearMsg();
     }
 
@@ -676,21 +951,6 @@
       } else {
         if (role === 'player') show('panePlayerRegister');
         else show('paneAgentStep1');
-      }
-    }
-
-    function refreshNarrative() {
-      const e = document.getElementById('eyebrow');
-      const t = document.getElementById('narrativeTitle');
-      const l = document.getElementById('narrativeLede');
-      if (role === 'agent') {
-        e.textContent = 'MATE Pro';
-        t.innerHTML = 'The race engineer for <em>your roster.</em>';
-        l.textContent = 'FFAR-licensed agents only. Legal, Coach, Analyst and Concierge sub-agents — one chat for every client conversation.';
-      } else {
-        e.textContent = 'MATE';
-        t.innerHTML = 'A quiet edge, <em>built for the work.</em>';
-        l.textContent = 'The personal AI race engineer for footballers. Sign in to continue, or request access to join.';
       }
     }
 
@@ -900,6 +1160,21 @@
       msg.textContent = text;
     }
     function validateEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s); }
+
+    // ── Consent checkboxes gate the signup submit buttons ────────────
+    function wireConsent(checkId, btnId) {
+      const c = document.getElementById(checkId);
+      const b = document.getElementById(btnId);
+      if (!c || !b) return;
+      const sync = () => {
+        b.disabled = !c.checked;
+        b.classList.toggle('is-disabled', !c.checked);
+      };
+      c.addEventListener('change', sync);
+      sync();
+    }
+    wireConsent('pr_consent', 'playerRegisterBtn');
+    wireConsent('ar_consent', 'agentStep1Btn');
   </script>
 </body>
 </html>
