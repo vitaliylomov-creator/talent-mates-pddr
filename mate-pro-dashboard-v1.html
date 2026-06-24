@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#794DC6" />
+  <title>MATE Pro — Talent Mates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple:        #794DC6;
+      --purple-dk:     #6b42b5;
+      --purple-lt:     #7a50cc;
+      --sidebar-bg:    #5c3a9e;
+      --white:         #ffffff;
+      --ink:           #1a0f2e;
+      --border:        rgba(255,255,255,0.10);
+      --border-mid:    rgba(255,255,255,0.20);
+      --border-strong: rgba(255,255,255,0.35);
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.35);
+      --accent-green:  #6dffb3;
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --sidebar-w: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-b);
+      background: var(--purple);
+      color: var(--t1);
+      height: 100dvh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      transition: transform 0.3s var(--ease);
+      z-index: 200;
+    }
+
+    .sidebar-top {
+      padding: 16px 16px 12px;
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .sidebar-brand span { color: var(--t4); font-weight: 400; }
+    .sidebar-brand-tag {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-green);
+      margin-bottom: 12px;
+    }
+
+    .new-chat-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.10);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      color: var(--t2);
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .new-chat-btn:hover { background: rgba(255,255,255,0.16); color: var(--t1); }
+    .new-chat-btn svg { flex-shrink: 0; }
+
+    /* Chat history list */
+    .sidebar-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.15) transparent;
+    }
+    .sidebar-history::-webkit-scrollbar { width: 3px; }
+    .sidebar-history::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    .history-section-label {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t4);
+      padding: 10px 8px 6px;
+    }
+
+    .chat-history-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: 1px;
+      position: relative;
+    }
+    .chat-history-item:hover { background: rgba(255,255,255,0.08); }
+    .chat-history-item.active { background: rgba(255,255,255,0.13); }
+
+    .chat-history-icon {
+      font-size: 13px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+    .chat-history-text { flex: 1; min-width: 0; }
+    .chat-history-title {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--t2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-history-time {
+      font-size: 10px;
+      color: var(--t4);
+      margin-top: 1px;
+    }
+    .chat-history-client {
+      font-size: 10px;
+      color: var(--accent-green);
+      margin-top: 1px;
+      opacity: 0.8;
+    }
+
+    .history-empty {
+      padding: 16px 10px;
+      font-size: 12px;
+      color: var(--t4);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Sidebar bottom: agent info */
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-agent {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .sidebar-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: 0.5px solid var(--border-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      flex-shrink: 0;
+      color: var(--t2);
+    }
+    .sidebar-agent-info { min-width: 0; }
+    .sidebar-agent-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--t1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .verified-tick {
+      color: var(--accent-green);
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+    .sidebar-agent-meta {
+      font-size: 11px;
+      color: var(--t4);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar-signout {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--t4);
+      font-family: var(--font-b);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 4px 0;
+      transition: color 0.2s;
+    }
+    .sidebar-signout:hover { color: var(--t2); }
+
+    /* Mobile overlay */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 199;
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    /* ══════════════════════════════════
+       MAIN AREA
+    ══════════════════════════════════ */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100dvh;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      height: 48px;
+      background: rgba(107,66,181,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+      gap: 10px;
+    }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--t3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .menu-btn:hover { color: var(--t1); }
+
+    .topbar-title {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--t2);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .founding-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(109,255,179,0.13);
+      border: 0.5px solid rgba(109,255,179,0.28);
+      border-radius: 100px;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--accent-green);
+      white-space: nowrap;
+    }
+    .founding-badge-num {
+      color: var(--t1);
+      font-weight: 600;
+    }
+
+    .edit-profile-btn {
+      background: none;
+      border: none;
+      color: var(--t4);
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, background 0.2s;
+      flex-shrink: 0;
+    }
+    .edit-profile-btn:hover { color: var(--t2); background: rgba(255,255,255,0.08); }
+
+    /* ── STATS BAR (agent identity) ── */
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.12);
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      height: 40px;
+    }
+    .stats-bar::-webkit-scrollbar { display: none; }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px;
+      border-right: 0.5px solid var(--border);
+      height: 100%;
+      min-width: fit-content;
+    }
+    .stat-item:first-child { padding-left: 0; }
+    .stat-item:last-child { border-right: none; }
+    .stat-label {
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t4);
+    }
+    .stat-value {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--t2);
+      white-space: nowrap;
+    }
+    .stat-value.accent { color: var(--accent-green); }
+
+    /* ── CLIENT ROSTER STRIP (the agent's clients) ── */
+    .roster-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(0,0,0,0.06);
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .roster-strip::-webkit-scrollbar { display: none; }
+
+    .roster-label {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t4);
+      padding-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .client-card {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 13px 6px 8px;
+      border-radius: 100px;
+      border: 0.5px solid var(--border-mid);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      flex-shrink: 0;
+    }
+    .client-card:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: var(--border-strong);
+    }
+    .client-card.active {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.45);
+    }
+    .client-card-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--t1);
+      flex-shrink: 0;
+    }
+    .client-card-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 0;
+    }
+    .client-card-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--t1);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .client-card-meta {
+      font-size: 9px;
+      color: var(--t4);
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .client-card-status {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .client-card-status.active { background: var(--accent-green); }
+    .client-card-status.prospect { background: #ffb86d; }
+    .client-card-status.dormant { background: rgba(255,255,255,0.3); }
+
+    .add-client-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 100px;
+      border: 0.5px dashed var(--border-mid);
+      background: transparent;
+      color: var(--t3);
+      font-family: var(--font-b);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .add-client-btn:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--t1);
+      border-color: var(--border-strong);
+    }
+
+    /* ── AGENT SELECTOR (sub-agents) ── */
+    .agent-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .agent-selector::-webkit-scrollbar { display: none; }
+    .agent-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 100px;
+      border: 0.5px solid var(--border-mid);
+      background: transparent;
+      color: var(--t3);
+      font-family: var(--font-b);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .agent-pill:hover { background: rgba(255,255,255,0.08); color: var(--t1); border-color: var(--border-strong); }
+    .agent-pill.active { background: rgba(255,255,255,0.14); color: var(--t1); border-color: rgba(255,255,255,0.5); }
+    .agent-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .selector-divider {
+      width: 0.5px;
+      background: rgba(255,255,255,0.15);
+      margin: 0 4px;
+      align-self: stretch;
+      flex-shrink: 0;
+    }
+
+    /* ── CHAT AREA ── */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    /* Welcome */
+    .welcome-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      padding: 20px;
+      animation: fadeUp 0.6s var(--ease) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .welcome-icon {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.10);
+      border: 0.5px solid var(--border-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 16px;
+    }
+    .welcome-title {
+      font-family: var(--font-d);
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+    .welcome-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.55);
+    }
+    .welcome-sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t3);
+      max-width: 340px;
+      line-height: 1.6;
+    }
+    .welcome-prompts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 24px;
+      max-width: 380px;
+      width: 100%;
+    }
+    .welcome-prompt {
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--t2);
+      font-size: 13px;
+      font-weight: 300;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: var(--font-b);
+    }
+    .welcome-prompt:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: var(--border-mid);
+    }
+
+    /* Messages */
+    .msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: fadeUp 0.35s var(--ease) both;
+      max-width: 88%;
+    }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; align-items: flex-start; }
+    .msg-meta {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--t4);
+      text-transform: uppercase;
+      padding: 0 4px;
+    }
+    .msg-bubble {
+      padding: 11px 15px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.65;
+      color: var(--t2);
+    }
+    .msg.user .msg-bubble {
+      background: rgba(255,255,255,0.07);
+      border-radius: 14px 14px 4px 14px;
+      border: 0.5px solid var(--border-mid);
+      color: var(--t1);
+    }
+    .msg.assistant .msg-bubble {
+      background: var(--purple-dk);
+      border-radius: 4px 14px 14px 14px;
+      border: 0.5px solid var(--border);
+    }
+    .msg.assistant .msg-bubble strong { color: var(--t1); font-weight: 500; }
+    .msg.assistant .msg-bubble h3 {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin: 12px 0 5px;
+    }
+    .msg.assistant .msg-bubble h3:first-child { margin-top: 0; }
+    .msg.assistant .msg-bubble p { margin-bottom: 9px; }
+    .msg.assistant .msg-bubble p:last-child { margin-bottom: 0; }
+    .msg.assistant .msg-bubble ul,
+    .msg.assistant .msg-bubble ol { padding-left: 18px; margin-bottom: 9px; }
+    .msg.assistant .msg-bubble li { margin-bottom: 4px; line-height: 1.55; }
+
+    /* Video clip preview inside chat */
+    .clip-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--t2);
+    }
+    .clip-preview-icon {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .clip-preview-meta { font-size: 10px; color: var(--t4); }
+
+    /* Typing */
+    .typing-indicator {
+      display: flex; align-items: center; gap: 5px;
+      padding: 11px 15px;
+      background: var(--purple-dk);
+      border: 0.5px solid var(--border);
+      border-radius: 4px 14px 14px 14px;
+      align-self: flex-start;
+    }
+    .typing-dot {
+      width:6px;height:6px;border-radius:50%;
+      background: rgba(255,255,255,0.5);
+      animation: bounce 1.4s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2){animation-delay:.2s}
+    .typing-dot:nth-child(3){animation-delay:.4s}
+    @keyframes bounce {
+      0%,80%,100%{transform:translateY(0);opacity:.4}
+      40%{transform:translateY(-5px);opacity:1}
+    }
+
+    /* ── INPUT AREA ── */
+    .input-area {
+      padding: 10px 20px 18px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .input-context {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 10px;
+      font-size: 11px; color: var(--t4);
+      align-self: flex-start;
+    }
+    .input-context strong {
+      color: var(--t2);
+      font-weight: 500;
+    }
+
+    .attachment-attached {
+      display: none; align-items: center; gap: 8px;
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.08);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      font-size: 11px; color: var(--t2);
+      align-self: flex-start;
+    }
+    .attachment-attached.visible { display: flex; }
+    .attachment-remove { background:none;border:none;color:var(--t4);cursor:pointer;font-size:13px;padding:0 2px; }
+    .attachment-remove:hover { color:var(--t1); }
+
+    .input-row {
+      display: flex; align-items: flex-end; gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 14px;
+      padding: 9px 9px 9px 14px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .input-row:focus-within { border-color: rgba(255,255,255,0.32); background: rgba(255,255,255,0.09); }
+
+    .chat-input {
+      flex:1; background:transparent; border:none; outline:none;
+      font-family:var(--font-b); font-size:14px; font-weight:300;
+      color:var(--t1); resize:none;
+      max-height:120px; overflow-y:auto;
+      line-height:1.5; min-height:22px;
+    }
+    .chat-input::placeholder { color: var(--t4); }
+
+    .input-btn {
+      background:transparent;border:none;cursor:pointer;
+      padding:5px;border-radius:7px;color:var(--t4);
+      transition:color .2s,background .2s;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .input-btn:hover { color:var(--t2);background:rgba(255,255,255,0.08); }
+    .input-btn.has-file { color:#fff; }
+    .hidden-file-input { display:none; }
+
+    .send-btn {
+      background:#ffffff;border:none;border-radius:9px;
+      width:34px;height:34px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;flex-shrink:0;
+      transition:opacity .2s,transform .15s;
+    }
+    .send-btn:hover { opacity:.88;transform:scale(1.04); }
+    .send-btn:active { transform:scale(0.96); }
+    .send-btn:disabled { opacity:.3;cursor:not-allowed;transform:none; }
+    .send-btn svg { stroke: var(--purple); }
+
+    /* ══════════════════════════════════
+       MODAL — shared shell
+    ══════════════════════════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20,10,50,0.88);
+      backdrop-filter: blur(12px);
+      z-index: 700;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: #4a2d8a;
+      border: 0.5px solid var(--border-mid);
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 520px;
+      animation: fadeUp 0.35s var(--ease) both;
+      margin: auto;
+    }
+    .modal-wide { max-width: 640px; }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .modal-title {
+      font-family: var(--font-d);
+      font-size: 24px;
+      font-weight: 400;
+    }
+    .modal-title em {
+      font-style: italic;
+      color: rgba(255,255,255,0.55);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--t4);
+      cursor: pointer;
+      font-size: 20px;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--t1); }
+
+    .modal-section-label {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t4);
+      margin: 18px 0 8px;
+    }
+    .modal-section-label:first-of-type { margin-top: 0; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .field label {
+      font-size: 11px;
+      color: var(--t3);
+      font-weight: 400;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--t1);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      width: 100%;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.10);
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: var(--t4); }
+    .field select option { background: #4a2d8a; color: var(--t1); }
+    .field textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+
+    .field-with-suffix {
+      position: relative;
+    }
+    .field-suffix {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--t4);
+      pointer-events: none;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      background: #ffffff;
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 18px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .primary-btn:hover { opacity: 0.88; transform: scale(1.01); }
+    .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .modal-msg {
+      text-align: center;
+      font-size: 12px;
+      color: var(--accent-green);
+      margin-top: 10px;
+      min-height: 18px;
+    }
+    .modal-msg.error { color: #ff9898; }
+
+    /* ── CLIENT ROSTER MODAL specific ── */
+    .client-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .client-list-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .client-list-item:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: var(--border-mid);
+    }
+    .client-list-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+      color: var(--t1);
+      flex-shrink: 0;
+    }
+    .client-list-info { flex: 1; min-width: 0; }
+    .client-list-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--t1);
+      margin-bottom: 2px;
+    }
+    .client-list-meta {
+      font-size: 11px;
+      color: var(--t4);
+      letter-spacing: 0.04em;
+    }
+    .client-list-status {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+    .client-list-status.active {
+      color: var(--accent-green);
+      background: rgba(109,255,179,0.10);
+      border: 0.5px solid rgba(109,255,179,0.28);
+    }
+    .client-list-status.prospect {
+      color: #ffb86d;
+      background: rgba(255,184,109,0.10);
+      border: 0.5px solid rgba(255,184,109,0.28);
+    }
+    .client-list-status.dormant {
+      color: var(--t3);
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border);
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .modal-tab {
+      padding: 5px 12px;
+      border-radius: 100px;
+      border: 0.5px solid var(--border);
+      background: none;
+      color: var(--t3);
+      font-family: var(--font-b);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-tab.active {
+      background: rgba(255,255,255,0.12);
+      color: var(--t1);
+      border-color: var(--border-strong);
+    }
+
+    /* ── VIDEO ANALYSIS MODAL specific ── */
+    .upload-zone {
+      border: 1px dashed var(--border-mid);
+      border-radius: 14px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 14px;
+    }
+    .upload-zone:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--border-strong);
+    }
+    .upload-zone.has-file {
+      border-style: solid;
+      background: rgba(255,255,255,0.04);
+    }
+    .upload-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+      opacity: 0.6;
+    }
+    .upload-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .upload-sub {
+      font-size: 11px;
+      color: var(--t4);
+      line-height: 1.5;
+    }
+    .upload-file-info {
+      font-size: 12px;
+      color: var(--accent-green);
+      margin-top: 8px;
+    }
+
+    .analysis-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .analysis-option {
+      padding: 11px 13px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .analysis-option:hover {
+      background: rgba(255,255,255,0.09);
+    }
+    .analysis-option.active {
+      background: rgba(255,255,255,0.13);
+      border-color: var(--border-strong);
+    }
+    .analysis-option-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--t1);
+      margin-bottom: 2px;
+    }
+    .analysis-option-sub {
+      font-size: 10px;
+      color: var(--t4);
+      line-height: 1.4;
+    }
+
+    .analysis-note {
+      font-size: 11px;
+      color: var(--t4);
+      line-height: 1.5;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+      border-left: 2px solid rgba(255,255,255,0.18);
+      margin-bottom: 12px;
+    }
+
+    /* ══════════════════════════════════
+       MOBILE
+    ══════════════════════════════════ */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .menu-btn { display: flex; }
+      .stats-bar { padding: 0 16px; }
+      .roster-strip { padding: 8px 16px; }
+      .agent-selector { padding: 8px 16px; }
+      .chat-area { padding: 16px; }
+      .input-area { padding: 8px 16px 16px; }
+      .row-2, .row-3 { grid-template-columns: 1fr; }
+      .analysis-options { grid-template-columns: 1fr; }
+      .founding-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="sidebar-brand">MATE <span>Pro</span></div>
+    <div class="sidebar-brand-tag">For licensed agents</div>
+    <button class="new-chat-btn" onclick="startNewChat()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New chat
+    </button>
+  </div>
+
+  <div class="sidebar-history" id="sidebarHistory">
+    <div class="history-section-label">Today</div>
+    <div class="chat-history-item active">
+      <span class="chat-history-icon">📊</span>
+      <div class="chat-history-text">
+        <div class="chat-history-title">Compare 5 Championship clubs</div>
+        <div class="chat-history-client">For Andriy K.</div>
+      </div>
+    </div>
+    <div class="chat-history-item">
+      <span class="chat-history-icon">⚖️</span>
+      <div class="chat-history-text">
+        <div class="chat-history-title">FFAR Article 14 — commission split</div>
+        <div class="chat-history-time">2 hours ago</div>
+      </div>
+    </div>
+
+    <div class="history-section-label">Yesterday</div>
+    <div class="chat-history-item">
+      <span class="chat-history-icon">🎥</span>
+      <div class="chat-history-text">
+        <div class="chat-history-title">Video read — defensive transitions</div>
+        <div class="chat-history-client">For Maksym P.</div>
+      </div>
+    </div>
+    <div class="chat-history-item">
+      <span class="chat-history-icon">📑</span>
+      <div class="chat-history-text">
+        <div class="chat-history-title">Contract review — Veres Rivne offer</div>
+        <div class="chat-history-client">For Bohdan S.</div>
+      </div>
+    </div>
+
+    <div class="history-section-label">Last week</div>
+    <div class="chat-history-item">
+      <span class="chat-history-icon">🏠</span>
+      <div class="chat-history-text">
+        <div class="chat-history-title">Manchester relocation checklist</div>
+        <div class="chat-history-client">For Andriy K.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-agent">
+      <div class="sidebar-avatar">VL</div>
+      <div class="sidebar-agent-info">
+        <div class="sidebar-agent-name" id="sideAgentName">
+          Vitalii Lomov
+          <span class="verified-tick" title="FFAR Verified">●</span>
+        </div>
+        <div class="sidebar-agent-meta" id="sideAgentMeta">Talent Mates · UK</div>
+      </div>
+    </div>
+    <button class="sidebar-signout" onclick="handleLogout()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Sign out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="topbar-title" id="topbarTitle">MATE Pro</div>
+    <div class="founding-badge" id="foundingBadge">
+      ✦ Founding Agent
+      <span class="founding-badge-num">#47</span>
+      / 100
+    </div>
+    <button class="edit-profile-btn" onclick="openAgentProfile()" title="Edit agent profile">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- STATS BAR (agent identity) -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-label">Licence</div>
+      <div class="stat-value" id="statLicence">FFAR-2024-UA-0847</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Agency</div>
+      <div class="stat-value" id="statAgency">Talent Mates</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Country</div>
+      <div class="stat-value" id="statCountry">United Kingdom</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Roster</div>
+      <div class="stat-value" id="statRoster">3 active</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Status</div>
+      <div class="stat-value accent" id="statStatus">● Verified</div>
+    </div>
+  </div>
+
+  <!-- CLIENT ROSTER STRIP -->
+  <div class="roster-strip" id="rosterStrip">
+    <div class="roster-label">Working on</div>
+
+    <div class="client-card active" onclick="selectClient(this, 'andriy_k')">
+      <div class="client-card-avatar">AK</div>
+      <div class="client-card-text">
+        <div class="client-card-name">Andriy Koval</div>
+        <div class="client-card-meta">CM · Dynamo Kyiv U19 · 17yo</div>
+      </div>
+      <div class="client-card-status active" title="Active"></div>
+    </div>
+
+    <div class="client-card" onclick="selectClient(this, 'maksym_p')">
+      <div class="client-card-avatar">MP</div>
+      <div class="client-card-text">
+        <div class="client-card-name">Maksym Petrenko</div>
+        <div class="client-card-meta">CB · Karpaty Lviv · 21yo</div>
+      </div>
+      <div class="client-card-status active" title="Active"></div>
+    </div>
+
+    <div class="client-card" onclick="selectClient(this, 'bohdan_s')">
+      <div class="client-card-avatar">BS</div>
+      <div class="client-card-text">
+        <div class="client-card-name">Bohdan Shevchuk</div>
+        <div class="client-card-meta">ST · FC Veres · 19yo</div>
+      </div>
+      <div class="client-card-status prospect" title="Prospect"></div>
+    </div>
+
+    <button class="add-client-btn" onclick="openClientRoster()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add client
+    </button>
+  </div>
+
+  <!-- SUB-AGENT SELECTOR + TOOLS -->
+  <div class="agent-selector">
+    <button class="agent-pill active" data-agent="auto" onclick="selectAgent(this,'auto')"><div class="agent-dot"></div>Auto</button>
+    <button class="agent-pill" data-agent="legal" onclick="selectAgent(this,'legal')"><div class="agent-dot"></div>⚖️ Legal</button>
+    <button class="agent-pill" data-agent="coach" onclick="selectAgent(this,'coach')"><div class="agent-dot"></div>🏋️ Coach</button>
+    <button class="agent-pill" data-agent="analyst" onclick="selectAgent(this,'analyst')"><div class="agent-dot"></div>📊 Analyst</button>
+    <button class="agent-pill" data-agent="concierge" onclick="selectAgent(this,'concierge')"><div class="agent-dot"></div>🏠 Concierge</button>
+    <div class="selector-divider"></div>
+    <button class="agent-pill" onclick="openVideoAnalysis()"><div class="agent-dot" style="background:#6dffb3"></div>🎥 Video Analysis</button>
+    <button class="agent-pill" onclick="openClientRoster()"><div class="agent-dot" style="background:#ffb86d"></div>👥 Client Roster</button>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea">
+    <div class="welcome-state" id="welcomeState">
+      <div class="welcome-icon">⚡</div>
+      <div class="welcome-title">Ready when you are, <em>Vitalii.</em></div>
+      <div class="welcome-sub" id="welcomeSub">Working on Andriy Koval. Ask anything — or open a different client to switch context.</div>
+
+      <div class="welcome-prompts" id="welcomePrompts">
+        <button class="welcome-prompt"
+                data-template="Compare 5 Championship clubs that fit {first} this window"
+                data-action="prompt"></button>
+        <button class="welcome-prompt"
+                data-template="Manager pedigree and tactical fit — Birmingham City vs Hull City for {first}"
+                data-action="prompt"></button>
+        <button class="welcome-prompt"
+                data-template="Draft the FFAR Article 14 commission clause for {first}'s UK signing"
+                data-action="prompt"></button>
+        <button class="welcome-prompt"
+                data-template="Upload a clip of {first} for video analysis"
+                data-action="video"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT AREA -->
+  <div class="input-area">
+    <div class="input-context">
+      Context: <strong id="contextClient">Andriy Koval — CM, Dynamo Kyiv U19</strong>
+    </div>
+
+    <div class="attachment-attached" id="attachmentAttached">
+      <span id="attachmentIcon">📄</span>
+      <span id="attachmentName">file.pdf</span>
+      <button class="attachment-remove" onclick="removeAttachment()">✕</button>
+    </div>
+
+    <div class="input-row">
+      <button type="button" class="input-btn" onclick="openPDFPicker()" title="Upload PDF (contract, scout report)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+      </button>
+      <input type="file" id="pdfFileInput" class="hidden-file-input" accept=".pdf" onchange="handlePDFSelect(event)" />
+
+      <button type="button" class="input-btn" onclick="openVideoAnalysis()" title="Upload video clip">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="23 7 16 12 23 17 23 7"/>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+      </button>
+
+      <textarea class="chat-input" id="chatInput" placeholder="Ask MATE about Andriy…" rows="1"
+        onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ══════════════════════════════════
+     CLIENT ROSTER MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="rosterModalOverlay" onclick="closeModal(event, 'rosterModalOverlay')">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Client <em>Roster</em></div>
+      <button class="modal-close" onclick="closeModalById('rosterModalOverlay')">✕</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchRosterTab('list', this)">All clients</button>
+      <button class="modal-tab" onclick="switchRosterTab('add', this)">Add new</button>
+    </div>
+
+    <!-- LIST TAB -->
+    <div id="rosterListTab">
+      <div class="modal-section-label">Active · 2</div>
+      <div class="client-list">
+        <div class="client-list-item">
+          <div class="client-list-avatar">AK</div>
+          <div class="client-list-info">
+            <div class="client-list-name">Andriy Koval</div>
+            <div class="client-list-meta">CM · Dynamo Kyiv U19 · 17 yo · Contract: 2027-06-30</div>
+          </div>
+          <div class="client-list-status active">Active</div>
+        </div>
+        <div class="client-list-item">
+          <div class="client-list-avatar">MP</div>
+          <div class="client-list-info">
+            <div class="client-list-name">Maksym Petrenko</div>
+            <div class="client-list-meta">CB · Karpaty Lviv · 21 yo · Contract: 2026-12-31</div>
+          </div>
+          <div class="client-list-status active">Active</div>
+        </div>
+      </div>
+
+      <div class="modal-section-label">Prospects · 1</div>
+      <div class="client-list">
+        <div class="client-list-item">
+          <div class="client-list-avatar">BS</div>
+          <div class="client-list-info">
+            <div class="client-list-name">Bohdan Shevchuk</div>
+            <div class="client-list-meta">ST · FC Veres Rivne · 19 yo · Unsigned</div>
+          </div>
+          <div class="client-list-status prospect">Prospect</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD TAB -->
+    <div id="rosterAddTab" style="display:none">
+      <div class="modal-section-label">Player identity</div>
+      <div class="row-2">
+        <div class="field">
+          <label>First name</label>
+          <input type="text" id="cl_first" placeholder="e.g. Andriy" />
+        </div>
+        <div class="field">
+          <label>Last name</label>
+          <input type="text" id="cl_last" placeholder="e.g. Koval" />
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Date of birth</label>
+          <input type="date" id="cl_dob" />
+        </div>
+        <div class="field">
+          <label>Nationality</label>
+          <input type="text" id="cl_nat" placeholder="e.g. Ukraine" />
+        </div>
+      </div>
+
+      <div class="modal-section-label">Football profile</div>
+      <div class="row-2">
+        <div class="field">
+          <label>Position</label>
+          <select id="cl_pos">
+            <option value="">Select position</option>
+            <option>Goalkeeper</option>
+            <option>Centre Back</option>
+            <option>Right Back</option>
+            <option>Left Back</option>
+            <option>Defensive Midfielder</option>
+            <option>Central Midfielder</option>
+            <option>Attacking Midfielder</option>
+            <option>Right Winger</option>
+            <option>Left Winger</option>
+            <option>Striker</option>
+            <option>Centre Forward</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dominant foot</label>
+          <select id="cl_foot">
+            <option value="">Select</option>
+            <option>Right</option>
+            <option>Left</option>
+            <option>Both</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Current club</label>
+          <input type="text" id="cl_club" placeholder="e.g. Dynamo Kyiv U19" />
+        </div>
+        <div class="field">
+          <label>Current league</label>
+          <input type="text" id="cl_league" placeholder="e.g. UPL U19" />
+        </div>
+      </div>
+
+      <div class="modal-section-label">Contract & representation</div>
+      <div class="row-2">
+        <div class="field">
+          <label>Contract expires</label>
+          <input type="date" id="cl_contract" />
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="cl_status">
+            <option value="active">Active client</option>
+            <option value="prospect">Prospect</option>
+            <option value="dormant">Dormant</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Representation agreement notes</label>
+        <textarea id="cl_repnotes" placeholder="e.g. 3% commission on transfer fees, exclusive representation until 2027-06"></textarea>
+      </div>
+
+      <div class="modal-section-label">Notes for MATE</div>
+      <div class="field">
+        <label>Anything MATE should know about this player</label>
+        <textarea id="cl_notes" placeholder="e.g. Late physical developer, strong technically. Family is open to UK move. Target: Championship loan by January 2027."></textarea>
+      </div>
+
+      <button class="primary-btn" onclick="saveNewClient()">Add Client</button>
+      <div class="modal-msg" id="rosterMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     VIDEO ANALYSIS MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="videoModalOverlay" onclick="closeModal(event, 'videoModalOverlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Video <em>Analysis</em></div>
+      <button class="modal-close" onclick="closeModalById('videoModalOverlay')">✕</button>
+    </div>
+
+    <div class="analysis-note">
+      MATE extracts key frames from your clip and gives you the same kind of read a top scout writes from film. Best with clips under 60 seconds focused on a single sequence. We don't measure pose or speed — we describe what's visible, contextualised to your client.
+    </div>
+
+    <div class="modal-section-label">For client</div>
+    <div class="field">
+      <select id="va_client">
+        <option value="andriy_k">Andriy Koval · CM · Dynamo Kyiv U19</option>
+        <option value="maksym_p">Maksym Petrenko · CB · Karpaty Lviv</option>
+        <option value="bohdan_s">Bohdan Shevchuk · ST · FC Veres</option>
+        <option value="prospect">No client (prospect scouting)</option>
+      </select>
+    </div>
+
+    <div class="modal-section-label">Upload clip</div>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('videoFileInput').click()">
+      <div class="upload-icon">🎥</div>
+      <div class="upload-title" id="uploadTitle">Drop clip or click to upload</div>
+      <div class="upload-sub">MP4, MOV, WEBM · up to 30 seconds recommended · max 50MB</div>
+      <div class="upload-file-info" id="uploadFileInfo" style="display:none"></div>
+    </div>
+    <input type="file" id="videoFileInput" class="hidden-file-input" accept="video/mp4,video/quicktime,video/webm" onchange="handleVideoSelect(event)" />
+
+    <div class="modal-section-label">What to read</div>
+    <div class="analysis-options">
+      <div class="analysis-option active" onclick="selectAnalysisOption(this, 'positioning')">
+        <div class="analysis-option-title">Positioning & shape</div>
+        <div class="analysis-option-sub">Where the player is on the pitch, body orientation, distances to teammates and opponents</div>
+      </div>
+      <div class="analysis-option" onclick="selectAnalysisOption(this, 'technical')">
+        <div class="analysis-option-title">Technical actions</div>
+        <div class="analysis-option-sub">First touch, passing technique, ball-carrying, finishing — what's visible in the frames</div>
+      </div>
+      <div class="analysis-option" onclick="selectAnalysisOption(this, 'decisions')">
+        <div class="analysis-option-title">Decision-making</div>
+        <div class="analysis-option-sub">What the player chose to do, what alternatives were available, scanning behaviour</div>
+      </div>
+      <div class="analysis-option" onclick="selectAnalysisOption(this, 'physical')">
+        <div class="analysis-option-title">Physical read</div>
+        <div class="analysis-option-sub">Visible athletic profile — frame, gait, recovery between actions, fatigue indicators</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Your question for MATE (optional)</label>
+      <textarea id="va_question" placeholder="e.g. Is he showing enough off-ball movement to play higher than UPL U19? What would a Championship scout flag here?"></textarea>
+    </div>
+
+    <button class="primary-btn" id="analyzeBtn" onclick="runVideoAnalysis()">Analyse with MATE</button>
+    <div class="modal-msg" id="videoMsg"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     AGENT PROFILE MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="profileModalOverlay" onclick="closeModal(event, 'profileModalOverlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Agent <em>Profile</em></div>
+      <button class="modal-close" onclick="closeModalById('profileModalOverlay')">✕</button>
+    </div>
+
+    <div class="modal-section-label">FFAR licence</div>
+    <div class="row-2">
+      <div class="field">
+        <label>Licence number</label>
+        <input type="text" id="ag_licence" value="FFAR-2024-UA-0847" />
+      </div>
+      <div class="field">
+        <label>Issuing country</label>
+        <input type="text" id="ag_country" value="Ukraine" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <input type="text" id="ag_verified" value="● Verified · Active" disabled style="color: var(--accent-green); font-weight: 500;" />
+    </div>
+
+    <div class="modal-section-label">Identity</div>
+    <div class="row-2">
+      <div class="field">
+        <label>First name</label>
+        <input type="text" id="ag_first" value="Vitalii" />
+      </div>
+      <div class="field">
+        <label>Last name</label>
+        <input type="text" id="ag_last" value="Lomov" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Agency</label>
+      <input type="text" id="ag_agency" value="Talent Mates" />
+    </div>
+    <div class="field">
+      <label>Country of operation</label>
+      <input type="text" id="ag_op_country" value="United Kingdom" />
+    </div>
+
+    <div class="modal-section-label">Practice</div>
+    <div class="row-2">
+      <div class="field">
+        <label>Years of experience</label>
+        <input type="number" id="ag_years" value="6" min="0" max="50" />
+      </div>
+      <div class="field">
+        <label>Active clients</label>
+        <input type="number" id="ag_active" value="3" min="0" max="200" disabled />
+      </div>
+    </div>
+    <div class="field">
+      <label>Specialisation</label>
+      <textarea id="ag_specialisation" placeholder="e.g. Youth development pathways from Eastern Europe into UK football. UEFA-licensed coach. Focus on technical midfielders 16-22.">Youth development pathways from Eastern Europe into UK football. UEFA-licensed coach. Focus on technical midfielders and centre-backs aged 16-22.</textarea>
+    </div>
+
+    <div class="modal-section-label">Founding 100</div>
+    <div class="analysis-note" style="border-left-color: var(--accent-green); color: var(--t2);">
+      <strong style="color: var(--accent-green);">Founding Agent #47 of 100.</strong> Lifetime price lock at €149/month. Direct founder access. Permanent place in the platform's history. Granted 2026.
+    </div>
+
+    <button class="primary-btn" onclick="saveAgentProfile()">Save Changes</button>
+    <div class="modal-msg" id="profileMsg"></div>
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════
+  // STATE
+  // ══════════════════════════════════════════════════
+  const state = {
+    selectedClientId: 'andriy_k',
+    selectedSubAgent: 'auto',
+    selectedAnalysisOption: 'positioning',
+    attachedFile: null,
+    videoFile: null,
+  };
+
+  // Mock client data — to be replaced with Supabase queries in production
+  const clients = {
+    andriy_k: { name: 'Andriy Koval', position: 'CM', club: 'Dynamo Kyiv U19', age: 17, status: 'active' },
+    maksym_p: { name: 'Maksym Petrenko', position: 'CB', club: 'Karpaty Lviv', age: 21, status: 'active' },
+    bohdan_s: { name: 'Bohdan Shevchuk', position: 'ST', club: 'FC Veres', age: 19, status: 'prospect' },
+  };
+
+  // ══════════════════════════════════════════════════
+  // WELCOME PROMPTS — dynamic by active client
+  // ══════════════════════════════════════════════════
+  function renderWelcomePrompts() {
+    const c = clients[state.selectedClientId];
+    if (!c) return;
+
+    const first = c.name.split(' ')[0];
+
+    // Update welcome subtitle
+    const sub = document.getElementById('welcomeSub');
+    if (sub) {
+      sub.textContent = `Working on ${c.name}. Ask anything — or open a different client to switch context.`;
+    }
+
+    // Update each prompt button
+    document.querySelectorAll('#welcomePrompts .welcome-prompt').forEach(btn => {
+      const tpl = btn.getAttribute('data-template') || '';
+      const rendered = tpl.replace(/\{first\}/g, first).replace(/\{full\}/g, c.name);
+      btn.textContent = rendered;
+
+      const action = btn.getAttribute('data-action');
+      btn.onclick = (action === 'video')
+        ? () => openVideoAnalysis()
+        : () => quickPrompt(rendered);
+    });
+  }
+
+  // ══════════════════════════════════════════════════
+  // SIDEBAR (mobile)
+  // ══════════════════════════════════════════════════
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('visible');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+
+  // ══════════════════════════════════════════════════
+  // CLIENT SWITCHING
+  // ══════════════════════════════════════════════════
+  function selectClient(el, clientId) {
+    document.querySelectorAll('.client-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    state.selectedClientId = clientId;
+
+    const c = clients[clientId];
+    if (c) {
+      document.getElementById('contextClient').textContent = `${c.name} — ${c.position}, ${c.club}`;
+      document.getElementById('chatInput').placeholder = `Ask MATE about ${c.name.split(' ')[0]}…`;
+    }
+
+    // Refresh welcome prompts with new client name
+    renderWelcomePrompts();
+  }
+
+  // ══════════════════════════════════════════════════
+  // SUB-AGENT SELECTION
+  // ══════════════════════════════════════════════════
+  function selectAgent(el, agent) {
+    document.querySelectorAll('.agent-pill[data-agent]').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    state.selectedSubAgent = agent;
+  }
+
+  // ══════════════════════════════════════════════════
+  // INPUT
+  // ══════════════════════════════════════════════════
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function quickPrompt(text) {
+    const input = document.getElementById('chatInput');
+    input.value = text;
+    autoResize(input);
+    input.focus();
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // In production: send to /functions/v1/mate-chat with client context
+    console.log('Send message:', {
+      text,
+      clientId: state.selectedClientId,
+      subAgent: state.selectedSubAgent,
+      attachedFile: state.attachedFile?.name,
+    });
+
+    input.value = '';
+    autoResize(input);
+  }
+
+  function startNewChat() {
+    document.getElementById('chatInput').focus();
+  }
+
+  // ══════════════════════════════════════════════════
+  // PDF ATTACHMENT
+  // ══════════════════════════════════════════════════
+  function openPDFPicker() {
+    document.getElementById('pdfFileInput').click();
+  }
+
+  function handlePDFSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    state.attachedFile = file;
+    showAttachment('📄', file.name);
+  }
+
+  function showAttachment(icon, name) {
+    document.getElementById('attachmentIcon').textContent = icon;
+    document.getElementById('attachmentName').textContent = name;
+    document.getElementById('attachmentAttached').classList.add('visible');
+  }
+
+  function removeAttachment() {
+    state.attachedFile = null;
+    document.getElementById('attachmentAttached').classList.remove('visible');
+    document.getElementById('pdfFileInput').value = '';
+  }
+
+  // ══════════════════════════════════════════════════
+  // MODAL HELPERS
+  // ══════════════════════════════════════════════════
+  function closeModal(e, id) {
+    if (e.target.id === id) {
+      document.getElementById(id).classList.remove('visible');
+    }
+  }
+  function closeModalById(id) {
+    document.getElementById(id).classList.remove('visible');
+  }
+
+  // ══════════════════════════════════════════════════
+  // CLIENT ROSTER MODAL
+  // ══════════════════════════════════════════════════
+  function openClientRoster() {
+    document.getElementById('rosterModalOverlay').classList.add('visible');
+    switchRosterTab('list', document.querySelector('#rosterModalOverlay .modal-tab'));
+  }
+  function switchRosterTab(tab, el) {
+    document.querySelectorAll('#rosterModalOverlay .modal-tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.getElementById('rosterListTab').style.display = tab === 'list' ? 'block' : 'none';
+    document.getElementById('rosterAddTab').style.display = tab === 'add' ? 'block' : 'none';
+  }
+
+  function saveNewClient() {
+    const first = document.getElementById('cl_first').value.trim();
+    const last = document.getElementById('cl_last').value.trim();
+    const msg = document.getElementById('rosterMsg');
+
+    if (!first || !last) {
+      msg.className = 'modal-msg error';
+      msg.textContent = 'Please enter first and last name.';
+      return;
+    }
+
+    // In production: insert into Supabase clients table linked to agent_id
+    msg.className = 'modal-msg';
+    msg.textContent = `✓ ${first} ${last} added to roster.`;
+
+    setTimeout(() => {
+      closeModalById('rosterModalOverlay');
+      msg.textContent = '';
+    }, 1500);
+  }
+
+  // ══════════════════════════════════════════════════
+  // VIDEO ANALYSIS MODAL
+  // ══════════════════════════════════════════════════
+  function openVideoAnalysis() {
+    // Sync client selector to currently active client
+    const sel = document.getElementById('va_client');
+    if (sel && state.selectedClientId) {
+      sel.value = state.selectedClientId;
+    }
+    document.getElementById('videoModalOverlay').classList.add('visible');
+  }
+
+  function handleVideoSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 50 * 1024 * 1024) {
+      const msg = document.getElementById('videoMsg');
+      msg.className = 'modal-msg error';
+      msg.textContent = 'File too large. Maximum 50MB.';
+      return;
+    }
+
+    state.videoFile = file;
+    document.getElementById('uploadZone').classList.add('has-file');
+    document.getElementById('uploadTitle').textContent = file.name;
+    const info = document.getElementById('uploadFileInfo');
+    info.style.display = 'block';
+    info.textContent = `✓ ${(file.size / 1024 / 1024).toFixed(1)}MB · Ready to analyse`;
+  }
+
+  function selectAnalysisOption(el, option) {
+    document.querySelectorAll('.analysis-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    state.selectedAnalysisOption = option;
+  }
+
+  function runVideoAnalysis() {
+    const msg = document.getElementById('videoMsg');
+    const btn = document.getElementById('analyzeBtn');
+
+    if (!state.videoFile) {
+      msg.className = 'modal-msg error';
+      msg.textContent = 'Please upload a clip first.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Extracting frames…';
+    msg.className = 'modal-msg';
+    msg.textContent = '';
+
+    // In production:
+    // 1. Extract 5-10 key frames from video using HTML5 canvas
+    // 2. Upload frames to Supabase storage
+    // 3. Call edge function with frame URLs + client context + question
+    // 4. Edge function calls Claude vision API
+    // 5. Insert response as assistant message in current conversation
+    setTimeout(() => {
+      btn.textContent = 'Reading frames with MATE…';
+      setTimeout(() => {
+        btn.textContent = 'Analyse with MATE';
+        btn.disabled = false;
+        msg.textContent = '✓ Analysis complete — see chat for full read.';
+        setTimeout(() => closeModalById('videoModalOverlay'), 1200);
+      }, 2000);
+    }, 1500);
+  }
+
+  // ══════════════════════════════════════════════════
+  // AGENT PROFILE MODAL
+  // ══════════════════════════════════════════════════
+  function openAgentProfile() {
+    document.getElementById('profileModalOverlay').classList.add('visible');
+  }
+
+  function saveAgentProfile() {
+    const msg = document.getElementById('profileMsg');
+    msg.className = 'modal-msg';
+    msg.textContent = '✓ Profile updated.';
+    setTimeout(() => {
+      closeModalById('profileModalOverlay');
+      msg.textContent = '';
+    }, 1500);
+  }
+
+  // ══════════════════════════════════════════════════
+  // LOGOUT
+  // ══════════════════════════════════════════════════
+  function handleLogout() {
+    // In production: await sb.auth.signOut(); window.location.href = 'mate-auth.html';
+    console.log('Sign out');
+  }
+
+  // ══════════════════════════════════════════════════
+  // INIT
+  // ══════════════════════════════════════════════════
+  renderWelcomePrompts();
+</script>
+</body>
+</html>
