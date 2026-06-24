@@ -1183,6 +1183,48 @@
     }
     .chat-msg-body a:hover { border-bottom-color: var(--t1); }
 
+
+    /* ── Thinking bubble (shown while assistant response is in flight) ─ */
+    .chat-msg-pending {
+      max-width: 760px;
+      margin: 18px auto;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 0.5px solid var(--border);
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,0.04) 0%,
+          rgba(255,255,255,0.10) 50%,
+          rgba(255,255,255,0.04) 100%);
+      background-size: 220% 100%;
+      animation: chat-shimmer 2.6s linear infinite;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    @keyframes chat-shimmer {
+      0%   { background-position: 220% 0; }
+      100% { background-position: -120% 0; }
+    }
+    .pending-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px rgba(109,255,179,0.50);
+      animation: pulse-dot-pending 1.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-dot-pending {
+      0%, 100% { opacity: 0.95; transform: scale(1); }
+      50%      { opacity: 0.30; transform: scale(0.75); }
+    }
+    .pending-label {
+      font-size: 13.5px;
+      color: var(--t2);
+      letter-spacing: 0.01em;
+      transition: opacity 0.25s var(--ease);
+    }
+
   </style>
 </head>
 <body>
@@ -2015,6 +2057,57 @@
     document.getElementById('chatInput').focus();
   }
 
+
+  // ── Thinking-state UI for chat send ──────────────────────────────────
+  const PENDING_STATUSES = {
+    legal:    ['Reading client context', 'Anchoring in FFAR', 'Cross-checking RSTP', 'Verifying jurisdiction', 'Drafting risk register', 'Composing strategic verdict', 'Tightening output'],
+    coach:    ['Reading session pattern', 'Calibrating to load', 'Pulling injury history', 'Drafting protocol', 'Tightening output'],
+    analyst:  ['Reading client profile', 'Pulling market comparators', 'Benchmarking against peers', 'Composing transfer intelligence', 'Tightening output'],
+    concierge:['Mapping the city', 'Pricing options', 'Cross-checking logistics', 'Drafting checklist', 'Tightening output'],
+    auto:     ['Routing to the right specialist', 'Reading context', 'Pulling live data', 'Composing response', 'Tightening output'],
+  };
+
+  let pendingTimer = null;
+  function showThinking(subAgent) {
+    const list = PENDING_STATUSES[subAgent] ?? PENDING_STATUSES.auto;
+    const chatArea = document.getElementById('chatArea');
+    const node = document.createElement('div');
+    node.className = 'chat-msg-pending';
+    node.id = 'pendingBubble';
+    node.innerHTML = '<span class="pending-dot"></span><span class="pending-label" id="pendingLabel">' + list[0] + '</span>';
+    chatArea.appendChild(node);
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    let i = 0;
+    pendingTimer = setInterval(() => {
+      i = (i + 1) % list.length;
+      const label = document.getElementById('pendingLabel');
+      if (!label) return;
+      label.style.opacity = '0';
+      setTimeout(() => {
+        label.textContent = list[i];
+        label.style.opacity = '1';
+      }, 220);
+    }, 2400);
+  }
+
+  function hideThinking() {
+    if (pendingTimer) { clearInterval(pendingTimer); pendingTimer = null; }
+    document.getElementById('pendingBubble')?.remove();
+  }
+
+  // ── Session refresh: catches 401 from edge by refreshing and retrying once
+  async function ensureFreshSession() {
+    if (!state.session) return false;
+    const exp = state.session.expires_at ? state.session.expires_at * 1000 : 0;
+    // Refresh if expiry is within 2 minutes
+    if (exp && exp - Date.now() > 120000) return true;
+    const { data, error } = await sb.auth.refreshSession();
+    if (error || !data.session) return false;
+    state.session = data.session;
+    return true;
+  }
+
   async function sendMessage() {
     if (state.busy) return;
     const input = document.getElementById('chatInput');
@@ -2024,7 +2117,6 @@
     state.busy = true;
     setSendingState(true);
 
-    // Optimistically push user message
     state.messages.push({
       role: 'user',
       content: text + (state.attachedPDF ? ' [PDF: ' + state.attachedPDF.name + ']' : ''),
@@ -2033,19 +2125,21 @@
     renderChatMessages();
     input.value = '';
     autoResize(input);
+    showThinking(state.selectedSubAgent);
 
-    try {
-      const body = {
-        conversation_id: state.selectedConversationId,
-        client_id: state.selectedClientId,
-        sub_agent: state.selectedSubAgent,
-        message: text,
-      };
-      if (state.attachedPDF) {
-        body.pdf_base64 = state.attachedPDF.base64;
-        body.pdf_name   = state.attachedPDF.name;
-      }
-      const res = await fetch(CHAT_URL, {
+    const body = {
+      conversation_id: state.selectedConversationId,
+      client_id: state.selectedClientId,
+      sub_agent: state.selectedSubAgent,
+      message: text,
+    };
+    if (state.attachedPDF) {
+      body.pdf_base64 = state.attachedPDF.base64;
+      body.pdf_name   = state.attachedPDF.name;
+    }
+
+    async function callChat() {
+      return fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2054,10 +2148,20 @@
         },
         body: JSON.stringify(body),
       });
+    }
+
+    try {
+      let res = await callChat();
+      // If token expired mid-session, refresh once and retry.
+      if (res.status === 401) {
+        const refreshed = await ensureFreshSession();
+        if (refreshed) res = await callChat();
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
 
       state.selectedConversationId = data.conversation_id;
+      hideThinking();
       state.messages.push({
         role: 'assistant',
         content: data.response,
@@ -2067,9 +2171,10 @@
       await reloadConversations();
       renderConversationHistory();
     } catch (err) {
+      hideThinking();
       state.messages.push({
         role: 'assistant',
-        content: '⚠️ ' + (err.message || 'Request failed'),
+        content: 'Flag: ' + (err.message || 'Request failed') + '. If your session expired, sign out and back in.',
         sub_agent: 'system',
       });
       renderChatMessages();
