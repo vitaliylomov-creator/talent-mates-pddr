@@ -1225,6 +1225,137 @@
       transition: opacity 0.25s var(--ease);
     }
 
+
+    /* ── Chat item delete (sidebar hover) ────────────────────────── */
+    .chat-history-item { position: relative; }
+    .chat-item-del-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px; height: 22px;
+      border: none;
+      background: transparent;
+      color: var(--t3);
+      cursor: pointer;
+      border-radius: 6px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s var(--ease), color 0.18s var(--ease);
+    }
+    .chat-history-item:hover .chat-item-del-btn { display: inline-flex; }
+    .chat-item-del-btn:hover {
+      background: rgba(255,152,152,0.18);
+      color: #ff9898;
+    }
+    .chat-item-del-btn svg { display: block; }
+
+    /* ── Danger zone in profile modal ──────────────────────────── */
+    .danger-zone {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 0.5px solid var(--border);
+    }
+    .danger-zone-label {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,152,152,0.75);
+      margin-bottom: 10px;
+    }
+    .danger-zone-body {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--t3);
+      margin-bottom: 12px;
+    }
+    .danger-btn {
+      background: transparent;
+      color: #ff9898;
+      border: 0.5px solid rgba(255,152,152,0.45);
+      border-radius: 100px;
+      padding: 11px 18px;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
+    }
+    .danger-btn:hover {
+      background: rgba(255,152,152,0.10);
+      border-color: rgba(255,152,152,0.75);
+    }
+
+    /* ── Confirmation modal (small, centered) ─────────────────── */
+    .confirm-modal {
+      max-width: 460px;
+      padding: 26px 28px 24px;
+    }
+    .confirm-title {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 22px;
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+    .confirm-body {
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: var(--t2);
+      margin-bottom: 16px;
+    }
+    .confirm-body strong { color: var(--white); }
+    .confirm-input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid rgba(255,152,152,0.35);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: var(--font-b);
+      font-size: 14px;
+      color: var(--white);
+      letter-spacing: 0.18em;
+      text-align: center;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .confirm-input:focus { border-color: rgba(255,152,152,0.7); }
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .confirm-cancel {
+      background: transparent;
+      color: var(--t2);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 11px 20px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+    .confirm-cancel:hover { color: var(--t1); border-color: var(--border-strong); }
+    .confirm-go {
+      background: #ff9898;
+      color: #1a0f2e;
+      border: none;
+      border-radius: 100px;
+      padding: 11px 22px;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .confirm-go:hover { opacity: 0.92; }
+    .confirm-go:disabled { opacity: 0.4; cursor: not-allowed; }
+
   </style>
 </head>
 <body>
@@ -1650,6 +1781,32 @@
 
     <button class="primary-btn" onclick="saveAgentProfile()">Save Changes</button>
     <div class="modal-msg" id="profileMsg"></div>
+
+    <div class="danger-zone">
+      <div class="danger-zone-label">Danger zone</div>
+      <div class="danger-zone-body">
+        Delete your MATE Pro account permanently. We erase your agent profile, every client, every conversation, every video analysis, and any uploaded files. Your Founding 100 slot stays consumed (cannot be re-claimed by re-registering with the same email).
+      </div>
+      <button class="danger-btn" onclick="openDeleteAccountConfirm()">Delete my account</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     DELETE ACCOUNT CONFIRMATION MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="deleteConfirmOverlay" onclick="closeModal(event, 'deleteConfirmOverlay')">
+  <div class="modal confirm-modal">
+    <div class="confirm-title">Delete your MATE Pro account?</div>
+    <div class="confirm-body">
+      This action is permanent. We erase your agent profile, <strong>every client</strong>, every conversation, every video analysis, and all uploaded files. Type <strong>DELETE</strong> below to confirm.
+    </div>
+    <input type="text" class="confirm-input" id="deleteConfirmInput" placeholder="DELETE" autocomplete="off" />
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeModalById('deleteConfirmOverlay')">Cancel</button>
+      <button class="confirm-go" id="confirmDeleteBtn" onclick="confirmDeleteAccount()">Delete forever</button>
+    </div>
   </div>
 </div>
 
@@ -1665,6 +1822,7 @@
   const FRAMES_BUCKET = 'mate-pro-frames';
   const CHAT_URL      = SUPABASE_URL + '/functions/v1/mate-pro-chat';
   const VIDEO_URL     = SUPABASE_URL + '/functions/v1/mate-pro-video-analyse';
+  const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/mate-pro-delete-account';
 
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1915,7 +2073,15 @@
           '<div class="chat-history-text">' +
             '<div class="chat-history-title">' + escapeHtml(titleText) + '</div>' +
             '<div class="chat-history-client">' + sub + '</div>' +
-          '</div>';
+          '</div>' +
+          '<button class="chat-item-del-btn" title="Delete conversation" data-conv="' + c.id + '">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+              '<polyline points="3 6 5 6 21 6"/>' +
+              '<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>' +
+              '<path d="M10 11v6M14 11v6"/>' +
+            '</svg>' +
+          '</button>';
+        item.querySelector('.chat-item-del-btn').onclick = (e) => deleteConversation(e, c.id);
         root.appendChild(item);
       });
     }
@@ -2257,6 +2423,66 @@
   async function handleLogout() {
     await sb.auth.signOut();
     window.location.href = AUTH_PAGE;
+  }
+
+
+  // ── DELETE CONVERSATION ──────────────────────────────────────────────
+  async function deleteConversation(e, conversationId) {
+    e.stopPropagation();
+    // Inline silent confirm — keeps the sidebar fast for power users
+    if (!confirm('Delete this conversation? This cannot be undone.')) return;
+    const { error } = await sb
+      .from('mate_pro_conversations')
+      .delete()
+      .eq('id', conversationId)
+      .eq('agent_id', state.agent.id);
+    if (error) { alert('Could not delete: ' + error.message); return; }
+    state.conversations = state.conversations.filter(c => c.id !== conversationId);
+    if (state.selectedConversationId === conversationId) {
+      state.selectedConversationId = null;
+      state.messages = [];
+      renderChatMessages();
+    }
+    renderConversationHistory();
+  }
+
+  // ── DELETE ACCOUNT (GDPR Article 17) ─────────────────────────────────
+  function openDeleteAccountConfirm() {
+    document.getElementById('deleteConfirmInput').value = '';
+    document.getElementById('confirmDeleteBtn').disabled = false;
+    document.getElementById('confirmDeleteBtn').textContent = 'Delete forever';
+    document.getElementById('deleteConfirmOverlay').classList.add('visible');
+    setTimeout(() => document.getElementById('deleteConfirmInput').focus(), 80);
+  }
+  async function confirmDeleteAccount() {
+    const input = document.getElementById('deleteConfirmInput').value.trim();
+    if (input !== 'DELETE') {
+      alert('Type DELETE in capital letters to confirm.');
+      return;
+    }
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting…';
+    try {
+      const res = await fetch(DELETE_ACCOUNT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + state.session.access_token,
+          'apikey': SUPABASE_ANON,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      await sb.auth.signOut();
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = AUTH_PAGE + '?deleted=1';
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Delete forever';
+      alert('Could not delete account: ' + (err.message || 'Unknown error'));
+    }
   }
 
   // ── PDF ATTACHMENT ──────────────────────────────────────────────────
