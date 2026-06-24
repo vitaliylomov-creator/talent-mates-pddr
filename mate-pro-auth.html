@@ -1150,8 +1150,8 @@
         return;
       }
 
-      // Read intent from URL: ?role=agent or ?mode=register
-      const params = new URLSearchParams(window.location.search);
+      // Not signed in — read intent from URL: ?role=agent or ?mode=register
+      // (params was declared above for the signed-in branch; reuse it)
       if (params.get('role') === 'agent') setRole('agent');
       if (params.get('mode') === 'register') setMode('register');
     })();
