@@ -2098,7 +2098,7 @@
           escapeHtml(c.first_name + ' ' + c.last_name) + '</option>'
         ).join('');
     }
-    document.getElementById('videoModalOverlay').classList.add('open');
+    document.getElementById('videoModalOverlay').classList.add('visible');
   }
 
   function handleVideoSelect(e) {
@@ -2260,13 +2260,13 @@
 
   // ── MODAL HELPERS (kept from v1, minor) ─────────────────────────────
   function closeModal(e, id) {
-    if (e.target.id === id) document.getElementById(id).classList.remove('open');
+    if (e.target.id === id) document.getElementById(id).classList.remove('visible');
   }
   function closeModalById(id) {
-    document.getElementById(id).classList.remove('open');
+    document.getElementById(id).classList.remove('visible');
   }
-  function openClientRoster() { document.getElementById('rosterModalOverlay').classList.add('open'); }
-  function openAgentProfile() { document.getElementById('profileModalOverlay').classList.add('open'); }
+  function openClientRoster() { document.getElementById('rosterModalOverlay').classList.add('visible'); }
+  function openAgentProfile() { document.getElementById('profileModalOverlay').classList.add('visible'); }
   function switchRosterTab(tab, el) {
     document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
