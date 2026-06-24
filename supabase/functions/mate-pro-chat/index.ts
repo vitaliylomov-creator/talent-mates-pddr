@@ -64,6 +64,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "../_shared/cors.ts";
 import { MATE_PERSONAS } from "../_shared/mate-personas.ts";
+import { MATE_AGENT_PERSONAS } from "../_shared/mate-personas-agent.ts";
 import {
   TOOLS_SHARED,
   tool_web_search,
@@ -323,7 +324,10 @@ Notes for MATE: ${client.notes_for_mate ?? "none"}
 </client_context>`.trim()
     : `<no_client_active>The agent has not selected a specific client. Treat this as a general or prospecting query. If the question would benefit from client context, you may call list_clients to scan their roster, or ask the agent which client they have in mind.</no_client_active>`;
 
-  const overlay = `
+  // Agent-audience overlay retargets a player-side persona for the agent
+  // operator. Skipped entirely when the persona is already agent-native
+  // (e.g. agent-side Legal SKILL.md) — the overlay would be misleading.
+  const audienceOverlay = `
 <agent_audience_overlay>
 This conversation is happening inside MATE Pro, the B2B product for licensed football agents. The persona below was originally written for direct conversations with the player. For this conversation:
   - Any phrase like "the player", "the footballer", "you" in the persona refers to the AGENT'S CLIENT described in the <client_context> block above. The reader of your output is the AGENT, not the player.
@@ -331,10 +335,14 @@ This conversation is happening inside MATE Pro, the B2B product for licensed foo
   - If the persona instructs you to call a tool that does not exist in this context (e.g. player_training_log, agents have no PDDR access), IGNORE that instruction. Use the tools that ARE available: web_search, places_search, weather, uk_train_times, fifa_regulations_search, football_data, world_football_data, list_clients, get_client.
   - When the agent asks about their roster as a whole, or about multiple clients, prefer list_clients. When they ask about a specific client other than the one in <client_context>, use get_client.
   - Do NOT echo the words "race engineer", "Edge OS" or "MATE Pro" back at the agent. They are framing notes for you, not phrases to repeat.
-</agent_audience_overlay>
+</agent_audience_overlay>`.trim();
 
+  // Formatting constraints apply universally: agent-native SKILL.md files
+  // already contain matching rules in their Section 6.2, this block is the
+  // belt-and-suspenders defence in case any persona slips its own rules.
+  const formattingConstraints = `
 <formatting_constraints>
-Output rules for this conversation. These OVERRIDE any formatting instruction the persona below may give you (the persona was written for a different audience and a different surface).
+Output rules for this conversation.
 
 Do not use:
   - Markdown headers of any level. No "# ", "## ", "### ", "#### ". The reader is on a phone between meetings. They read paragraphs, not section walls.
@@ -358,11 +366,24 @@ Tone: senior peer to senior peer. The reader is a licensed agent with reputation
     ? `\nA contract document has been uploaded. Analyse it thoroughly as the Legal Advisor and cross-reference with fifa_regulations_search where relevant.`
     : "";
 
-  const personaRaw = MATE_PERSONAS[agentType] ?? MATE_PERSONAS.concierge;
-  // mate-chat originally injects pdfBlock inline at end of the Legal persona
-  // via ${pdfBlock}. We preserved that token as literal text in the snapshot
-  // and resolve it here so the rest of the persona stays byte-identical.
-  const persona = personaRaw.replace("${pdfBlock}", pdfBlockText);
+  // Persona selection: prefer agent-native SKILL.md when one exists for this
+  // sub-agent type. Falls back to the player-side snapshot from mate-chat
+  // wrapped by the audience overlay for sub-agents we have not yet rewritten.
+  const agentNativePersona = MATE_AGENT_PERSONAS[agentType];
+  let persona: string;
+  if (agentNativePersona) {
+    // SKILL.md is already written for the agent audience. Append the PDF
+    // note only when relevant (agent-side Legal handles PDFs the same way).
+    persona = agentNativePersona + (hasPDF ? "\n\n" + pdfBlockText.trim() : "");
+  } else {
+    const personaRaw = MATE_PERSONAS[agentType] ?? MATE_PERSONAS.concierge;
+    // mate-chat originally injects pdfBlock inline at end of the Legal
+    // persona via ${pdfBlock}. We preserved that token as literal text in
+    // the snapshot and resolve it here so the rest of the persona stays
+    // byte-identical to the player-side production version.
+    persona = personaRaw.replace("${pdfBlock}", pdfBlockText);
+  }
+  const useAgentNative = !!agentNativePersona;
 
   const toolGuidance = `
 Tool usage notes:
@@ -373,7 +394,11 @@ Tool usage notes:
 
   const dateBlock = `Today: ${dateStr} | Time: ${timeStr} (UK)`;
 
-  return `${overlay}
+  const overlayBlock = useAgentNative
+    ? formattingConstraints
+    : audienceOverlay + "\n\n" + formattingConstraints;
+
+  return `${overlayBlock}
 
 ${persona}
 
@@ -385,7 +410,7 @@ ${dateBlock}
 
 ${toolGuidance}
 
-Keep responses focused and premium. Use markdown formatting (numbered lists for steps, tables for structured comparisons, headers for contract analysis) only when it adds clarity. The agent reads this between meetings — never pad.`;
+Keep responses focused and premium. The agent reads this between meetings. Never pad.`;
 }
 
 // ─────────────────────────────────────────────
