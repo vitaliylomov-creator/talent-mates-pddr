@@ -1030,24 +1030,25 @@
       // Populate FIFA country dropdown (subset from server-side list)
       await populateCountries();
 
-      // If already signed in, route based on whether they have an Agent row
+      // If already signed in, route based on whether they have an Agent row.
+      // NEVER auto-redirect to PLAYER_DASH from this page — Players have
+      // their own mate-auth.html → mate-dashboard-v6.html flow and never
+      // legitimately land here. If a signed-in caller has no mate_pro_agents
+      // row, they're almost certainly a mid-flow agent (signed up step 1 but
+      // didn't complete profile), or they took a wrong link. In either case
+      // we keep them ON this page and offer step 2 (complete profile).
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        const { data: agent } = await sb
+        const { data: agent, error: agentErr } = await sb
           .from('mate_pro_agents')
           .select('id')
           .eq('user_id', session.user.id)
           .maybeSingle();
         if (agent) { window.location.href = AGENT_DASH; return; }
-        // Logged-in user without agent row — could be Player OR mid-flow agent.
-        // Default to Player dashboard; agent can sign out + request access if needed.
-        // If URL has ?role=agent intent, jump to step 2 instead.
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('role') === 'agent' && params.get('step') === '2') {
-          setRole('agent'); setMode('register'); showAgentStep2();
-          return;
-        }
-        window.location.href = PLAYER_DASH;
+        // No agent row → default to "complete profile" view rather than
+        // throwing them into the wrong product. They can also sign out if
+        // they want to register fresh as a Player via mate-auth.html.
+        setRole('agent'); setMode('register'); showAgentStep2();
         return;
       }
 
