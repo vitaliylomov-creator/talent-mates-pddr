@@ -761,6 +761,65 @@
       text-align: right;
     }
 
+
+    /* ── Google OAuth + OR divider ───────────────────── */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0 14px;
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--t4);
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: rgba(255,255,255,0.12);
+    }
+    .oauth-btn {
+      width: 100%;
+      background: var(--white);
+      color: var(--ink);
+      border: none;
+      border-radius: 100px;
+      padding: 13px 18px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .oauth-btn:hover { opacity: 0.92; transform: scale(1.005); }
+    .oauth-btn svg { flex-shrink: 0; }
+
+    /* Password input show/hide toggle */
+    .field-input-wrap { position: relative; }
+    .field-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--t3);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 4px 6px;
+      transition: color 0.2s;
+    }
+    .field-toggle:hover { color: var(--t1); }
+
   </style>
 </head>
 <body>
@@ -879,10 +938,23 @@
         </div>
         <div class="field">
           <label class="field-label" for="si_password">Password</label>
-          <input type="password" id="si_password" autocomplete="current-password" placeholder="••••••••" />
+          <div class="field-input-wrap"><input type="password" id="si_password" autocomplete="current-password" placeholder="••••••••" /><button type="button" class="field-toggle" onclick="togglePw('si_password', this)" aria-label="Show password">Show</button></div>
         </div>
 
         <button class="btn-primary" type="button" id="signinBtn" onclick="doSignIn()">Sign in</button>
+
+        <div class="auth-divider">OR</div>
+
+        <button type="button" class="oauth-btn" onclick="doGoogleOAuth(event)">
+          <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+            <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
         <button class="btn-ghost"   type="button" onclick="sendMagicLink()">Send me a magic link instead</button>
 
         <div class="link-row">
@@ -904,7 +976,7 @@
         </div>
         <div class="field">
           <label class="field-label" for="pr_password">Password</label>
-          <input type="password" id="pr_password" autocomplete="new-password" placeholder="At least 8 characters" />
+          <div class="field-input-wrap"><input type="password" id="pr_password" autocomplete="new-password" placeholder="At least 8 characters" /><button type="button" class="field-toggle" onclick="togglePw('pr_password', this)" aria-label="Show password">Show</button></div>
           <div class="helper">Minimum 8 characters.</div>
         </div>
 
@@ -921,6 +993,18 @@
         </label>
 
         <button class="btn-primary is-disabled" type="button" id="playerRegisterBtn" onclick="doPlayerRegister()" disabled>Create account</button>
+
+        <div class="auth-divider">OR</div>
+
+        <button type="button" class="oauth-btn" onclick="doGoogleOAuth(event)">
+          <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+            <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
 
 
         <div id="playerRegisterMsg" class="form-msg"></div>
@@ -941,7 +1025,7 @@
         </div>
         <div class="field">
           <label class="field-label" for="ar_password">Password</label>
-          <input type="password" id="ar_password" autocomplete="new-password" placeholder="At least 8 characters" />
+          <div class="field-input-wrap"><input type="password" id="ar_password" autocomplete="new-password" placeholder="At least 8 characters" /><button type="button" class="field-toggle" onclick="togglePw('ar_password', this)" aria-label="Show password">Show</button></div>
           <div class="helper">Minimum 8 characters.</div>
         </div>
 
@@ -1030,25 +1114,39 @@
       // Populate FIFA country dropdown (subset from server-side list)
       await populateCountries();
 
-      // If already signed in, route based on whether they have an Agent row.
-      // NEVER auto-redirect to PLAYER_DASH from this page — Players have
-      // their own mate-auth.html → mate-dashboard-v6.html flow and never
-      // legitimately land here. If a signed-in caller has no mate_pro_agents
-      // row, they're almost certainly a mid-flow agent (signed up step 1 but
-      // didn't complete profile), or they took a wrong link. In either case
-      // we keep them ON this page and offer step 2 (complete profile).
+      // If already signed in, route by product affiliation:
+      //   1. mate_pro_agents row exists → AGENT_DASH
+      //   2. players row exists → PLAYER_DASH
+      //   3. neither → check intent (URL ?role= or localStorage mate_intent)
+      //      - intent=agent → step 2 (complete agent profile)
+      //      - intent=player → mate-onboarding.html (Players' onboarding)
+      //      - intent missing → default to mate-onboarding.html (Player path
+      //        is the more common case for direct OAuth landings)
       const { data: { session } } = await sb.auth.getSession();
+      const params = new URLSearchParams(window.location.search);
       if (session) {
-        const { data: agent, error: agentErr } = await sb
+        const { data: agent } = await sb
           .from('mate_pro_agents')
           .select('id')
           .eq('user_id', session.user.id)
           .maybeSingle();
         if (agent) { window.location.href = AGENT_DASH; return; }
-        // No agent row → default to "complete profile" view rather than
-        // throwing them into the wrong product. They can also sign out if
-        // they want to register fresh as a Player via mate-auth.html.
-        setRole('agent'); setMode('register'); showAgentStep2();
+
+        const { data: player } = await sb
+          .from('players')
+          .select('id')
+          .eq('auth_user_id', session.user.id)
+          .maybeSingle();
+        if (player) { window.location.href = PLAYER_DASH; return; }
+
+        // Neither product row exists — route by stored intent
+        const intent = params.get('role') || localStorage.getItem('mate_intent');
+        if (intent === 'agent') {
+          setRole('agent'); setMode('register'); showAgentStep2();
+        } else {
+          // Default to Players onboarding (existing Players flow)
+          window.location.href = 'mate-onboarding.html';
+        }
         return;
       }
 
@@ -1116,6 +1214,35 @@
         const el = document.getElementById(id);
         if (el) { el.className = 'form-msg'; el.textContent = ''; }
       });
+    }
+
+
+    // ── Google OAuth (Player or Agent — intent stored before redirect) ──
+    async function doGoogleOAuth(e) {
+      if (e) e.preventDefault();
+      // Persist role intent so post-OAuth init() can route correctly
+      try { localStorage.setItem('mate_intent', role); } catch (_) {}
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://app.talent-mates.com/mate-pro-auth.html',
+          queryParams: { access_type: 'offline', prompt: 'consent' },
+        },
+      });
+      if (error) {
+        const msg = document.getElementById(mode === 'signin' ? 'signinMsg' : (role === 'player' ? 'playerRegisterMsg' : 'agentStep1Msg'));
+        if (msg) { msg.className = 'form-msg error'; msg.textContent = 'Google sign-in failed: ' + error.message; }
+      }
+    }
+
+    // ── Show/hide password toggle ───────────────────────────────────────
+    function togglePw(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.textContent = isHidden ? 'Hide' : 'Show';
+      btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
     }
 
     // ── SIGN IN (Player or Agent) ───────────────────────────────────────
