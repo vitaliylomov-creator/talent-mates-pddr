@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#794DC6" />
   <title>MATE Pro — Talent Mates</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
@@ -1099,6 +1101,88 @@
       .analysis-options { grid-template-columns: 1fr; }
       .founding-badge { display: none; }
     }
+
+    /* ── Rendered markdown inside assistant messages ───────────────── */
+    .chat-msg-body { font-size: 14.5px; line-height: 1.62; color: var(--t1); }
+    .chat-msg-body > *:first-child { margin-top: 0; }
+    .chat-msg-body > *:last-child  { margin-bottom: 0; }
+    .chat-msg-body p { margin: 0 0 12px; }
+    .chat-msg-body h1,
+    .chat-msg-body h2,
+    .chat-msg-body h3,
+    .chat-msg-body h4 {
+      font-family: var(--font-d);
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--t1);
+      margin: 18px 0 8px;
+    }
+    .chat-msg-body h1 { font-size: 22px; }
+    .chat-msg-body h2 { font-size: 19px; }
+    .chat-msg-body h3 { font-size: 16.5px; }
+    .chat-msg-body h4 { font-size: 15px; }
+    .chat-msg-body strong { color: var(--t1); font-weight: 500; }
+    .chat-msg-body em { color: var(--t2); font-style: italic; font-family: inherit; }
+    .chat-msg-body ul,
+    .chat-msg-body ol { margin: 6px 0 14px; padding-left: 22px; }
+    .chat-msg-body li { margin: 4px 0; color: var(--t2); }
+    .chat-msg-body li > p { margin: 0 0 6px; }
+    .chat-msg-body blockquote {
+      margin: 12px 0;
+      padding: 6px 0 6px 14px;
+      border-left: 2px solid rgba(255,255,255,0.25);
+      color: var(--t2);
+      font-style: italic;
+    }
+    .chat-msg-body hr {
+      border: none;
+      border-top: 0.5px solid rgba(255,255,255,0.10);
+      margin: 18px 0;
+    }
+    .chat-msg-body code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      font-size: 0.88em;
+      background: rgba(0,0,0,0.22);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .chat-msg-body pre {
+      background: rgba(0,0,0,0.28);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      margin: 10px 0 14px;
+    }
+    .chat-msg-body pre code { background: transparent; padding: 0; }
+    .chat-msg-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 16px;
+      font-size: 13.5px;
+    }
+    .chat-msg-body th,
+    .chat-msg-body td {
+      padding: 8px 12px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.12);
+      text-align: left;
+      vertical-align: top;
+    }
+    .chat-msg-body th {
+      font-weight: 500;
+      color: var(--t1);
+      background: rgba(0,0,0,0.16);
+      letter-spacing: 0.02em;
+    }
+    .chat-msg-body td { color: var(--t2); }
+    .chat-msg-body tr:last-child td { border-bottom: none; }
+    .chat-msg-body a {
+      color: var(--t1);
+      border-bottom: 0.5px dotted rgba(255,255,255,0.35);
+    }
+    .chat-msg-body a:hover { border-bottom-color: var(--t1); }
+
   </style>
 </head>
 <body>
@@ -1855,8 +1939,14 @@
       node.appendChild(tag);
     }
     const body = document.createElement('div');
-    body.style.cssText = 'white-space: pre-wrap; line-height: 1.55; font-size: 14px;';
-    body.textContent = m.content || '';
+    if (m.role === 'assistant' && window.marked && window.DOMPurify) {
+      body.className = 'chat-msg-body';
+      const raw = window.marked.parse(m.content || '', { breaks: true, gfm: true });
+      body.innerHTML = window.DOMPurify.sanitize(raw);
+    } else {
+      body.style.cssText = 'white-space: pre-wrap; line-height: 1.55; font-size: 14px;';
+      body.textContent = m.content || '';
+    }
     node.appendChild(body);
     if (m.attachment_type === 'video_analysis') {
       const tag = document.createElement('div');
