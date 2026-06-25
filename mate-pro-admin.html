@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#794DC6" />
+  <title>MATE Pro — Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --purple:        #794DC6;
+      --purple-dk:     #6b42b5;
+      --ink:           #1a0f2e;
+      --white:         #ffffff;
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.35);
+      --border:        rgba(255,255,255,0.10);
+      --border-mid:    rgba(255,255,255,0.20);
+      --border-strong: rgba(255,255,255,0.35);
+      --accent-green:  #6dffb3;
+      --accent-amber:  #ffb86d;
+      --accent-red:    #ff9898;
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--purple);
+      color: var(--t1);
+      font-family: var(--font-b);
+      font-weight: 300;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+
+    .topnav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 32px;
+      background: rgba(121,77,198,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .nav-brand {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .nav-brand strong { color: var(--white); font-weight: 500; }
+    .nav-brand span { color: var(--t3); font-weight: 400; }
+    .nav-brand .admin-tag {
+      color: var(--accent-amber);
+      margin-left: 14px;
+      font-weight: 500;
+    }
+    .nav-back {
+      font-size: 12px;
+      color: var(--t3);
+      letter-spacing: 0.04em;
+    }
+    .nav-back:hover { color: var(--t1); }
+
+    main { padding: 32px 32px 80px; max-width: 1500px; margin: 0 auto; }
+
+    h1 {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 38px;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    h1 em { color: var(--t3); font-family: var(--font-d); font-style: italic; }
+    .subtitle { color: var(--t3); margin-bottom: 28px; font-size: 13px; }
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .stat {
+      padding: 16px 18px;
+      background: rgba(0,0,0,0.18);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+    }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      color: var(--white);
+    }
+    @media (max-width: 900px) { .stats { grid-template-columns: 1fr 1fr; } }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(0,0,0,0.12);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    th {
+      text-align: left;
+      padding: 12px 14px;
+      background: rgba(0,0,0,0.20);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--t3);
+      font-weight: 500;
+      border-bottom: 0.5px solid var(--border);
+    }
+    td {
+      padding: 14px;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--t2);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .pill::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+    }
+    .pill-pending  { background: rgba(255,184,109,0.10); border: 0.5px solid rgba(255,184,109,0.40); color: var(--accent-amber); }
+    .pill-pending::before  { background: var(--accent-amber); }
+    .pill-verified { background: rgba(109,255,179,0.10); border: 0.5px solid rgba(109,255,179,0.40); color: var(--accent-green); }
+    .pill-verified::before { background: var(--accent-green); }
+    .pill-rejected { background: rgba(255,152,152,0.10); border: 0.5px solid rgba(255,152,152,0.40); color: var(--accent-red); }
+    .pill-rejected::before { background: var(--accent-red); }
+    .pill-sub-active   { background: rgba(109,255,179,0.10); border: 0.5px solid rgba(109,255,179,0.40); color: var(--accent-green); }
+    .pill-sub-active::before { background: var(--accent-green); }
+    .pill-sub-trial    { background: rgba(255,184,109,0.10); border: 0.5px solid rgba(255,184,109,0.40); color: var(--accent-amber); }
+    .pill-sub-trial::before { background: var(--accent-amber); }
+    .pill-sub-none     { background: rgba(255,255,255,0.04); border: 0.5px solid var(--border); color: var(--t3); }
+    .pill-sub-none::before { background: var(--t3); }
+
+    .name { color: var(--t1); font-weight: 500; }
+    .email { color: var(--t3); font-size: 11.5px; margin-top: 2px; }
+    .licence { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--t1); }
+    .country { font-size: 11px; color: var(--t3); margin-top: 2px; letter-spacing: 0.04em; }
+    .founding { font-family: var(--font-d); font-size: 20px; color: var(--accent-green); }
+    .founding-empty { color: var(--t4); font-size: 12px; }
+    .deadline { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .deadline.expired { color: var(--accent-red); }
+    .joined { font-size: 11px; color: var(--t3); }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: stretch;
+      min-width: 150px;
+    }
+    .action-btn {
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border-mid);
+      color: var(--t1);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
+      font-family: var(--font-b);
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.10); border-color: var(--border-strong); }
+    .action-btn.verify { color: var(--accent-green); border-color: rgba(109,255,179,0.35); }
+    .action-btn.verify:hover { background: rgba(109,255,179,0.08); }
+    .action-btn.reject { color: var(--accent-red); border-color: rgba(255,152,152,0.35); }
+    .action-btn.reject:hover { background: rgba(255,152,152,0.08); }
+    .action-btn.fifa { color: var(--accent-amber); border-color: rgba(255,184,109,0.35); }
+    .action-btn.fifa:hover { background: rgba(255,184,109,0.08); }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #loading, #error {
+      padding: 22px;
+      border-radius: 14px;
+      text-align: center;
+      color: var(--t2);
+      background: rgba(0,0,0,0.18);
+      border: 0.5px solid var(--border);
+      margin-top: 22px;
+    }
+    #error { color: var(--accent-red); border-color: rgba(255,152,152,0.35); }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav">
+    <div class="nav-brand">
+      <strong>Talent</strong> <span>Mates</span>
+      <span class="admin-tag">· MATE PRO ADMIN</span>
+    </div>
+    <a href="mate-pro-dashboard.html" class="nav-back">← back to dashboard</a>
+  </nav>
+
+  <main>
+    <h1>Admin · <em>FFAR verification</em></h1>
+    <div class="subtitle">Check FFAR licence numbers at <a href="https://www.fifa.com/about-fifa/football-agents" target="_blank" rel="noopener" style="color:var(--accent-amber); border-bottom: 0.5px dotted;">fifa.com/about-fifa/football-agents</a>. Verify or reject each agent during their 14-day trial.</div>
+
+    <div class="stats" id="stats"></div>
+
+    <div id="loading">Loading…</div>
+    <div id="error" style="display:none"></div>
+    <table id="agentsTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>FFAR licence</th>
+          <th>Verification</th>
+          <th>Founding</th>
+          <th>Subscription</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="agentsBody"></tbody>
+    </table>
+  </main>
+
+  <script>
+    const SUPABASE_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+    const ADMIN_URL     = SUPABASE_URL + '/functions/v1/mate-pro-admin-actions';
+    const AUTH_PAGE     = 'mate-pro-auth.html';
+    const DASHBOARD     = 'mate-pro-dashboard.html';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    let session = null;
+
+    (async function init() {
+      const { data: { session: s } } = await sb.auth.getSession();
+      if (!s) { window.location.href = AUTH_PAGE; return; }
+      session = s;
+      await loadAgents();
+    })();
+
+    async function apiCall(payload) {
+      const res = await fetch(ADMIN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.access_token,
+          'apikey': SUPABASE_ANON,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      return data;
+    }
+
+    async function loadAgents() {
+      const loading = document.getElementById('loading');
+      const errBox = document.getElementById('error');
+      const tbl = document.getElementById('agentsTable');
+      loading.style.display = 'block';
+      errBox.style.display = 'none';
+      tbl.style.display = 'none';
+      try {
+        const data = await apiCall({ action: 'list' });
+        renderStats(data.agents);
+        renderAgents(data.agents);
+        loading.style.display = 'none';
+        tbl.style.display = '';
+      } catch (err) {
+        loading.style.display = 'none';
+        errBox.style.display = 'block';
+        errBox.textContent = err.message === 'Not authorized'
+          ? 'You are not on the admin allowlist for this page. If this is wrong, edit ADMIN_EMAILS in mate-pro-admin-actions edge function.'
+          : 'Error: ' + err.message;
+      }
+    }
+
+    function renderStats(agents) {
+      const total = agents.length;
+      const verified = agents.filter(a => a.ffar_verified).length;
+      const pending  = total - verified;
+      const trialing = agents.filter(a => a.subscription?.status === 'trialing').length;
+      const active   = agents.filter(a => a.subscription?.status === 'active').length;
+      document.getElementById('stats').innerHTML = `
+        <div class="stat"><div class="stat-label">Total agents</div><div class="stat-value">${total}</div></div>
+        <div class="stat"><div class="stat-label">FFAR pending</div><div class="stat-value">${pending}</div></div>
+        <div class="stat"><div class="stat-label">FFAR verified</div><div class="stat-value">${verified}</div></div>
+        <div class="stat"><div class="stat-label">In trial</div><div class="stat-value">${trialing}</div></div>
+        <div class="stat"><div class="stat-label">Paying</div><div class="stat-value">${active}</div></div>
+      `;
+    }
+
+    function renderAgents(agents) {
+      const body = document.getElementById('agentsBody');
+      body.innerHTML = '';
+      if (agents.length === 0) {
+        body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 30px; color: var(--t3);">No agents yet.</td></tr>';
+        return;
+      }
+      const now = Date.now();
+      agents.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.id = 'row-' + a.id;
+        const deadline = a.founding_window_ends_at ? new Date(a.founding_window_ends_at).getTime() : 0;
+        const deadlineExpired = deadline && now > deadline;
+        const daysLeft = deadline ? Math.max(0, Math.ceil((deadline - now) / 86400000)) : 0;
+        const verifPill = a.ffar_verified
+          ? '<span class="pill pill-verified">Verified</span>'
+          : (a.ffar_verified_at === null && a.ffar_verified === false
+              ? '<span class="pill pill-pending">Pending</span>'
+              : '<span class="pill pill-pending">Pending</span>');
+        let subPill = '<span class="pill pill-sub-none">No subscription</span>';
+        if (a.subscription) {
+          const s = a.subscription;
+          if (s.status === 'trialing') subPill = `<span class="pill pill-sub-trial">Trial · ${s.plan}</span>`;
+          else if (s.status === 'active') subPill = `<span class="pill pill-sub-active">Active · ${s.plan}</span>`;
+          else subPill = `<span class="pill pill-sub-none">${s.status}</span>`;
+        }
+        const fifaSearchUrl = 'https://www.fifa.com/about-fifa/football-agents';
+        tr.innerHTML = `
+          <td>
+            <div class="name">${esc(a.first_name)} ${esc(a.last_name)}</div>
+            <div class="email">${esc(a.email)}</div>
+          </td>
+          <td>
+            <div class="licence">${esc(a.ffar_licence)}</div>
+            <div class="country">${esc(a.ffar_country)}</div>
+          </td>
+          <td>${verifPill}</td>
+          <td>
+            ${a.founding_number ? '<div class="founding">#' + a.founding_number + '</div>' : '<div class="founding-empty">none</div>'}
+            ${a.founding_number ? '<div class="deadline ' + (deadlineExpired ? 'expired' : '') + '">' + (deadlineExpired ? 'Window expired' : daysLeft + ' days for €149') + '</div>' : ''}
+          </td>
+          <td>${subPill}</td>
+          <td class="joined">${new Date(a.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'2-digit' })}</td>
+          <td>
+            <div class="actions">
+              <a class="action-btn fifa" href="${fifaSearchUrl}" target="_blank" rel="noopener">Search FIFA registry</a>
+              ${!a.ffar_verified
+                ? '<button class="action-btn verify" onclick="actVerify(\'' + a.id + '\')">Verify FFAR</button>'
+                : '<button class="action-btn reject" onclick="actReject(\'' + a.id + '\')">Unverify</button>'}
+              ${a.subscription && !a.subscription.cancel_at && (a.subscription.status === 'trialing' || a.subscription.status === 'active')
+                ? '<button class="action-btn reject" onclick="actCancelSub(\'' + a.id + '\')">Cancel subscription</button>'
+                : ''}
+            </div>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    async function actVerify(agentId) {
+      if (!confirm('Mark this agent as FFAR-verified? They become eligible for the Founding €149 price (if still within the 30-day window).')) return;
+      try {
+        await apiCall({ action: 'verify', agent_id: agentId });
+        await loadAgents();
+      } catch (err) { alert('Verify failed: ' + err.message); }
+    }
+    async function actReject(agentId) {
+      if (!confirm('Mark this agent as NOT FFAR-verified? They lose Founding €149 eligibility.')) return;
+      try {
+        await apiCall({ action: 'reject', agent_id: agentId });
+        await loadAgents();
+      } catch (err) { alert('Reject failed: ' + err.message); }
+    }
+    async function actCancelSub(agentId) {
+      if (!confirm('Cancel this agent\'s subscription at period end (Stripe-side)? They keep access until the current period ends.')) return;
+      try {
+        await apiCall({ action: 'cancel_subscription', agent_id: agentId });
+        await loadAgents();
+      } catch (err) { alert('Cancel failed: ' + err.message); }
+    }
+    function esc(s) { return (s ?? '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+  </script>
+</body>
+</html>

@@ -1356,6 +1356,77 @@
     .confirm-go:hover { opacity: 0.92; }
     .confirm-go:disabled { opacity: 0.4; cursor: not-allowed; }
 
+
+    /* ── Billing banner (top of main area) ─────────────────────────── */
+    .billing-banner {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      margin: 0 24px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+      backdrop-filter: blur(10px);
+    }
+    .billing-banner.visible { display: flex; }
+    .billing-banner.tone-pending {
+      background: rgba(255,184,109,0.10);
+      border: 0.5px solid rgba(255,184,109,0.40);
+      color: var(--t1);
+    }
+    .billing-banner.tone-trial {
+      background: rgba(109,255,179,0.10);
+      border: 0.5px solid rgba(109,255,179,0.40);
+      color: var(--t1);
+    }
+    .billing-banner.tone-active {
+      background: rgba(109,255,179,0.06);
+      border: 0.5px solid rgba(109,255,179,0.28);
+      color: var(--t2);
+    }
+    .billing-banner.tone-cancel {
+      background: rgba(255,152,152,0.10);
+      border: 0.5px solid rgba(255,152,152,0.40);
+      color: var(--t1);
+    }
+    .billing-banner-body { flex: 1; }
+    .billing-banner-body strong { color: var(--white); font-weight: 500; }
+    .billing-banner-cta {
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .billing-banner-cta:hover { opacity: 0.92; transform: scale(1.02); }
+    .billing-banner-cta:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Admin link in sidebar (founder only) */
+    .sidebar-admin-link {
+      display: none;
+      margin: 8px 16px 0;
+      padding: 7px 12px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-amber);
+      border: 0.5px solid rgba(255,184,109,0.35);
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.15s var(--ease);
+    }
+    .sidebar-admin-link.visible { display: block; }
+    .sidebar-admin-link:hover { background: rgba(255,184,109,0.10); }
+
   </style>
 </head>
 <body>
@@ -1374,6 +1445,7 @@
       </svg>
       New chat
     </button>
+    <a href="mate-pro-admin.html" class="sidebar-admin-link" id="sidebarAdminLink">⚙ Admin · FFAR</a>
   </div>
 
   <div class="sidebar-history" id="sidebarHistory">
@@ -1419,6 +1491,11 @@
         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
       </svg>
     </button>
+  </div>
+
+  <div class="billing-banner" id="billingBanner">
+    <div class="billing-banner-body" id="billingBannerBody"></div>
+    <button class="billing-banner-cta" id="billingBannerCta" onclick="onBillingCtaClick()"></button>
   </div>
 
   <!-- STATS BAR (agent identity) -->
@@ -1787,11 +1864,29 @@
       <div class="danger-zone-body">
         Delete your MATE Pro account permanently. We erase your agent profile, every client, every conversation, every video analysis, and any uploaded files. Your Founding 100 slot stays consumed (cannot be re-claimed by re-registering with the same email).
       </div>
+      <button class="danger-btn" id="cancelSubBtn" onclick="openCancelSubConfirm()" style="display:none; margin-right: 10px;">Cancel subscription</button>
       <button class="danger-btn" onclick="openDeleteAccountConfirm()">Delete my account</button>
     </div>
   </div>
 </div>
 
+
+
+<!-- ══════════════════════════════════
+     CANCEL SUBSCRIPTION CONFIRMATION
+══════════════════════════════════ -->
+<div class="modal-overlay" id="cancelSubOverlay" onclick="closeModal(event, 'cancelSubOverlay')">
+  <div class="modal confirm-modal">
+    <div class="confirm-title">Cancel subscription?</div>
+    <div class="confirm-body">
+      Your card will not be charged again. You keep access until the current period ends. You can resubscribe any time.
+    </div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeModalById('cancelSubOverlay')">Keep subscription</button>
+      <button class="confirm-go" id="cancelSubGoBtn" onclick="confirmCancelSub()">Cancel at period end</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════
      DELETE ACCOUNT CONFIRMATION MODAL
@@ -1823,6 +1918,9 @@
   const CHAT_URL      = SUPABASE_URL + '/functions/v1/mate-pro-chat';
   const VIDEO_URL     = SUPABASE_URL + '/functions/v1/mate-pro-video-analyse';
   const DELETE_ACCOUNT_URL = SUPABASE_URL + '/functions/v1/mate-pro-delete-account';
+  const CHECKOUT_URL       = SUPABASE_URL + '/functions/v1/mate-pro-create-checkout';
+  const CANCEL_SUB_URL     = SUPABASE_URL + '/functions/v1/mate-pro-cancel-subscription';
+  const ADMIN_EMAILS       = new Set(['vitaliylomov@gmail.com']);
 
   const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1841,6 +1939,7 @@
     attachedPDF: null,            // { base64, name }
     videoFile: null,
     busy: false,
+    subscription: null,
   };
 
   // ── INIT ────────────────────────────────────────────────────────────
@@ -1866,9 +1965,12 @@
       state.clients.find(c => c.status === 'active')?.id ?? state.clients[0]?.id ?? null;
 
     await reloadConversations();
+    await loadSubscription();
 
     renderAgentIdentity();
     renderRosterStrip();
+    renderBillingBanner();
+    showAdminLinkIfFounder();
     renderClientListInModal();
     renderConversationHistory();
     renderWelcomePrompts();
@@ -2485,6 +2587,179 @@
     }
   }
 
+
+  // ── SUBSCRIPTION (Stripe) ────────────────────────────────────────────
+  async function loadSubscription() {
+    const { data } = await sb
+      .from('mate_pro_subscriptions')
+      .select('id, plan, status, trial_ends_at, current_period_end, cancel_at, stripe_subscription_id')
+      .eq('agent_id', state.agent.id)
+      .in('status', ['trialing','active','past_due'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    state.subscription = data || null;
+  }
+
+  function renderBillingBanner() {
+    const banner = document.getElementById('billingBanner');
+    const body   = document.getElementById('billingBannerBody');
+    const cta    = document.getElementById('billingBannerCta');
+    if (!banner || !body || !cta) return;
+    banner.classList.remove('visible','tone-pending','tone-trial','tone-active','tone-cancel');
+
+    const sub = state.subscription;
+    const agent = state.agent;
+    const now = Date.now();
+    const foundingDeadline = agent.founding_window_ends_at ? new Date(agent.founding_window_ends_at).getTime() : 0;
+    const founding30LeftDays = foundingDeadline ? Math.max(0, Math.ceil((foundingDeadline - now) / 86400000)) : 0;
+    const foundingExpired = foundingDeadline && now > foundingDeadline;
+    const eligibleFounding = agent.ffar_verified && agent.founding_number && !foundingExpired;
+    const priceLabel = eligibleFounding ? '€149/mo Founding' : '€299/mo Standard';
+
+    if (!sub) {
+      // No subscription yet
+      banner.classList.add('visible','tone-pending');
+      let msg;
+      if (!agent.ffar_verified) {
+        msg = '<strong>FFAR verification pending.</strong> Your licence is being reviewed. ' +
+              (foundingExpired
+                ? 'The €149 Founding window has closed; standard rate is €299/mo when ready.'
+                : 'You have <strong>' + founding30LeftDays + ' day' + (founding30LeftDays === 1 ? '' : 's') + '</strong> left to lock the €149 Founding rate after verification.');
+      } else if (eligibleFounding) {
+        msg = '<strong>Lock your €149/month lifetime Founding rate.</strong> ' + founding30LeftDays + ' day' + (founding30LeftDays === 1 ? '' : 's') + ' left in the window. After that, €299/month.';
+      } else {
+        msg = '<strong>Start your subscription.</strong> 14-day trial, then €299/month Standard.';
+      }
+      body.innerHTML = msg;
+      cta.textContent = 'Subscribe — ' + priceLabel;
+      cta.disabled = false;
+      cta.dataset.action = 'subscribe';
+      return;
+    }
+
+    // Has subscription
+    if (sub.status === 'trialing') {
+      const trialEnd = sub.trial_ends_at ? new Date(sub.trial_ends_at) : null;
+      const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - now) / 86400000)) : 0;
+      const planPrice = sub.plan === 'founding' ? '€149/mo' : '€299/mo';
+      banner.classList.add('visible','tone-trial');
+      body.innerHTML = '<strong>Trial active.</strong> ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + ' left. After trial: ' + planPrice + '. ' +
+        (sub.cancel_at
+          ? '<span style="color: var(--accent-amber)"> Cancellation scheduled for end of period.</span>'
+          : 'Cancel any time from your profile.');
+      cta.textContent = sub.cancel_at ? 'Reactivate' : 'Manage';
+      cta.dataset.action = 'manage';
+      return;
+    }
+    if (sub.status === 'active') {
+      const planPrice = sub.plan === 'founding' ? '€149/mo Founding' : '€299/mo Standard';
+      banner.classList.add('visible','tone-active');
+      if (sub.cancel_at) {
+        const endDate = new Date(sub.cancel_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        body.innerHTML = '<strong>Subscription ends ' + endDate + '.</strong> ' + planPrice + ' until then. You can resubscribe any time.';
+      } else {
+        body.innerHTML = 'Active subscription · <strong>' + planPrice + '</strong>.';
+      }
+      cta.textContent = 'Manage';
+      cta.dataset.action = 'manage';
+      return;
+    }
+    if (sub.status === 'past_due') {
+      banner.classList.add('visible','tone-cancel');
+      body.innerHTML = '<strong>Payment failed.</strong> Update your card to keep access.';
+      cta.textContent = 'Update payment';
+      cta.dataset.action = 'subscribe';
+      return;
+    }
+  }
+
+  function showAdminLinkIfFounder() {
+    const link = document.getElementById('sidebarAdminLink');
+    const email = (state.session?.user?.email ?? '').toLowerCase();
+    if (link && ADMIN_EMAILS.has(email)) link.classList.add('visible');
+  }
+
+  async function onBillingCtaClick() {
+    const cta = document.getElementById('billingBannerCta');
+    const action = cta.dataset.action;
+    if (action === 'subscribe') return doSubscribe();
+    if (action === 'manage') {
+      // Open profile modal so user can see Cancel button (or other manage options later)
+      openAgentProfile();
+      return;
+    }
+  }
+
+  async function doSubscribe() {
+    const cta = document.getElementById('billingBannerCta');
+    const originalLabel = cta.textContent;
+    cta.disabled = true;
+    cta.textContent = 'Loading…';
+    try {
+      const res = await fetch(CHECKOUT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + state.session.access_token,
+          'apikey': SUPABASE_ANON,
+        },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      if (!data.url) throw new Error('No checkout URL returned');
+      window.location.href = data.url;
+    } catch (err) {
+      cta.disabled = false;
+      cta.textContent = originalLabel;
+      alert('Could not start checkout: ' + (err.message || 'Unknown error'));
+    }
+  }
+
+  function openCancelSubConfirm() {
+    document.getElementById('cancelSubGoBtn').disabled = false;
+    document.getElementById('cancelSubGoBtn').textContent = 'Cancel at period end';
+    document.getElementById('cancelSubOverlay').classList.add('visible');
+  }
+
+  async function confirmCancelSub() {
+    const btn = document.getElementById('cancelSubGoBtn');
+    btn.disabled = true;
+    btn.textContent = 'Cancelling…';
+    try {
+      const res = await fetch(CANCEL_SUB_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + state.session.access_token,
+          'apikey': SUPABASE_ANON,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      closeModalById('cancelSubOverlay');
+      await loadSubscription();
+      renderBillingBanner();
+      updateProfileCancelButton();
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Cancel at period end';
+      alert('Could not cancel: ' + (err.message || 'Unknown error'));
+    }
+  }
+
+  function updateProfileCancelButton() {
+    const btn = document.getElementById('cancelSubBtn');
+    if (!btn) return;
+    const sub = state.subscription;
+    if (sub && !sub.cancel_at && (sub.status === 'trialing' || sub.status === 'active')) {
+      btn.style.display = '';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
   // ── PDF ATTACHMENT ──────────────────────────────────────────────────
   function openPDFPicker() { document.getElementById('pdfFileInput').click(); }
   async function handlePDFSelect(e) {
@@ -2687,7 +2962,7 @@
     document.getElementById(id).classList.remove('visible');
   }
   function openClientRoster() { document.getElementById('rosterModalOverlay').classList.add('visible'); }
-  function openAgentProfile() { document.getElementById('profileModalOverlay').classList.add('visible'); }
+  function openAgentProfile() { updateProfileCancelButton(); document.getElementById('profileModalOverlay').classList.add('visible'); }
   function switchRosterTab(tab, el) {
     document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');

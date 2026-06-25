@@ -460,6 +460,21 @@ Deno.serve(async (req) => {
     if (agentErr) return json({ error: agentErr.message }, 500);
     if (!agent) return json({ error: "Caller is not a registered MATE Pro agent" }, 403);
 
+    // ── 1b. Subscription gate ──────────────────────────────────────────
+    // Enforce only when MATE_PRO_BILLING_ENFORCED=true. During early beta
+    // the flag is off so warm-network agents can use the product without
+    // friction. Flip the env var to true once the conversion flow is
+    // validated end-to-end.
+    if ((Deno.env.get("MATE_PRO_BILLING_ENFORCED") ?? "false") === "true") {
+      const { data: hasAccess } = await admin.rpc("mate_pro_has_active_access", { p_agent_id: agent.id });
+      if (!hasAccess) {
+        return json({
+          error: "Subscribe to continue using MATE Pro.",
+          checkout_required: true,
+        }, 402);
+      }
+    }
+
     // ── 2. Parse body ──────────────────────────────────────────────────
     let body: Record<string, any>;
     try {
