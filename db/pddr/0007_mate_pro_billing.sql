@@ -92,14 +92,36 @@ CREATE TRIGGER trg_mate_pro_subs_touch
 -- 30-day window from registration during which the Founding €149
 -- lifetime price is available, contingent on ffar_verified=true.
 -- After this timestamp, only the Standard €299 price is offered.
+--
+-- Implementation note. PostgreSQL refuses GENERATED ALWAYS AS for
+-- (timestamptz + interval) — the operator is STABLE not IMMUTABLE
+-- because of theoretical DST/timezone edge cases. We use a BEFORE
+-- INSERT trigger instead, which is functionally equivalent and lets
+-- us backfill existing rows once with a plain UPDATE.
 ALTER TABLE public.mate_pro_agents
-  ADD COLUMN IF NOT EXISTS founding_window_ends_at timestamptz
-  GENERATED ALWAYS AS (created_at + INTERVAL '30 days') STORED;
+  ADD COLUMN IF NOT EXISTS founding_window_ends_at timestamptz;
 
--- Existing agents (created before this migration) will have the column
--- auto-populated by the generated expression on next read. No backfill
--- needed because GENERATED ALWAYS STORED computes at insert/update time
--- and ADD COLUMN with GENERATED populates the existing rows.
+CREATE OR REPLACE FUNCTION public.mate_pro_set_founding_window()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.founding_window_ends_at IS NULL THEN
+    NEW.founding_window_ends_at = NEW.created_at + INTERVAL '30 days';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_mate_pro_agents_set_founding_window ON public.mate_pro_agents;
+CREATE TRIGGER trg_mate_pro_agents_set_founding_window
+  BEFORE INSERT ON public.mate_pro_agents
+  FOR EACH ROW EXECUTE FUNCTION public.mate_pro_set_founding_window();
+
+-- Backfill existing rows (founder + any pre-billing agents)
+UPDATE public.mate_pro_agents
+   SET founding_window_ends_at = created_at + INTERVAL '30 days'
+ WHERE founding_window_ends_at IS NULL;
 
 
 -- ── 3. Helper view: current active subscription per agent ─────────
