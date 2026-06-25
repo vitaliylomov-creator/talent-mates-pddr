@@ -2739,9 +2739,20 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
       closeModalById('cancelSubOverlay');
-      await loadSubscription();
+      // Optimistic update — Stripe-API returned cancel_at directly. The
+      // webhook will write the same value to the DB a moment later; we
+      // do not wait for it (otherwise the banner reads stale state).
+      if (state.subscription && data.cancel_at) {
+        state.subscription.cancel_at = data.cancel_at;
+      }
       renderBillingBanner();
       updateProfileCancelButton();
+      // Delayed reload to pick up any other fields the webhook updated.
+      setTimeout(async () => {
+        await loadSubscription();
+        renderBillingBanner();
+        updateProfileCancelButton();
+      }, 2500);
     } catch (err) {
       btn.disabled = false;
       btn.textContent = 'Cancel at period end';
