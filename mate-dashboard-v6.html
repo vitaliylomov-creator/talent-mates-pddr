@@ -2291,28 +2291,123 @@
       const { data: { session: activeSession } } = await sb.auth.getSession();
       const token = activeSession?.access_token ?? '';
 
-      const res  = await fetch(EDGE_URL, {
+      const res = await fetch(EDGE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'Accept': 'text/event-stream',
         },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      typingEl.remove();
 
-      if (data.error) {
+      if (!res.ok || !res.body) {
+        typingEl.remove();
         appendMATEMessage('I encountered an issue. Please try again.', null, false, true);
       } else {
-        appendMATEMessage(data.response, data.agent_type, data.had_real_time_data, true);
-        if (!isPro) { msgCount++; updateMsgCounter(); }
-        // Refresh sidebar history after first message
-        if (!document.querySelector(`.chat-history-item[data-session="${sessionId}"]`)) {
-          refreshSidebarItem();
+        // ── SSE streaming ──
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        let msgEl = null;
+        let bubbleEl = null;
+        let accumulated = '';
+        let agentTypeRecv = null;
+        let hadRealTime = false;
+
+        const ensureBubble = () => {
+          if (msgEl) return;
+          typingEl.remove();
+          const chatArea = document.getElementById('chatArea');
+          msgEl = document.createElement('div');
+          msgEl.className = 'msg assistant';
+          const labels = { legal:'⚖️ Legal Advisor', coach:'🏋️ Performance Coach', analyst:'📊 Transfer Analyst', concierge:'🏠 Concierge' };
+          const label = labels[agentTypeRecv] ?? '✦ MATE';
+          msgEl.innerHTML = `
+            <div class="msg-meta">${label}</div>
+            <div class="msg-bubble"></div>`;
+          bubbleEl = msgEl.querySelector('.msg-bubble');
+          chatArea.appendChild(msgEl);
+          scrollToBottom();
+        };
+
+        const TOOL_LABELS = {
+          tool_web_search:           'Searching the web…',
+          tool_places_search:        'Looking up places…',
+          tool_weather:              'Checking the weather…',
+          tool_uk_train_times:       'Pulling UK train times…',
+          tool_fifa_regulations_search: 'Reading FIFA regulations…',
+          tool_football_data:        'Pulling football data…',
+          tool_world_football_data:  'Pulling football data…',
+          tool_player_training_log:  'Reviewing your training log…',
+          synthesizing:              'Compiling everything…',
+        };
+
+        const updateTypingLabel = (text) => {
+          const label = document.getElementById('typingLabel');
+          if (!label) return;
+          label.textContent = text;
+          label.classList.add('visible');
+        };
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const dataStr = line.slice(6).trim();
+            if (!dataStr) continue;
+            let evt;
+            try { evt = JSON.parse(dataStr); } catch { continue; }
+
+            if (evt.type === 'status') {
+              hadRealTime = true;
+              updateTypingLabel(TOOL_LABELS[evt.tool] ?? 'Working…');
+            } else if (evt.type === 'text' && evt.delta) {
+              ensureBubble();
+              accumulated += evt.delta;
+              bubbleEl.innerHTML = formatResponse(accumulated);
+              scrollToBottom();
+            } else if (evt.type === 'done') {
+              agentTypeRecv = evt.agent_type ?? agentTypeRecv;
+              if (!msgEl) {
+                // No text was streamed — show a fallback once
+                ensureBubble();
+                bubbleEl.innerHTML = formatResponse(accumulated || 'Done.');
+              }
+              if (evt.had_real_time_data && msgEl) {
+                const rt = document.createElement('div');
+                rt.className = 'rt-badge';
+                rt.innerHTML = `<div class="rt-dot"></div>Live data`;
+                msgEl.appendChild(rt);
+              }
+              // Update meta label now that we know the agent
+              if (msgEl && agentTypeRecv) {
+                const labels = { legal:'⚖️ Legal Advisor', coach:'🏋️ Performance Coach', analyst:'📊 Transfer Analyst', concierge:'🏠 Concierge' };
+                const metaEl = msgEl.querySelector('.msg-meta');
+                if (metaEl) metaEl.textContent = labels[agentTypeRecv] ?? '✦ MATE';
+              }
+              if (!isPro) { msgCount++; updateMsgCounter(); }
+              if (!document.querySelector(`.chat-history-item[data-session="${sessionId}"]`)) {
+                refreshSidebarItem();
+              }
+            } else if (evt.type === 'error') {
+              typingEl.remove();
+              if (!msgEl) {
+                appendMATEMessage('I encountered an issue. Please try again.', null, false, true);
+              }
+            }
+          }
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Stream error:', err);
       typingEl.remove();
       appendMATEMessage('Connection issue. Please check your internet and try again.', null, false, true);
     }
