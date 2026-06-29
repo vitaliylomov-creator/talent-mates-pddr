@@ -2411,6 +2411,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
           'Authorization': 'Bearer ' + state.session.access_token,
           'apikey': SUPABASE_ANON,
         },
@@ -2420,24 +2421,80 @@
 
     try {
       let res = await callChat();
-      // If token expired mid-session, refresh once and retry.
       if (res.status === 401) {
         const refreshed = await ensureFreshSession();
         if (refreshed) res = await callChat();
       }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      if (!res.ok || !res.body) {
+        let detail = 'HTTP ' + res.status;
+        try { const j = await res.json(); detail = j.error || detail; } catch {}
+        throw new Error(detail);
+      }
 
-      state.selectedConversationId = data.conversation_id;
-      hideThinking();
-      state.messages.push({
-        role: 'assistant',
-        content: data.response,
-        sub_agent: data.sub_agent,
-      });
-      renderChatMessages();
-      await reloadConversations();
-      renderConversationHistory();
+      // ── SSE streaming ──
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let assistantIndex = -1;
+      let accumulated = '';
+      let firstChunkSeen = false;
+
+      const ensureAssistantBubble = (subAgent) => {
+        if (assistantIndex >= 0) return;
+        hideThinking();
+        state.messages.push({
+          role: 'assistant',
+          content: '',
+          sub_agent: subAgent || state.selectedSubAgent,
+        });
+        assistantIndex = state.messages.length - 1;
+        renderChatMessages();
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const dataStr = line.slice(6).trim();
+          if (!dataStr) continue;
+          let evt;
+          try { evt = JSON.parse(dataStr); } catch { continue; }
+
+          if (evt.type === 'text' && typeof evt.delta === 'string') {
+            firstChunkSeen = true;
+            ensureAssistantBubble();
+            accumulated += evt.delta;
+            state.messages[assistantIndex].content = accumulated;
+            renderChatMessages();
+          } else if (evt.type === 'status') {
+            // Update pending label to give immediate signal that a tool is running
+            const label = document.getElementById('pendingLabel');
+            if (label) label.textContent = friendlyToolLabel(evt.tool);
+          } else if (evt.type === 'done') {
+            ensureAssistantBubble(evt.sub_agent);
+            // Trust the server's canonical text for the final message
+            const finalText = (typeof evt.response === 'string' && evt.response.length >= accumulated.length)
+              ? evt.response
+              : accumulated;
+            state.messages[assistantIndex].content = finalText;
+            if (evt.sub_agent) state.messages[assistantIndex].sub_agent = evt.sub_agent;
+            if (evt.message_id) state.messages[assistantIndex].id = evt.message_id;
+            if (evt.conversation_id) state.selectedConversationId = evt.conversation_id;
+            renderChatMessages();
+            await reloadConversations();
+            renderConversationHistory();
+          } else if (evt.type === 'error') {
+            if (!firstChunkSeen) {
+              throw new Error(evt.message || 'Stream failed');
+            }
+          }
+        }
+      }
     } catch (err) {
       hideThinking();
       state.messages.push({
@@ -2451,6 +2508,23 @@
       state.busy = false;
       setSendingState(false);
     }
+  }
+
+  // Plain-language label for the pending bubble while a tool runs
+  function friendlyToolLabel(tool) {
+    const map = {
+      tool_web_search:              'Searching the web…',
+      tool_places_search:           'Looking up places…',
+      tool_weather:                 'Checking the weather…',
+      tool_uk_train_times:          'Pulling UK train times…',
+      tool_fifa_regulations_search: 'Reading FIFA regulations…',
+      tool_football_data:           'Pulling football data…',
+      tool_world_football_data:     'Pulling football data…',
+      tool_list_clients:            'Pulling your client list…',
+      tool_get_client:              'Loading client profile…',
+      synthesizing:                 'Compiling everything…',
+    };
+    return map[tool] || 'Working…';
   }
 
   function setSendingState(busy) {

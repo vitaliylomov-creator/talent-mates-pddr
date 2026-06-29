@@ -428,6 +428,9 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Missing Authorization header" }, 401);
 
+    // Opt-in SSE streaming. Old callers without this header still get JSON.
+    const wantsStream = (req.headers.get("accept") || "").includes("text/event-stream");
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -596,7 +599,24 @@ Deno.serve(async (req) => {
       { role: "user", content: userContent },
     ];
 
-    // ── 10. Tool-use agent loop ──────────────────────────────────────
+    // ── 10a. Streaming branch — only if client asked for SSE ────────
+    // Existing JSON loop below stays untouched as fallback for any caller
+    // that doesn't send Accept: text/event-stream.
+    if (wantsStream) {
+      return runStreamingLoop({
+        ANTHROPIC_KEY,
+        admin,
+        agentId: agent.id,
+        conversationId,
+        agentType,
+        pdfBase64,
+        systemPrompt,
+        messages,
+        TOOLS,
+      });
+    }
+
+    // ── 10. Tool-use agent loop (non-streaming JSON path) ────────────
     let iteration = 0;
     let finalText = "";
     let totalInputTokens = 0;
@@ -742,6 +762,242 @@ Deno.serve(async (req) => {
     return json({ error: err instanceof Error ? err.message : "Unknown error" }, 500);
   }
 });
+
+// ────────────────────────────────────────────────────────────────────
+// STREAMING BRANCH — used only when caller sends Accept: text/event-stream.
+// Mirrors the non-streaming agent loop above but uses stream=true on every
+// Anthropic call, forwarding text deltas to the client as SSE events.
+// Tool execution, persistence and synthesis fallback are identical.
+// ────────────────────────────────────────────────────────────────────
+
+function runStreamingLoop(params: {
+  ANTHROPIC_KEY: string;
+  admin: any;
+  agentId: string;
+  conversationId: string;
+  agentType: string;
+  pdfBase64: string | null;
+  systemPrompt: string;
+  messages: any[];
+  TOOLS: any[];
+}): Response {
+  const {
+    ANTHROPIC_KEY, admin, agentId, conversationId, agentType, pdfBase64,
+    systemPrompt, TOOLS,
+  } = params;
+  const messages = [...params.messages];
+
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
+  const send = (event: unknown) =>
+    writer.write(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+
+  // One streamed Anthropic call: forward text deltas, collect tool_use blocks.
+  const streamCall = async (body: any) => {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-beta": "pdfs-2024-09-25",
+      },
+      body: JSON.stringify({ ...body, stream: true }),
+    });
+    if (!res.ok || !res.body) {
+      const errText = await res.text().catch(() => "");
+      throw new Error(`Claude API error: ${res.status} ${errText}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    const collectedText: string[] = [];
+    const toolUses: any[] = [];
+    let curBlockType: "text" | "tool_use" | null = null;
+    let curToolUse: any = null;
+    let curToolJson = "";
+    let stopReason = "";
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const dataStr = line.slice(6).trim();
+        if (!dataStr) continue;
+        let evt: any;
+        try { evt = JSON.parse(dataStr); } catch { continue; }
+
+        if (evt.type === "message_start") {
+          inputTokens = evt.message?.usage?.input_tokens ?? 0;
+        } else if (evt.type === "content_block_start") {
+          curBlockType = evt.content_block?.type ?? null;
+          if (curBlockType === "tool_use") {
+            curToolUse = { ...evt.content_block };
+            curToolJson = "";
+          }
+        } else if (evt.type === "content_block_delta") {
+          if (evt.delta?.type === "text_delta" && curBlockType === "text") {
+            const t = evt.delta.text ?? "";
+            collectedText.push(t);
+            await send({ type: "text", delta: t });
+          } else if (evt.delta?.type === "input_json_delta") {
+            curToolJson += evt.delta.partial_json ?? "";
+          }
+        } else if (evt.type === "content_block_stop") {
+          if (curBlockType === "tool_use" && curToolUse) {
+            try { curToolUse.input = JSON.parse(curToolJson || "{}"); }
+            catch { curToolUse.input = {}; }
+            toolUses.push(curToolUse);
+            curToolUse = null;
+          }
+          curBlockType = null;
+        } else if (evt.type === "message_delta") {
+          if (evt.delta?.stop_reason) stopReason = evt.delta.stop_reason;
+          outputTokens = evt.usage?.output_tokens ?? outputTokens;
+        }
+      }
+    }
+
+    return {
+      text: collectedText.join(""),
+      toolUses,
+      stopReason,
+      inputTokens,
+      outputTokens,
+    };
+  };
+
+  (async () => {
+    let iteration = 0;
+    let finalText = "";
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+    const toolsUsed: string[] = [];
+    let hadToolUse = false;
+
+    try {
+      while (iteration < MAX_ITERATIONS) {
+        const res = await streamCall({
+          model: MODEL,
+          max_tokens: 4000,
+          system: systemPrompt,
+          tools: TOOLS,
+          messages,
+        });
+        totalInputTokens  += res.inputTokens;
+        totalOutputTokens += res.outputTokens;
+
+        if (res.toolUses.length === 0 || res.stopReason === "end_turn") {
+          finalText = res.text.trim();
+          break;
+        }
+
+        hadToolUse = true;
+        for (const tu of res.toolUses) {
+          toolsUsed.push(tu.name);
+          await send({ type: "status", tool: tu.name });
+        }
+
+        const toolResults = await Promise.all(
+          res.toolUses.map(async (tu: any) => {
+            const result = await executeTool(tu.name, tu.input, admin, agentId);
+            console.log(`[TOOL] ${tu.name}`, JSON.stringify(tu.input).slice(0, 200), "→", typeof result === "string" ? result.slice(0, 200) : "?");
+            return { type: "tool_result", tool_use_id: tu.id, content: result };
+          })
+        );
+
+        const assistantContent: any[] = [];
+        if (res.text) assistantContent.push({ type: "text", text: res.text });
+        assistantContent.push(...res.toolUses);
+
+        messages.push({ role: "assistant", content: assistantContent });
+        messages.push({ role: "user", content: toolResults });
+        iteration++;
+      }
+
+      if (!finalText) {
+        await send({ type: "status", tool: "synthesizing" });
+        const synth = await streamCall({
+          model: MODEL,
+          max_tokens: 2000,
+          system: systemPrompt,
+          tool_choice: { type: "none" },
+          tools: TOOLS,
+          messages: [
+            ...messages,
+            {
+              role: "user",
+              content:
+                "Based on everything you have researched above, give your best complete answer now. Do not call any more tools.",
+            },
+          ],
+        });
+        totalInputTokens  += synth.inputTokens;
+        totalOutputTokens += synth.outputTokens;
+        finalText = synth.text.trim();
+        if (!finalText) {
+          finalText =
+            "I researched this thoroughly but couldn't compile a complete answer. Try rephrasing or breaking it into smaller questions.";
+          await send({ type: "text", delta: finalText });
+        }
+      }
+
+      // Persist assistant message — same shape as the JSON path.
+      const { data: assistantMsg, error: assistantErr } = await admin
+        .from("mate_pro_messages")
+        .insert({
+          conversation_id: conversationId,
+          agent_id: agentId,
+          role: "assistant",
+          content: finalText,
+          sub_agent: agentType,
+        })
+        .select("id")
+        .single();
+
+      if (assistantErr) console.error("Failed to persist assistant message:", assistantErr);
+
+      await send({
+        type: "done",
+        conversation_id: conversationId,
+        message_id: assistantMsg?.id ?? null,
+        sub_agent: agentType,
+        response: finalText,
+        tools_used: toolsUsed,
+        iterations: iteration,
+        input_tokens: totalInputTokens,
+        output_tokens: totalOutputTokens,
+        had_pdf: !!pdfBase64,
+        had_tool_use: hadToolUse,
+      });
+    } catch (err) {
+      console.error("mate-pro-chat stream error:", err);
+      try { await send({ type: "error", message: err instanceof Error ? err.message : "Stream failed" }); } catch {}
+    } finally {
+      await writer.close();
+    }
+  })();
+
+  return new Response(readable, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    },
+  });
+}
 
 function json(body: unknown, status = 200): Response {
   // Defensive: walk JSON.stringify output and force-escape any control char
