@@ -1,884 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Content Engine — Talent Mates Creators</title>
-  <meta name="description" content="Sign in or create your account to access AI Content Engine and MUSE AI by Talent Mates Creators." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Magnetism — the diary that writes back. Write exactly what you'd never say out loud. No one else opens this page, and you still get a real answer. By invitation." />
+<meta property="og:title" content="Magnetism — the diary that writes back | Talent Mates" />
+<meta property="og:description" content="No one else opens this page. It doesn't interrupt. And when you're done writing, it answers — for real." />
+<meta property="og:type" content="website" />
+<title>Magnetism — Talent Mates</title>
 
-  <!-- Supabase JS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<style>
+  :root{
+    /* Magnetism palette — intentionally not Edge OS. Warm, private, editorial. */
+    --cream:        #F4EFE5;
+    --cream-deep:   #ECE3D2;
+    --paper:        #FBF9F4;
+    --graphite:     #24221E;
+    --ink:          #24221E;
+    --t1:           #24221E;
+    --t2:           rgba(36,34,30,0.68);
+    --t3:           rgba(36,34,30,0.48);
+    --t4:           rgba(36,34,30,0.32);
+    --border:       rgba(36,34,30,0.12);
+    --border-mid:   rgba(36,34,30,0.20);
+    --border-strong:rgba(36,34,30,0.36);
+    --gold:         #A9702F;
+    --gold-soft:    rgba(169,112,47,0.14);
+    --font-d: 'DM Serif Display', Georgia, serif;
+    --font-b: 'DM Sans', system-ui, sans-serif;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
 
-    :root {
-      --purple:  #794DC6;
-      --purple-dk: #6b42b5;
-      --white:   #ffffff;
-      --border:  rgba(255,255,255,0.12);
-      --border-mid: rgba(255,255,255,0.22);
-      --t1: #ffffff;
-      --t2: rgba(255,255,255,0.82);
-      --t3: rgba(255,255,255,0.55);
-      --t4: rgba(255,255,255,0.30);
-      --font-d: 'DM Serif Display', Georgia, serif;
-      --font-b: 'DM Sans', system-ui, sans-serif;
-      --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    }
+  *{ box-sizing: border-box; margin:0; padding:0; }
 
-    html { -webkit-font-smoothing: antialiased; }
+  html{ scroll-behavior: smooth; }
 
-    body {
-      font-family: var(--font-b);
-      background: var(--purple);
-      color: var(--t1);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  body{
+    background: var(--cream);
+    color: var(--t1);
+    font-family: var(--font-b);
+    font-weight: 300;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 
-    a { text-decoration: none; color: inherit; }
-    button { font-family: var(--font-b); cursor: pointer; }
+  em{
+    font-style: italic;
+    font-family: var(--font-d);
+    color: rgba(36,34,30,0.42);
+  }
 
-    /* ── SCREENS ── */
-    .screen { display: none; }
-    .screen.active {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      align-items: center;
-      justify-content: center;
-    }
+  a{ color: inherit; text-decoration:none; }
 
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .anim-1 { animation: fadeUp 0.7s var(--ease) 0.05s both; }
-    .anim-2 { animation: fadeUp 0.7s var(--ease) 0.18s both; }
-    .anim-3 { animation: fadeUp 0.7s var(--ease) 0.30s both; }
-    .anim-4 { animation: fadeUp 0.7s var(--ease) 0.42s both; }
-    .anim-5 { animation: fadeUp 0.7s var(--ease) 0.54s both; }
-    .slide-up { animation: fadeUp 0.5s var(--ease) both; }
+  .container{ max-width: 1280px; margin: 0 auto; padding: 0 56px; }
 
-    /* ── HOME SCREEN ── */
-    #screen-home {
-      padding: 40px 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
+  /* ---------- NAV ---------- */
+  nav{
+    position: fixed; top:0; left:0; right:0; z-index: 100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 26px 56px;
+    background: linear-gradient(to bottom, rgba(244,239,229,0.92), rgba(244,239,229,0));
+    transition: background 0.4s var(--ease), border-color 0.4s var(--ease);
+    border-bottom: 0.5px solid transparent;
+  }
+  nav.scrolled{
+    background: rgba(251,249,244,0.86);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-left{ display:flex; align-items:center; gap:14px; }
+  .nav-brand{ font-size:12px; letter-spacing:0.22em; text-transform:uppercase; }
+  .nav-brand strong{ font-weight:500; color: var(--t1); }
+  .nav-brand span{ font-weight:400; color: var(--t3); }
+  .nav-tag{
+    font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+    color: var(--gold); border:0.5px solid var(--gold-soft);
+    background: var(--gold-soft);
+    padding: 5px 12px; border-radius: 100px;
+  }
+  .nav-links{ display:flex; align-items:center; gap:32px; }
+  .nav-link{ font-size:13px; color: var(--t2); transition: color 0.2s; }
+  .nav-link:hover{ color: var(--t1); }
+  .nav-cta{
+    font-family: var(--font-b); font-size:13px; font-weight:500; letter-spacing:0.04em;
+    background: transparent; color: var(--t1);
+    border: 0.5px solid var(--border-strong); border-radius: 100px;
+    padding: 12px 24px; cursor:pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-cta:hover{ background: rgba(36,34,30,0.05); border-color: var(--t1); }
 
-    /* Glow */
-    #screen-home::before {
-      content: '';
-      position: fixed;
-      top: -15%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 500px;
-      background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 65%);
-      pointer-events: none;
-    }
+  @media (max-width: 960px){
+    nav{ padding: 18px 24px; }
+    .nav-links .nav-link{ display:none; }
+  }
 
-    .home-logo {
-      margin-bottom: 16px;
-    }
+  /* ---------- HERO ---------- */
+  .hero{
+    position: relative;
+    padding: 200px 56px 140px;
+    background:
+      radial-gradient(ellipse 70% 55% at 22% 20%, rgba(169,112,47,0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 82% 70%, rgba(169,112,47,0.07) 0%, transparent 60%),
+      var(--cream);
+    overflow: hidden;
+  }
+  .hero::after{
+    content:'';
+    position:absolute; inset:0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.14   0 0 0 0 0.13   0 0 0 0 0.11   0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: 0.5; mix-blend-mode: multiply; pointer-events:none;
+  }
+  .section-eyebrow{
+    font-size:11px; letter-spacing:0.28em; text-transform:uppercase;
+    color: var(--t3); display:inline-flex; align-items:center; gap:12px; margin-bottom:26px;
+  }
+  .section-eyebrow::before{ content:''; width:28px; height:0.5px; background: var(--border-strong); }
+  .hero h1{
+    position: relative; z-index:2;
+    font-family: var(--font-d); font-weight:400;
+    font-size: clamp(42px, 6.6vw, 96px);
+    letter-spacing: -0.022em; line-height: 1.05;
+    max-width: 900px;
+  }
+  .hero-lede{
+    position: relative; z-index:2;
+    font-size: clamp(16px, 1.6vw, 19px); font-weight:300; color: var(--t2);
+    max-width: 560px; margin-top: 32px;
+  }
+  .hero-scroll{
+    position: relative; z-index:2;
+    display:inline-flex; align-items:center; gap:10px;
+    margin-top: 56px; font-size:13px; color: var(--t3);
+    border-bottom: 0.5px solid var(--border-mid); padding-bottom:4px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .hero-scroll:hover{ color: var(--t1); border-color: var(--t1); }
 
-    .home-logo a {
-      display: inline-block;
-    }
+  /* Compass motif — Magnetism's signature, not the Edge OS diagonal */
+  .compass{
+    position:absolute; right: 8%; top: 46%;
+    width: 168px; height:168px;
+    z-index:1;
+  }
+  .compass-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border: 0.5px solid var(--border-mid);
+  }
+  .compass-ring::before{
+    content:''; position:absolute; inset:22px; border-radius:50%;
+    border: 0.5px solid var(--border);
+  }
+  .compass-needle{
+    position:absolute; left:50%; top:50%;
+    width: 1.5px; height: 62px;
+    background: linear-gradient(to top, var(--gold), transparent);
+    transform-origin: bottom center;
+    transform: translate(-50%, -100%) rotate(-8deg);
+    animation: settle 7s var(--ease) infinite;
+  }
+  .compass-dot{
+    position:absolute; left:50%; top:50%; width:6px; height:6px; margin:-3px;
+    border-radius:50%; background: var(--gold);
+  }
+  @keyframes settle{
+    0%   { transform: translate(-50%, -100%) rotate(-8deg); }
+    30%  { transform: translate(-50%, -100%) rotate(4deg); }
+    55%  { transform: translate(-50%, -100%) rotate(-2deg); }
+    75%  { transform: translate(-50%, -100%) rotate(1deg); }
+    100% { transform: translate(-50%, -100%) rotate(-8deg); }
+  }
+  @media (max-width: 960px){
+    .hero{ padding: 150px 24px 90px; }
+    .compass{ display:none; }
+  }
 
-    /* Logo SVG */
-    .logo-svg text { font-family: 'DM Sans', system-ui, sans-serif; }
+  /* ---------- SECTION SHARED ---------- */
+  section.block{ padding: 120px 56px; position: relative; }
+  section.block.alt{ background: var(--cream-deep); }
+  @media (max-width: 960px){ section.block{ padding: 80px 24px; } }
 
-    .home-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.10);
-      border: 0.5px solid rgba(255,255,255,0.22);
-      border-radius: 100px;
-      padding: 7px 18px;
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.82);
-      margin-bottom: 32px;
-    }
+  .section-head{
+    display:grid; grid-template-columns: 1fr 380px; gap: 60px;
+    margin-bottom: 72px; align-items: end;
+  }
+  .section-head h2{
+    font-family: var(--font-d); font-weight:400;
+    font-size: clamp(32px, 4.2vw, 58px); letter-spacing:-0.02em; line-height:1.12;
+  }
+  .section-lead{ font-size:16px; color: var(--t2); max-width: 380px; }
+  @media (max-width: 960px){
+    .section-head{ grid-template-columns: 1fr; gap: 20px; }
+  }
 
-    .badge-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #fff;
-      animation: pulse 2s ease-in-out infinite;
-    }
+  .reveal{ opacity:0; transform: translateY(20px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+  .reveal.visible{ opacity:1; transform: translateY(0); }
+  .reveal-delay-1{ transition-delay: 0.10s; }
+  .reveal-delay-2{ transition-delay: 0.20s; }
+  .reveal-delay-3{ transition-delay: 0.30s; }
 
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50%      { opacity: 0.3; }
-    }
+  /* ---------- EXPECT CARDS ---------- */
+  .expect-grid{
+    display:grid; grid-template-columns: repeat(3, 1fr);
+  }
+  .expect-card{
+    padding: 8px 40px 8px 0; border-right: 0.5px solid var(--border);
+    position: relative;
+  }
+  .expect-card:last-child{ border-right:none; }
+  .expect-num{ font-family: var(--font-d); font-style:italic; color: var(--gold); font-size:14px; margin-bottom:18px; display:block; }
+  .expect-card h3{ font-family: var(--font-d); font-weight:400; font-size: 22px; letter-spacing:-0.012em; margin-bottom:14px; }
+  .expect-card p{ font-size:14.5px; color: var(--t2); line-height:1.7; }
 
-    .home-title {
-      font-family: var(--font-d);
-      font-size: clamp(40px, 7vw, 72px);
-      font-weight: 400;
-      line-height: 1.02;
-      letter-spacing: -0.02em;
-      color: var(--t1);
-      margin-bottom: 16px;
-    }
+  @media (max-width: 960px){
+    .expect-grid{ grid-template-columns: 1fr; }
+    .expect-card{ border-right:none; border-bottom:0.5px solid var(--border); padding: 32px 0; }
+    .expect-card:last-child{ border-bottom:none; }
+  }
 
-    .home-title em {
-      font-style: italic;
-      color: rgba(255,255,255,0.42);
-    }
+  .minds-line{
+    margin-top: 56px; padding-top: 40px; border-top: 0.5px solid var(--border);
+    font-size: 14px; color: var(--t3);
+  }
+  .minds-line strong{ color: var(--t2); font-weight: 500; }
 
-    .home-sub {
-      font-size: 17px;
-      font-weight: 300;
-      color: var(--t3);
-      max-width: 440px;
-      margin: 0 auto 44px;
-      line-height: 1.68;
-    }
+  /* ---------- INVITE ---------- */
+  .invite{
+    text-align: left;
+  }
+  .invite-body{ font-size: 17px; color: var(--t2); max-width: 620px; margin-top: 26px; line-height: 1.75; }
+  .invite-cta-row{ display:flex; align-items:center; gap:22px; margin-top: 44px; flex-wrap: wrap; }
+  .btn-ghost-lg{
+    display:inline-block; font-family: var(--font-b); font-size:14px; font-weight:500; letter-spacing:0.04em;
+    color: var(--t1); background: transparent; border: 0.5px solid var(--border-strong);
+    border-radius: 100px; padding: 16px 34px;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  }
+  .btn-ghost-lg:hover{ background: rgba(36,34,30,0.05); transform: translateY(-1px); }
+  .invite-note{ font-size: 13px; color: var(--t3); }
 
-    /* Auth buttons */
-    .auth-row {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
+  .boundary-line{
+    margin-top: 64px; padding-top: 28px; border-top: 0.5px solid var(--border);
+    font-size: 12.5px; color: var(--t3); max-width: 620px; line-height: 1.7;
+  }
 
-    .btn-signin {
-      background: var(--white);
-      color: var(--purple);
-      border: none;
-      border-radius: 100px;
-      padding: 15px 36px;
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .btn-signin:hover  { opacity: 0.88; transform: scale(1.02); }
-    .btn-signin:active { transform: scale(0.98); }
-
-    .btn-create {
-      background: transparent;
-      color: rgba(255,255,255,0.85);
-      border: 0.5px solid rgba(255,255,255,0.35);
-      border-radius: 100px;
-      padding: 15px 36px;
-      font-size: 15px;
-      font-weight: 400;
-      letter-spacing: 0.02em;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .btn-create:hover { color: var(--t1); border-color: rgba(255,255,255,0.70); }
-
-    .home-hint {
-      font-size: 12px;
-      color: rgba(255,255,255,0.28);
-      letter-spacing: 0.04em;
-      margin-bottom: 48px;
-    }
-
-    /* Agent pills */
-    .agents-strip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      border-top: 0.5px solid rgba(255,255,255,0.08);
-      padding-top: 24px;
-      flex-wrap: wrap;
-    }
-
-    .agent-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 20px;
-      border-right: 0.5px solid rgba(255,255,255,0.08);
-    }
-    .agent-pill:last-child { border-right: none; }
-
-    .agent-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.28);
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-    .agent-pill:nth-child(2) .agent-dot { animation-delay: 0.8s; }
-
-    .agent-name {
-      font-size: 12px;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.40);
-    }
-
-    /* Back to creators link */
-    .back-link {
-      font-size: 12px;
-      color: rgba(255,255,255,0.28);
-      letter-spacing: 0.04em;
-      margin-top: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.2s;
-    }
-    .back-link:hover { color: rgba(255,255,255,0.60); }
-
-    /* ── REG SHELL (Sign In & Create Account screens) ── */
-    #screen-signin,
-    #screen-create {
-      padding: 40px 24px;
-    }
-
-    .reg-shell {
-      width: 100%;
-      max-width: 440px;
-      margin: 0 auto;
-    }
-
-    .reg-back-btn {
-      background: none;
-      border: none;
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--t3);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 28px;
-      padding: 0;
-      transition: color 0.2s;
-      cursor: pointer;
-    }
-    .reg-back-btn:hover { color: rgba(255,255,255,0.70); }
-
-    .reg-card {
-      background: rgba(255,255,255,0.04);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 20px;
-      padding: 44px 40px 40px;
-    }
-
-    .reg-product-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(255,255,255,0.08);
-      border: 0.5px solid rgba(255,255,255,0.16);
-      border-radius: 100px;
-      padding: 5px 14px;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 16px;
-    }
-
-    .reg-mark {
-      font-family: var(--font-d);
-      font-size: 26px;
-      font-weight: 400;
-      color: var(--t1);
-      margin-bottom: 4px;
-    }
-
-    .reg-sub {
-      font-size: 11px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--t4);
-      margin-bottom: 28px;
-    }
-
-    .reg-divider {
-      font-size: 13px;
-      color: var(--t3);
-      margin-bottom: 22px;
-      line-height: 1.5;
-    }
-
-    .field { margin-bottom: 14px; }
-
-    .field label {
-      display: block;
-      font-size: 10.5px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--t4);
-      margin-bottom: 7px;
-    }
-
-    .field input {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 10px;
-      padding: 13px 16px;
-      font-family: var(--font-b);
-      font-size: 14px;
-      font-weight: 300;
-      color: var(--t1);
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-      -webkit-appearance: none;
-    }
-    .field input::placeholder { color: rgba(255,255,255,0.18); }
-    .field input:focus {
-      border-color: rgba(255,255,255,0.38);
-      background: rgba(255,255,255,0.08);
-    }
-
-    .reg-submit {
-      width: 100%;
-      background: var(--white);
-      color: var(--purple);
-      border: none;
-      border-radius: 10px;
-      padding: 15px 20px;
-      font-family: var(--font-b);
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 10px;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .reg-submit:hover  { opacity: 0.88; }
-    .reg-submit:active { transform: scale(0.99); }
-
-    .reg-terms {
-      font-size: 12px;
-      color: var(--t4);
-      text-align: center;
-      margin-top: 18px;
-      line-height: 1.7;
-    }
-    .reg-terms a { color: var(--t3); text-decoration: none; }
-    .reg-terms a:hover { color: var(--t2); }
-
-    /* ── OAUTH BUTTON ── */
-    .btn-google {
-      width: 100%;
-      background: rgba(255,255,255,0.06);
-      color: var(--t1);
-      border: 0.5px solid var(--border-mid);
-      border-radius: 10px;
-      padding: 13px 16px;
-      font-family: var(--font-b);
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 0.01em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 18px;
-      transition: background 0.2s, border-color 0.2s;
-      cursor: pointer;
-    }
-    .btn-google:hover {
-      background: rgba(255,255,255,0.10);
-      border-color: rgba(255,255,255,0.38);
-    }
-    .btn-google:active { transform: scale(0.99); }
-    .btn-google svg { flex-shrink: 0; }
-
-    /* ── OR DIVIDER ── */
-    .or-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 6px 0 18px;
-      font-size: 11px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--t4);
-    }
-    .or-divider::before,
-    .or-divider::after {
-      content: '';
-      flex: 1;
-      height: 0.5px;
-      background: rgba(255,255,255,0.16);
-    }
-
-    /* ── INLINE MESSAGE (error / success) ── */
-    .auth-msg {
-      font-size: 13px;
-      line-height: 1.5;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-bottom: 14px;
-      display: none;
-    }
-    .auth-msg.error {
-      display: block;
-      background: rgba(255, 80, 80, 0.12);
-      border: 0.5px solid rgba(255, 80, 80, 0.35);
-      color: rgba(255, 200, 200, 0.95);
-    }
-    .auth-msg.success {
-      display: block;
-      background: rgba(80, 200, 120, 0.12);
-      border: 0.5px solid rgba(80, 200, 120, 0.35);
-      color: rgba(180, 240, 200, 0.95);
-    }
-
-    /* ── SPINNER ── */
-    .spinner {
-      display: inline-block;
-      width: 12px; height: 12px;
-      border: 1.5px solid rgba(121,77,198,0.25);
-      border-top-color: var(--purple);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: -2px;
-      margin-right: 8px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── MOBILE ── */
-    @media (max-width: 600px) {
-      .auth-row { flex-direction: column; align-items: center; }
-      .btn-signin, .btn-create { width: 100%; justify-content: center; }
-      .reg-card { padding: 32px 24px 28px; border-radius: 16px; }
-      .agent-pill { padding: 8px 14px; border-right: none; }
-    }
-  </style>
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top: 0.5px solid var(--border);
+    padding: 32px 56px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+    background: var(--cream-deep);
+  }
+  .footer-brand, .footer-link{ font-size:11px; color: var(--t4); letter-spacing:0.06em; }
+  .footer-link:hover{ color: var(--t2); }
+  .footer-links{ display:flex; gap:22px; }
+  @media (max-width: 600px){
+    footer{ flex-direction:column; text-align:center; padding: 32px 24px; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- ════════════════════════════════════════
-       SCREEN 1 — HOME (Sign In or Create)
-  ════════════════════════════════════════ -->
-  <div id="screen-home" class="screen active">
+<nav id="nav">
+  <div class="nav-left">
+    <a href="https://talent-mates.com/" class="nav-brand"><strong>Talent</strong> <span>Mates</span></a>
+    <span class="nav-tag">Magnetism</span>
+  </div>
+  <div class="nav-links">
+    <a href="https://talent-mates.com/about" class="nav-link">About</a>
+    <a href="https://app.talent-mates.com/mate-auth.html" class="nav-link">MATE AI</a>
+    <a href="mailto:hello@talent-mates.com" class="nav-link">Contact</a>
+    <button class="nav-cta" onclick="document.getElementById('invite').scrollIntoView({behavior:'smooth'})">Request private access</button>
+  </div>
+</nav>
 
-    <div class="home-logo anim-1">
-      <a href="https://talent-mates.com" aria-label="Talent Mates home">
-        <svg class="logo-svg" width="160" height="32" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <text x="0" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="500" letter-spacing="4" fill="white">TALENT</text>
-          <text x="76" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="400" letter-spacing="4" fill="rgba(255,255,255,0.52)"> MATES</text>
-        </svg>
-      </a>
+<section class="hero">
+  <div class="section-eyebrow">01 — Nobody else opens this</div>
+  <h1>The diary<br/><em>that writes back.</em></h1>
+  <p class="hero-lede">Write exactly what you'd never say out loud. No one reads it over your shoulder, no one interrupts halfway through the sentence — and when you're done, you get a real answer back.</p>
+  <a href="#expect" class="hero-scroll">See how it works ↓</a>
+
+  <div class="compass">
+    <div class="compass-ring"></div>
+    <div class="compass-needle"></div>
+    <div class="compass-dot"></div>
+  </div>
+</section>
+
+<section class="block" id="expect">
+  <div class="section-head reveal">
+    <div>
+      <div class="section-eyebrow">02 — How it works</div>
+      <h2>You write.<br/><em>It listens first.</em></h2>
     </div>
-
-    <div class="home-badge anim-2">
-      <div class="badge-dot"></div>
-      Creators Division
-    </div>
-
-    <h1 class="home-title anim-3">
-      AI Content<br><em>Engine.</em>
-    </h1>
-
-    <p class="home-sub anim-4">
-      Your intelligent creative partner — strategy, content planning, brand deals, and IP management. Powered by MUSE AI.
-    </p>
-
-    <div class="auth-row anim-5">
-      <button class="btn-signin" onclick="showSignIn()">
-        Sign in
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <button class="btn-create" onclick="showCreateAccount()">
-        Create new account
-      </button>
-    </div>
-
-    <p class="home-hint anim-5">Free to try &nbsp;·&nbsp; No credit card required</p>
-
-    <div class="agents-strip anim-5">
-      <div class="agent-pill">
-        <div class="agent-dot"></div>
-        <span class="agent-name">AI Content Engine</span>
-      </div>
-      <div class="agent-pill">
-        <div class="agent-dot"></div>
-        <span class="agent-name">MUSE AI</span>
-      </div>
-    </div>
-
-    <a href="https://talent-mates.com/talent-mates-creators" class="back-link anim-5">
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-        <path d="M7 2L3 5l4 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Back to Creators
-    </a>
-
+    <p class="section-lead">Three things stay true, every time you open it.</p>
   </div>
 
-
-  <!-- ════════════════════════════════════════
-       SCREEN 2 — SIGN IN
-  ════════════════════════════════════════ -->
-  <div id="screen-signin" class="screen">
-    <div class="reg-shell">
-
-      <button class="reg-back-btn" onclick="showHome()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Back
-      </button>
-
-      <div class="reg-card slide-up">
-        <div class="reg-product-badge">
-          <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white" opacity="0.7"/></svg>
-          AI Content Engine · MUSE AI
-        </div>
-
-        <a href="https://talent-mates.com" style="display:inline-block;margin-bottom:6px;">
-          <svg class="logo-svg" width="140" height="28" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="0" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="500" letter-spacing="4" fill="white">TALENT</text>
-            <text x="76" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="400" letter-spacing="4" fill="rgba(255,255,255,0.52)"> MATES</text>
-          </svg>
-        </a>
-        <div class="reg-sub">Creators &nbsp;·&nbsp; Sign in</div>
-
-        <div class="reg-divider">Welcome back — sign in to your account</div>
-
-        <button class="btn-google" type="button" onclick="handleGoogleAuth()">
-          <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-            <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
-            <path d="M9 3.579c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="or-divider">or</div>
-
-        <div id="signin-msg" class="auth-msg"></div>
-
-        <div class="field">
-          <label for="si-email">Email address</label>
-          <input id="si-email" type="email" placeholder="you@example.com" autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="si-password">Password</label>
-          <input id="si-password" type="password" placeholder="Your password" autocomplete="current-password" />
-        </div>
-
-        <button class="reg-submit" id="signin-btn" onclick="handleSignIn()">
-          Sign in
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-
-        <p class="reg-terms">
-          <a href="#">Forgot password?</a><br>
-          Don't have an account?
-          <a href="#" onclick="showCreateAccount(); return false;">Create one free →</a>
-        </p>
-      </div>
-
+  <div class="expect-grid">
+    <div class="expect-card reveal reveal-delay-1">
+      <span class="expect-num">i.</span>
+      <h3>No one else opens this.</h3>
+      <p>Not a group chat. Not a public post. Not a notebook that could end up in the wrong hands. What you write here stays exactly where you put it.</p>
+    </div>
+    <div class="expect-card reveal reveal-delay-2">
+      <span class="expect-num">ii.</span>
+      <h3>It doesn't interrupt.</h3>
+      <p>No follow-up question before you've finished the sentence. No "have you tried—" halfway through. You write until you're actually done.</p>
+    </div>
+    <div class="expect-card reveal reveal-delay-3">
+      <span class="expect-num">iii.</span>
+      <h3>Then it answers — for real.</h3>
+      <p>Grounded in a curated body of psychology and philosophy, not a guess from the cloud. Motivation and clarity, yes. Diagnosis or therapy, never — and a real person immediately, if you're ever in crisis.</p>
     </div>
   </div>
 
+  <div class="minds-line reveal">
+    For the people who perform in public and think in private — on the pitch, on stage, in the room where the decision gets made.
+  </div>
+</section>
 
-  <!-- ════════════════════════════════════════
-       SCREEN 3 — CREATE ACCOUNT
-  ════════════════════════════════════════ -->
-  <div id="screen-create" class="screen">
-    <div class="reg-shell">
+<section class="block alt invite" id="invite">
+  <div class="section-eyebrow reveal">03 — Private, for now</div>
+  <h2 style="font-family:var(--font-d); font-weight:400; font-size:clamp(32px,4.2vw,58px); letter-spacing:-0.02em; line-height:1.12;" class="reveal">By invitation.<br/><em>Quietly, for now.</em></h2>
+  <p class="invite-body reveal reveal-delay-1">Magnetism is opening to a small number of people for testing. No launch day, no announcement. If you're interested, write to us.</p>
 
-      <button class="reg-back-btn" onclick="showHome()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Back
-      </button>
-
-      <div class="reg-card slide-up">
-        <div class="reg-product-badge">
-          <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="white" opacity="0.7"/></svg>
-          AI Content Engine · MUSE AI
-        </div>
-
-        <a href="https://talent-mates.com" style="display:inline-block;margin-bottom:6px;">
-          <svg class="logo-svg" width="140" height="28" viewBox="0 0 160 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="0" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="500" letter-spacing="4" fill="white">TALENT</text>
-            <text x="76" y="22" font-family="DM Sans,system-ui,sans-serif" font-size="12" font-weight="400" letter-spacing="4" fill="rgba(255,255,255,0.52)"> MATES</text>
-          </svg>
-        </a>
-        <div class="reg-sub">Creators &nbsp;·&nbsp; Create account</div>
-
-        <div class="reg-divider">Create your free account to continue</div>
-
-        <button class="btn-google" type="button" onclick="handleGoogleAuth()">
-          <svg width="16" height="16" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-            <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
-            <path d="M9 3.579c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
-          </svg>
-          Sign up with Google
-        </button>
-
-        <div class="or-divider">or</div>
-
-        <div id="create-msg" class="auth-msg"></div>
-
-        <div class="field">
-          <label for="ca-name">Full name</label>
-          <input id="ca-name" type="text" placeholder="Your name" autocomplete="name" />
-        </div>
-        <div class="field">
-          <label for="ca-email">Email address</label>
-          <input id="ca-email" type="email" placeholder="you@example.com" autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="ca-password">Password</label>
-          <input id="ca-password" type="password" placeholder="Minimum 8 characters" autocomplete="new-password" />
-        </div>
-
-        <button class="reg-submit" id="create-btn" onclick="handleCreateAccount()">
-          Create account &amp; continue
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7h10M8 3l4 4-4 4" stroke="#794DC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-
-        <p class="reg-terms">
-          By continuing you agree to the
-          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.<br>
-          Already have an account?
-          <a href="#" onclick="showSignIn(); return false;">Sign in</a>
-        </p>
-      </div>
-
-    </div>
+  <div class="invite-cta-row reveal reveal-delay-2">
+    <a class="btn-ghost-lg" href="mailto:magnetism@talent-mates.com?subject=Magnetism%20%E2%80%94%20private%20access&body=Hi%2C%0A%0AI%27d%20like%20private%20access%20to%20Magnetism.%0A%0AWhat%20I%27m%20carrying%20right%20now%3A%0A%0AThanks%2C%0A">Write to us</a>
+    <span class="invite-note">magnetism@talent-mates.com</span>
   </div>
 
+  <p class="boundary-line reveal reveal-delay-3">Magnetism is not a person and not a therapist, and it does not replace one. If you're in crisis, please contact a crisis line or emergency services in your country — that conversation matters more than this one.</p>
+</section>
 
-  <script>
-    // ════════════════════════════════════════════════════════
-    // SUPABASE CONFIG — Content Engine project (cwoedvxltgtwmjazekal)
-    // Separate Supabase project from MATE AI for clean product isolation.
-    // ════════════════════════════════════════════════════════
-    const SUPABASE_URL  = 'https://cwoedvxltgtwmjazekal.supabase.co';
-    const SUPABASE_ANON = 'sb_publishable_bSaKsm6r7ehIvkdDZlA5TQ_gBE54prH';
+<footer>
+  <div class="footer-brand">© 2026 Talent Mates Limited · London</div>
+  <div class="footer-links">
+    <a href="https://talent-mates.com/about" class="footer-link">About</a>
+    <a href="https://app.talent-mates.com/mate-auth.html" class="footer-link">MATE AI</a>
+    <a href="https://talent-mates.com/brand-consulting" class="footer-link">NORTH</a>
+    <a href="mailto:hello@talent-mates.com" class="footer-link">Contact</a>
+  </div>
+</footer>
 
-    // Post-auth destinations
-    const DASHBOARD_URL  = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-dashboard.html';
-    const ONBOARDING_URL = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-onboarding.html';
-    const AUTH_URL       = 'https://vitaliylomov-creator.github.io/talent-mates-pddr/creators-auth.html';
+<script>
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
 
-    // Init Supabase client (loaded from CDN above)
-    const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-
-    // ── If already signed in → route based on onboarding state ──
-    // Also handles the OAuth callback: Supabase processes the URL hash
-    // automatically on createClient(), and the auth checks below will
-    // pick up the newly-established session.
-    async function routeAfterAuth(userId) {
-      // Look up onboarding flag. RLS allows the user to read their own row.
-      // If the profile row doesn't exist yet (e.g. race with the trigger),
-      // treat it as "needs onboarding".
-      const { data: profile } = await sb
-        .from('profiles')
-        .select('onboarding_complete')
-        .eq('user_id', userId)
-        .maybeSingle();
-      window.location.href = profile?.onboarding_complete ? DASHBOARD_URL : ONBOARDING_URL;
-    }
-
-    (async function checkExistingSession() {
-      // ── Escape hatch: ?logout=1 forces sign-out and shows the auth UI
-      //    even if there's a session in localStorage. Use this if you ever
-      //    get stuck in a redirect loop (e.g. token for a deleted user).
-      const params = new URLSearchParams(window.location.search);
-      if (params.has('logout')) {
-        await sb.auth.signOut();
-        // Strip the param so a refresh doesn't repeat the sign-out
-        window.history.replaceState({}, '', window.location.pathname);
-        return;
-      }
-
-      // ── Validate the cached session against the server.
-      //    getSession() only reads localStorage — it would happily return a
-      //    session whose user was deleted in the Dashboard. getUser() hits
-      //    the auth server, so a stale token resolves to an error and we
-      //    clean up instead of redirecting into a broken state.
-      const { data: { user }, error } = await sb.auth.getUser();
-      if (error || !user) {
-        // No session, OR session is stale → wipe and show the auth UI
-        if (error) await sb.auth.signOut();
-        return;
-      }
-
-      await routeAfterAuth(user.id);
-    })();
-
-    // ── Screen control ───────────────────────────────────────
-    function show(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      window.scrollTo(0, 0);
-      const card = document.querySelector('#' + id + ' .reg-card');
-      if (card) {
-        card.classList.remove('slide-up');
-        void card.offsetWidth;
-        card.classList.add('slide-up');
-      }
-      clearMsg('signin-msg');
-      clearMsg('create-msg');
-    }
-    function showHome()          { show('screen-home'); }
-    function showSignIn()        { show('screen-signin'); setTimeout(() => document.getElementById('si-email')?.focus(), 350); }
-    function showCreateAccount() { show('screen-create'); setTimeout(() => document.getElementById('ca-name')?.focus(),   350); }
-
-    // ── Inline message helpers ──────────────────────────────
-    function showMsg(id, text, type) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = text;
-      el.className = 'auth-msg ' + type;
-    }
-    function clearMsg(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = '';
-      el.className = 'auth-msg';
-    }
-
-    // ── Sign In (email + password) ──────────────────────────
-    async function handleSignIn() {
-      const email = document.getElementById('si-email').value.trim();
-      const pass  = document.getElementById('si-password').value;
-      const btn   = document.getElementById('signin-btn');
-
-      clearMsg('signin-msg');
-      if (!email || !pass) {
-        showMsg('signin-msg', 'Please enter your email and password.', 'error');
-        return;
-      }
-
-      const original = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Signing in…';
-
-      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-
-      if (error) {
-        showMsg('signin-msg', error.message || 'Sign in failed. Check your credentials.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = original;
-        return;
-      }
-
-      // Route based on whether onboarding has been completed
-      await routeAfterAuth(data.user.id);
-    }
-
-    // ── Create Account (email + password) ───────────────────
-    async function handleCreateAccount() {
-      const name  = document.getElementById('ca-name').value.trim();
-      const email = document.getElementById('ca-email').value.trim();
-      const pass  = document.getElementById('ca-password').value;
-      const btn   = document.getElementById('create-btn');
-
-      clearMsg('create-msg');
-      if (!name) { showMsg('create-msg', 'Please enter your full name.', 'error'); return; }
-      if (!email || !email.includes('@')) { showMsg('create-msg', 'Please enter a valid email.', 'error'); return; }
-      if (pass.length < 8) { showMsg('create-msg', 'Password must be at least 8 characters.', 'error'); return; }
-
-      const original = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Creating account…';
-
-      const { data, error } = await sb.auth.signUp({
-        email,
-        password: pass,
-        options: {
-          data: { full_name: name },
-          emailRedirectTo: AUTH_URL
-        }
-      });
-
-      if (error) {
-        showMsg('create-msg', error.message || 'Registration failed. Please try again.', 'error');
-        btn.disabled = false;
-        btn.innerHTML = original;
-        return;
-      }
-
-      // If Supabase project requires email confirmation, `data.session` is null
-      // here — the user must click the confirmation link before signing in.
-      if (!data.session) {
-        showMsg('create-msg', '✅ Account created. Check your email to confirm, then sign in.', 'success');
-        btn.disabled = false;
-        btn.innerHTML = original;
-        return;
-      }
-
-      // Email confirmation disabled → session is already live → onboarding
-      showMsg('create-msg', '✅ Account created. Redirecting to setup…', 'success');
-      setTimeout(() => { window.location.href = ONBOARDING_URL; }, 900);
-    }
-
-    // ── Google OAuth (used from both Sign In and Create cards) ──
-    async function handleGoogleAuth() {
-      // Show feedback in whichever card is currently visible
-      const activeId = document.querySelector('.screen.active')?.id;
-      const msgId = activeId === 'screen-create' ? 'create-msg' : 'signin-msg';
-      clearMsg(msgId);
-
-      const { error } = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: AUTH_URL,
-          queryParams: { access_type: 'offline', prompt: 'consent' }
-        }
-      });
-
-      if (error) {
-        // Most common reason: Google provider is not enabled in
-        // Supabase Dashboard → Authentication → Providers → Google.
-        showMsg(msgId, error.message || 'Google sign-in unavailable. Try email instead.', 'error');
-      }
-      // On success, browser navigates to Google → back to AUTH_URL.
-      // The checkExistingSession() IIFE at top of script will then redirect
-      // the now-authenticated user to DASHBOARD_URL.
-    }
-
-    // ── Enter key submits the visible form ──────────────────
-    document.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') return;
-      const activeId = document.querySelector('.screen.active')?.id;
-      if (activeId === 'screen-signin') handleSignIn();
-      if (activeId === 'screen-create') handleCreateAccount();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); }
     });
-  </script>
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 
 </body>
 </html>
