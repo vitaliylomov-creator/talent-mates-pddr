@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Set a new password for your MATE account." />
+  <meta name="theme-color" content="#794DC6" />
+  <title>Reset password — MATE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --purple:        #794DC6;
+      --white:         #ffffff;
+      --t1: #ffffff;
+      --t2: rgba(255,255,255,0.82);
+      --t3: rgba(255,255,255,0.55);
+      --t4: rgba(255,255,255,0.35);
+      --border:        rgba(255,255,255,0.10);
+      --border-mid:    rgba(255,255,255,0.20);
+      --border-strong: rgba(255,255,255,0.35);
+      --accent-red:    #ff9898;
+      --accent-green:  #6dffb3;
+      --font-d: 'DM Serif Display', Georgia, serif;
+      --font-b: 'DM Sans', system-ui, sans-serif;
+      --ease:   cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100vh; }
+    body {
+      background: var(--purple);
+      color: var(--t1);
+      font-family: var(--font-b);
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: var(--t2); text-decoration: none; border-bottom: 0.5px dotted var(--border-mid); }
+    a:hover { color: var(--t1); }
+
+    .topnav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 40px;
+      background: rgba(121,77,198,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .nav-brand {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--t1);
+    }
+    .nav-brand strong { font-weight: 500; }
+    .nav-brand span { color: var(--t3); font-weight: 400; }
+    .nav-back {
+      font-size: 12px;
+      color: var(--t3);
+      letter-spacing: 0.06em;
+      border-bottom: none;
+    }
+    .nav-back:hover { color: var(--t1); }
+
+    .wrap {
+      min-height: calc(100vh - 65px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255,255,255,0.05);
+      border: 0.5px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 32px 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-family: var(--font-d);
+      font-weight: 400;
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      margin-bottom: 10px;
+    }
+    .lede {
+      font-size: 14px;
+      color: var(--t3);
+      margin-bottom: 26px;
+    }
+
+    .field { margin-bottom: 14px; }
+    .field-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: 6px;
+      font-weight: 400;
+    }
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: var(--font-b);
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input::placeholder { color: rgba(255,255,255,0.30); }
+    input:focus {
+      border-color: var(--border-strong);
+      background: rgba(255,255,255,0.10);
+    }
+    .helper {
+      font-size: 11px;
+      color: var(--t4);
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--white);
+      color: var(--purple);
+      border: none;
+      border-radius: 100px;
+      padding: 16px 24px;
+      font-family: var(--font-b);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 10px;
+    }
+    .btn-primary:hover { opacity: 0.92; transform: scale(1.005); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      width: 100%;
+      background: transparent;
+      color: var(--t2);
+      border: 0.5px solid var(--border-mid);
+      border-radius: 100px;
+      padding: 13px 24px;
+      font-family: var(--font-b);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 12px;
+      text-align: center;
+      display: block;
+    }
+    .btn-ghost:hover { border-color: var(--border-strong); color: var(--t1); }
+
+    .form-msg {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      display: none;
+    }
+    .form-msg.error {
+      display: block;
+      background: rgba(255,152,152,0.08);
+      border: 0.5px solid rgba(255,152,152,0.30);
+      color: var(--accent-red);
+    }
+    .form-msg.success {
+      display: block;
+      background: rgba(109,255,179,0.06);
+      border: 0.5px solid rgba(109,255,179,0.28);
+      color: var(--accent-green);
+    }
+    .form-msg.busy {
+      display: block;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      color: var(--t2);
+    }
+
+    .fineprint {
+      margin-top: 18px;
+      font-size: 11px;
+      color: var(--t4);
+      text-align: center;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+    }
+
+    .hidden { display: none !important; }
+    .fade-in { animation: fadeUp 0.45s var(--ease) both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .topnav { padding: 16px 20px; }
+      .card { padding: 30px 22px 24px; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav">
+    <div class="nav-brand"><strong>TALENT</strong> <span>MATES</span></div>
+    <a href="mate-pro-auth.html" class="nav-back">← sign in</a>
+  </nav>
+
+  <div class="wrap">
+    <!-- Verifying view -->
+    <div id="verifyView" class="card fade-in">
+      <div class="eyebrow">Reset password</div>
+      <h1>Verifying your link…</h1>
+      <p class="lede">One moment while we confirm your reset link.</p>
+    </div>
+
+    <!-- Password form -->
+    <div id="formView" class="card fade-in hidden">
+      <div class="eyebrow">Reset password</div>
+      <h1>Set a new password</h1>
+      <p class="lede" id="formLede">Choose something you'll remember. At least 8 characters.</p>
+
+      <div class="field">
+        <label class="field-label" for="pw1">New password</label>
+        <input id="pw1" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+      </div>
+      <div class="field">
+        <label class="field-label" for="pw2">Confirm password</label>
+        <input id="pw2" type="password" autocomplete="new-password" placeholder="Repeat the same password" />
+      </div>
+
+      <button id="submitBtn" class="btn-primary" type="button">Save new password</button>
+      <div id="formMsg" class="form-msg"></div>
+    </div>
+
+    <!-- Error view (bad / expired link) -->
+    <div id="errorView" class="card fade-in hidden">
+      <div class="eyebrow">Reset password</div>
+      <h1>This link isn't valid</h1>
+      <p class="lede" id="errorDetail">Your reset link may have expired or already been used. Request a new one and try again.</p>
+      <a href="mate-pro-auth.html" class="btn-ghost">← Back to sign in</a>
+    </div>
+
+    <!-- Success view -->
+    <div id="successView" class="card fade-in hidden">
+      <div class="eyebrow">Reset password</div>
+      <h1>Password updated</h1>
+      <p class="lede">You're signed in with the new password. Taking you to MATE…</p>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL  = 'https://zlkzjeaojpxzccpovygk.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_3E7wboJ9pXRrMxCfDzxxaA_iauXsILn';
+    const AUTH_URL      = 'mate-pro-auth.html';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const verifyView  = document.getElementById('verifyView');
+    const formView    = document.getElementById('formView');
+    const errorView   = document.getElementById('errorView');
+    const successView = document.getElementById('successView');
+    const errorDetail = document.getElementById('errorDetail');
+    const formMsg     = document.getElementById('formMsg');
+    const submitBtn   = document.getElementById('submitBtn');
+    const pw1         = document.getElementById('pw1');
+    const pw2         = document.getElementById('pw2');
+
+    function show(view) {
+      [verifyView, formView, errorView, successView].forEach(v => v.classList.add('hidden'));
+      view.classList.remove('hidden');
+    }
+
+    function setMsg(cls, text) {
+      formMsg.className = 'form-msg ' + cls;
+      formMsg.textContent = text;
+    }
+
+    // ── Bootstrap ─────────────────────────────────────────────────────
+    // Supabase v2 auto-processes the recovery token from the URL hash and
+    // emits a PASSWORD_RECOVERY event, at which point the user has a
+    // temporary session that only permits updateUser({ password }).
+    let recoveryReady = false;
+
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' && session) {
+        recoveryReady = true;
+        show(formView);
+        pw1.focus();
+      }
+    });
+
+    (async function init() {
+      // Fallback path: if user already has a session (e.g. link processed
+      // before the listener attached, or they refreshed the page), still let
+      // them set a new password. The recovery flag gets set implicitly by
+      // the presence of a valid session on this page.
+      await new Promise(r => setTimeout(r, 300));
+      if (recoveryReady) return;
+
+      const { data: { session } } = await sb.auth.getSession();
+
+      // Detect broken links: Supabase puts errors in the hash on failed
+      // verification (e.g. ?error=access_denied&error_code=otp_expired).
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const query = new URLSearchParams(window.location.search);
+      const err = hash.get('error_description') || query.get('error_description')
+               || hash.get('error') || query.get('error');
+
+      if (err) {
+        errorDetail.textContent = decodeURIComponent(err.replace(/\+/g, ' '));
+        show(errorView);
+        return;
+      }
+
+      if (session) {
+        // Assume this is a recovery session (user landed here via the reset
+        // link). Show the form; updateUser will fail cleanly if it's not.
+        show(formView);
+        pw1.focus();
+        return;
+      }
+
+      // No session, no error — link was never valid or was already consumed.
+      show(errorView);
+    })();
+
+    // ── Submit ────────────────────────────────────────────────────────
+    submitBtn.addEventListener('click', async () => {
+      const a = pw1.value;
+      const b = pw2.value;
+
+      if (a.length < 8) { setMsg('error', 'Password must be at least 8 characters.'); pw1.focus(); return; }
+      if (a !== b)      { setMsg('error', 'Passwords do not match.'); pw2.focus(); return; }
+
+      submitBtn.disabled = true;
+      setMsg('busy', 'Saving…');
+
+      const { error } = await sb.auth.updateUser({ password: a });
+      if (error) {
+        submitBtn.disabled = false;
+        setMsg('error', error.message || 'Could not update password. Try requesting a new link.');
+        return;
+      }
+
+      setMsg('success', 'Password updated. Redirecting…');
+      show(successView);
+      setTimeout(() => { window.location.href = AUTH_URL; }, 1400);
+    });
+
+    // Enter submits from either password field
+    [pw1, pw2].forEach(el => el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); submitBtn.click(); }
+    }));
+  </script>
+</body>
+</html>

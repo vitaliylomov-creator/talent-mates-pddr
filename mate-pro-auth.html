@@ -1304,7 +1304,9 @@
         return;
       }
       msg.className = 'form-msg busy'; msg.textContent = 'Sending reset link…';
-      const { error } = await sb.auth.resetPasswordForEmail(email);
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/mate-pro-reset.html'
+      });
       if (error) { msg.className = 'form-msg error'; msg.textContent = error.message; return; }
       msg.className = 'form-msg success';
       msg.textContent = 'Reset link sent. Check your inbox.';
