@@ -1754,7 +1754,7 @@
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('videoFileInput').click()">
       <div class="upload-icon">🎥</div>
       <div class="upload-title" id="uploadTitle">Drop clip or click to upload</div>
-      <div class="upload-sub">MP4, MOV, WEBM · up to 30 seconds recommended · max 50MB</div>
+      <div class="upload-sub">MP4, MOV, WEBM · up to 60 seconds</div>
       <div class="upload-file-info" id="uploadFileInfo" style="display:none"></div>
     </div>
     <input type="file" id="videoFileInput" class="hidden-file-input" accept="video/mp4,video/quicktime,video/webm" onchange="handleVideoSelect(event)" />
@@ -2886,10 +2886,6 @@
     const file = e.target.files[0];
     if (!file) return;
     const msg = document.getElementById('videoMsg');
-    if (file.size > 60 * 1024 * 1024) {
-      msg.textContent = 'Clip too large — max 60 MB'; msg.className = 'modal-msg error';
-      return;
-    }
     state.videoFile = file;
     document.getElementById('uploadFileInfo').textContent = file.name + ' · ' + Math.round(file.size / 1024) + ' KB';
     document.getElementById('uploadFileInfo').style.display = '';
